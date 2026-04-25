@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GreenHueBlues — Coming Soon</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#0e0e0d;
+  color:#ede8df;
+  font-family:'DM Mono', monospace;
+  min-height: 100vh; 
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow-x:hidden; /* Prevents side-to-side wobble */
+  cursor:none;
+  padding: 40px 20px;
+}
+
+/* ── BACKGROUND ASSET (SPIRAL) ── */
+.bg-asset-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.bg-asset-container img {
+  width: 90vmin;
+  height: 90vmin;
+  object-fit: contain;
+  animation: spin 180s linear infinite; /* Very slow, ethereal rotation */
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* ── POSTCARD WRAPPER ── */
+.container {
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width: 100%;
+}
+
+.postcard {
+  background-color: #d6d4ce;
+  padding: 25px;
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.9);
+  
+  /* PC RESIZING LOGIC */
+  width: auto;
+  max-width: 95vw; 
+  max-height: 90vh; /* Keeps the card within the browser height */
+  
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease-out;
+}
+
+/* ── POSTCARD IMAGE ── */
+.postcard-img-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #222; /* Small border effect inside the card */
+}
+
+.postcard-img-wrapper img {
+  max-width: 100%;
+  max-height: 70vh; /* Shrinks the image to keep the footer visible */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── POSTCARD FOOTER ── */
+.postcard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 20px;
+  color: #111;
+  text-transform: uppercase;
+  font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.footer-left { text-align: left; }
+.footer-center {
+  font-family: serif;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  letter-spacing: 0.15em;
+  text-align: center;
+  font-weight: 400;
+}
+.footer-right { text-align: right; }
+
+/* ── CURSOR ── */
+#cursor {
+  position:fixed;
+  top:0; left:0;
+  pointer-events:none;
+  z-index:9999;
+}
+
+#c-dot {
+  width:6px;
+  height:6px;
+  background:#c8a96e;
+  border-radius:50%;
+  position:absolute;
+  transform:translate(-50%,-50%);
+}
+
+#c-ring {
+  width:30px;
+  height:30px;
+  border:1px solid rgba(200,169,110,0.5);
+  border-radius:50%;
+  position:absolute;
+  transform:translate(-50%,-50%);
+  transition: all 0.2s ease-out;
+}
+
+body.cursor-active #c-ring {
+  width:65px;
+  height:65px;
+  border-color:#c8a96e;
+  background: rgba(200,169,110,0.05);
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-asset-container" id="bg-layer">
+  <img src="assets/greenhueblues.png" alt="Ethereal Background" />
+</div>
+
+<div class="container">
+  <div class="postcard" id="postcard-element">
+    <div class="postcard-img-wrapper">
+      <img src="assets/jux.png" alt="Juxtaposition Asset" />
+    </div>
+    
+    <div class="postcard-footer">
+      <div class="footer-left">
+        NEPAL<br>
+        04/25/26<br>
+        10:39 PM
+      </div>
+      
+      <div class="footer-center">
+        GREENHUEBLUES
+      </div>
+      
+      <div class="footer-right">
+        COMING SOON<br>
+        ©2026
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="cursor">
+  <div id="c-dot"></div>
+  <div id="c-ring"></div>
+</div>
+
+<script>
+const dot = document.getElementById('c-dot');
+const ring = document.getElementById('c-ring');
+const postcard = document.getElementById('postcard-element');
+const bgLayer = document.getElementById('bg-layer');
+
+let mx = window.innerWidth/2, my = window.innerHeight/2;
+let rx = mx, ry = my;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+
+  dot.style.left = mx+'px';
+  dot.style.top = my+'px';
+
+  const dx = (mx / window.innerWidth - 0.5);
+  const dy = (my / window.innerHeight - 0.5);
+
+  // Parallax: Background moves opposite to mouse, Card moves with it
+  bgLayer.style.transform = `translate(${dx * -30}px, ${dy * -30}px)`;
+  postcard.style.transform = `translate(${dx * 12}px, ${dy * 12}px) rotateY(${dx * 4}deg) rotateX(${dy * -4}deg)`;
+
+  const rect = postcard.getBoundingClientRect();
+  const isHovering = (mx >= rect.left && mx <= rect.right && my >= rect.top && my <= rect.bottom);
+
+  if (isHovering) {
+    document.body.classList.add('cursor-active');
+  } else {
+    document.body.classList.remove('cursor-active');
+  }
+});
+
+(function animate(){
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx+'px';
+  ring.style.top = ry+'px';
+  requestAnimationFrame(animate);
+})();
+</script>
+
+</body>
+</html>
