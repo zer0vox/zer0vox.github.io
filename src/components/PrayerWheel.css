@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Tibetan:wght@400;700&display=swap');
+
+.prayer-wheel-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #0a0814;
+}
+
+.prayer-wheel-container {
+  cursor: pointer;
+  user-select: none;
+}
+
+.prayer-wheel-svg {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prayer-wheel-container {
+    /* Animations will be handled via JavaScript detecting this media query */
+  }
+}

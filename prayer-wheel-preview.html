@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrayerWheel Component Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0814;
+            overflow: hidden;
+        }
+
+        #root {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #FFF8E7;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .instructions {
+            color: #7FFFD4;
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(124, 255, 212, 0.2));
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Tibetan:wght@400;700&display=swap');
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="container">
+            <h1>🙏 Buddhist Prayer Wheel</h1>
+            <div class="instructions">Click the wheel to spin • Watch it rotate automatically • Particles burst on spin</div>
+            <svg id="prayerWheel" viewBox="0 0 400 500" width="400" height="500" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer;">
+                <!-- Placeholder SVG will be replaced by JavaScript -->
+            </svg>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        // Constants
+        const WHEEL_CENTER_X = 200;
+        const WHEEL_CENTER_Y = 220;
+        const WHEEL_OUTER_RADIUS = 145;
+        const HUB_RADIUS = 48;
+
+        // Create SVG elements
+        function createSVGElement(tag, attrs = {}) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([key, value]) => {
+                if (key === 'class') {
+                    el.setAttribute('class', value);
+                } else {
+                    el.setAttribute(key, value);
+                }
+            });
+            return el;
+        }
+
+        // Build prayer wheel SVG
+        function buildPrayerWheel() {
+            const svg = document.getElementById('prayerWheel');
+            svg.innerHTML = '';
+
+            // Background
+            const bg = createSVGElement('rect', {
+                width: '400',
+                height: '500',
+                fill: '#0a0814'
+            });
+            svg.appendChild(bg);
+
+            // Axle Rod
+            const axleMain = createSVGElement('rect', {
+                x: '194',
+                y: '360',
+                width: '12',
+                height: '120',
+                fill: '#8B4513',
+                stroke: '#111',
+                'stroke-width': '1'
+            });
+            svg.appendChild(axleMain);
+
+            const axleHighlight = createSVGElement('rect', {
+                x: '196',
+                y: '360',
+                width: '3',
+                height: '120',
+                fill: '#A0522D',
+                opacity: '0.6'
+            });
+            svg.appendChild(axleHighlight);
+
+            // Mandala Ring
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const x1 = WHEEL_CENTER_X + Math.cos(angle) * 160;
+                const y1 = WHEEL_CENTER_Y + Math.sin(angle) * 160;
+                const x2 = WHEEL_CENTER_X + Math.cos(angle) * 155;
+                const y2 = WHEEL_CENTER_Y + Math.sin(angle) * 155;
+
+                const line = createSVGElement('line', {
+                    x1: x1.toFixed(1),
+                    y1: y1.toFixed(1),
+                    x2: x2.toFixed(1),
+                    y2: y2.toFixed(1),
+                    stroke: '#111',
+                    'stroke-width': '1',
+                    opacity: '0.3'
+                });
+                svg.appendChild(line);
+
+                if (i % 2 === 0) {
+                    const dot = createSVGElement('circle', {
+                        cx: x1.toFixed(1),
+                        cy: y1.toFixed(1),
+                        r: '2',
+                        fill: '#E8890C',
+                        stroke: '#111',
+                        'stroke-width': '0.5'
+                    });
+                    svg.appendChild(dot);
+                }
+            }
+
+            // Main rotating group
+            const wheelGroup = createSVGElement('g', { id: 'wheelGroup' });
+            wheelGroup.style.transformOrigin = `${WHEEL_CENTER_X}px ${WHEEL_CENTER_Y}px`;
+
+            // Outer Ring with panels
+            for (let i = 0; i < 8; i++) {
+                const angle1 = i * (Math.PI * 2 / 8);
+                const angle2 = (i + 1) * (Math.PI * 2 / 8);
+
+                const color = i % 2 === 0 ? '#C0392B' : '#F5C842';
+                const r1 = WHEEL_OUTER_RADIUS;
+                const r2 = HUB_RADIUS + 5;
+
+                const x1 = WHEEL_CENTER_X + Math.cos(angle1) * r1;
+                const y1 = WHEEL_CENTER_Y + Math.sin(angle1) * r1;
+                const x2 = WHEEL_CENTER_X + Math.cos(angle2) * r1;
+                const y2 = WHEEL_CENTER_Y + Math.sin(angle2) * r1;
+                const x3 = WHEEL_CENTER_X + Math.cos(angle2) * r2;
+                const y3 = WHEEL_CENTER_Y + Math.sin(angle2) * r2;
+                const x4 = WHEEL_CENTER_X + Math.cos(angle1) * r2;
+                const y4 = WHEEL_CENTER_Y + Math.sin(angle1) * r2;
+
+                const pathData = `
+                    M ${x1.toFixed(1)} ${y1.toFixed(1)}
+                    A ${r1} ${r1} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}
+                    L ${x3.toFixed(1)} ${y3.toFixed(1)}
+                    A ${r2} ${r2} 0 0 0 ${x4.toFixed(1)} ${y4.toFixed(1)}
+                    Z
+                `;
+
+                const panel = createSVGElement('path', {
+                    d: pathData,
+                    fill: color,
+                    stroke: '#111',
+                    'stroke-width': '2'
+                });
+                wheelGroup.appendChild(panel);
+
+                // Divider
+                const divX1 = WHEEL_CENTER_X + Math.cos(angle2) * r1;
+                const divY1 = WHEEL_CENTER_Y + Math.sin(angle2) * r1;
+                const divX2 = WHEEL_CENTER_X + Math.cos(angle2) * (r2 + 2);
+                const divY2 = WHEEL_CENTER_Y + Math.sin(angle2) * (r2 + 2);
+
+                const divider = createSVGElement('line', {
+                    x1: divX1.toFixed(1),
+                    y1: divY1.toFixed(1),
+                    x2: divX2.toFixed(1),
+                    y2: divY2.toFixed(1),
+                    stroke: '#111',
+                    'stroke-width': '3'
+                });
+                wheelGroup.appendChild(divider);
+            }
+
+            // Mantra Text Path
+            const defs = createSVGElement('defs');
+            const pathEl = createSVGElement('path', {
+                id: 'mantraCircle',
+                d: `M ${WHEEL_CENTER_X - 110}, ${WHEEL_CENTER_Y}
+                   a 110,110 0 1,1 220,0
+                   a 110,110 0 1,1 -220,0`,
+                fill: 'none'
+            });
+            defs.appendChild(pathEl);
+            wheelGroup.appendChild(defs);
+
+            // Tibetan mantra
+            const mantras = 'ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ';
+            for (let rep = 0; rep < 3; rep++) {
+                const text = createSVGElement('text', {
+                    fill: '#FFF8E7',
+                    'font-size': '14',
+                    'font-family': "'Noto Serif Tibetan', serif",
+                    'font-weight': '400',
+                    'letter-spacing': '2'
+                });
+
+                const textPath = createSVGElement('textPath', {
+                    href: '#mantraCircle',
+                    'start-offset': `${(rep / 3) * 100}%`
+                });
+
+                mantras.split('').forEach((char, idx) => {
+                    const tspan = createSVGElement('tspan', {
+                        'data-char': 'true',
+                        opacity: '1'
+                    });
+                    tspan.textContent = char;
+                    textPath.appendChild(tspan);
+                });
+
+                text.appendChild(textPath);
+                wheelGroup.appendChild(text);
+            }
+
+            // Speed Lines
+            const speedLinesGroup = createSVGElement('g', { id: 'speedLines', opacity: '0' });
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2;
+                const x1 = WHEEL_CENTER_X + Math.cos(angle) * 60;
+                const y1 = WHEEL_CENTER_Y + Math.sin(angle) * 60;
+                const x2 = WHEEL_CENTER_X + Math.cos(angle) * 120;
+                const y2 = WHEEL_CENTER_Y + Math.sin(angle) * 120;
+
+                const line = createSVGElement('line', {
+                    x1: x1.toFixed(1),
+                    y1: y1.toFixed(1),
+                    x2: x2.toFixed(1),
+                    y2: y2.toFixed(1),
+                    stroke: '#7FFFD4',
+                    'stroke-width': '0.5',
+                    opacity: '0'
+                });
+                speedLinesGroup.appendChild(line);
+            }
+            wheelGroup.appendChild(speedLinesGroup);
+
+            // Inner Hub
+            const hubCircle = createSVGElement('circle', {
+                cx: WHEEL_CENTER_X.toFixed(1),
+                cy: WHEEL_CENTER_Y.toFixed(1),
+                r: HUB_RADIUS.toFixed(1),
+                fill: '#E8890C',
+                stroke: '#111',
+                'stroke-width': '2'
+            });
+            wheelGroup.appendChild(hubCircle);
+
+            // Dharma wheel spokes
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const x1 = WHEEL_CENTER_X + Math.cos(angle) * 8;
+                const y1 = WHEEL_CENTER_Y + Math.sin(angle) * 8;
+                const x2 = WHEEL_CENTER_X + Math.cos(angle) * 40;
+                const y2 = WHEEL_CENTER_Y + Math.sin(angle) * 40;
+
+                const spoke = createSVGElement('line', {
+                    x1: x1.toFixed(1),
+                    y1: y1.toFixed(1),
+                    x2: x2.toFixed(1),
+                    y2: y2.toFixed(1),
+                    stroke: '#111',
+                    'stroke-width': '1.5'
+                });
+                wheelGroup.appendChild(spoke);
+            }
+
+            // Inner hub circle
+            const innerCircle = createSVGElement('circle', {
+                cx: WHEEL_CENTER_X.toFixed(1),
+                cy: WHEEL_CENTER_Y.toFixed(1),
+                r: (HUB_RADIUS - 8).toFixed(1),
+                fill: 'none',
+                stroke: '#111',
+                'stroke-width': '1',
+                opacity: '0.5'
+            });
+            wheelGroup.appendChild(innerCircle);
+
+            svg.appendChild(wheelGroup);
+
+            // Central Jewel
+            const jewelGroup = createSVGElement('g', { id: 'centralJewel' });
+            jewelGroup.style.transformOrigin = `${WHEEL_CENTER_X}px ${WHEEL_CENTER_Y}px`;
+
+            const angle = Math.PI / 8;
+            const size = 12;
+            let points = [];
+            for (let i = 0; i < 8; i++) {
+                const a = i * (Math.PI / 4) + angle;
+                const x = WHEEL_CENTER_X + Math.cos(a) * size;
+                const y = WHEEL_CENTER_Y + Math.sin(a) * size;
+                points.push([x, y]);
+            }
+
+            const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ') + ' Z';
+            const jewel = createSVGElement('path', {
+                d: pathD,
+                fill: '#C0392B',
+                stroke: '#F5C842',
+                'stroke-width': '1.5'
+            });
+            jewelGroup.appendChild(jewel);
+
+            const jewelCenter = createSVGElement('circle', {
+                cx: WHEEL_CENTER_X.toFixed(1),
+                cy: WHEEL_CENTER_Y.toFixed(1),
+                r: '3',
+                fill: '#FFF8E7'
+            });
+            jewelGroup.appendChild(jewelCenter);
+
+            svg.appendChild(jewelGroup);
+
+            // Particles
+            const particlesGroup = createSVGElement('g', { id: 'particles' });
+            for (let i = 0; i < 12; i++) {
+                const particle = createSVGElement('ellipse', {
+                    cx: WHEEL_CENTER_X.toFixed(1),
+                    cy: WHEEL_CENTER_Y.toFixed(1),
+                    rx: '6',
+                    ry: '3',
+                    fill: '#E8567A',
+                    opacity: '0'
+                });
+                particlesGroup.appendChild(particle);
+            }
+            svg.appendChild(particlesGroup);
+
+            // Lotus petals
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+                const petalWidth = 18;
+                const petalHeight = 28;
+                const petalX = WHEEL_CENTER_X + Math.cos(angle) * 110;
+                const petalY = WHEEL_CENTER_Y + Math.sin(angle) * 110;
+
+                const petal = createSVGElement('ellipse', {
+                    cx: petalX.toFixed(1),
+                    cy: petalY.toFixed(1),
+                    rx: petalWidth.toString(),
+                    ry: petalHeight.toString(),
+                    fill: '#E8567A',
+                    stroke: '#111',
+                    'stroke-width': '1',
+                    opacity: '0.8',
+                    transform: `rotate(${(angle * 180) / Math.PI} ${petalX.toFixed(1)} ${petalY.toFixed(1)})`
+                });
+                svg.appendChild(petal);
+            }
+
+            return svg;
+        }
+
+        // Build the wheel
+        buildPrayerWheel();
+
+        // Get references
+        const wheelGroup = document.getElementById('wheelGroup');
+        const jewelGroup = document.getElementById('centralJewel');
+        const speedLines = document.getElementById('speedLines');
+        const particles = document.getElementById('particles');
+        const svg = document.getElementById('prayerWheel');
+
+        // Animation functions
+        function triggerMantraReveal() {
+            const chars = document.querySelectorAll('[data-char]');
+            chars.forEach((char, i) => {
+                gsap.fromTo(
+                    char,
+                    { opacity: 0, attr: { dy: 8 } },
+                    {
+                        opacity: 1,
+                        attr: { dy: 0 },
+                        duration: 0.3,
+                        delay: i * 0.06,
+                        ease: 'power2.out'
+                    }
+                );
+            });
+        }
+
+        function emitParticles() {
+            const particleEls = particles.querySelectorAll('ellipse');
+            const particleCount = 12;
+            const angleStep = (Math.PI * 2) / particleCount;
+
+            particleEls.forEach((particle, i) => {
+                if (i >= particleCount) return;
+
+                const angle = angleStep * i;
+                const distance = 120;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                gsap.set(particle, { opacity: 1, scale: 1, x: 0, y: 0 });
+                gsap.to(particle, {
+                    x: dx,
+                    y: dy,
+                    opacity: 0,
+                    scale: 0,
+                    duration: 1.2,
+                    ease: 'power1.out',
+                    delay: i * 0.05
+                });
+            });
+        }
+
+        // Start animations
+        function startAnimations() {
+            // Idle rotation
+            gsap.to(wheelGroup, {
+                rotation: 360,
+                duration: 8,
+                ease: 'none',
+                repeat: -1,
+                onRepeat: triggerMantraReveal
+            });
+
+            // Jewel pulse
+            gsap.to(jewelGroup, {
+                scale: 1.08,
+                duration: 1.5,
+                yoyo: true,
+                repeat: -1,
+                ease: 'sine.inOut'
+            });
+        }
+
+        // Click handler
+        function handleClick() {
+            const tl = gsap.timeline();
+
+            // Speed lines
+            tl.to(speedLines, { opacity: 0.7, duration: 0.15 }, 0);
+            tl.to(speedLines, { opacity: 0, duration: 0.8 }, 0.4);
+
+            // Wheel spin
+            tl.to(
+                wheelGroup,
+                {
+                    rotation: '+=1440',
+                    duration: 2.2,
+                    ease: 'power2.out',
+                    overwrite: 'auto'
+                },
+                0
+            );
+
+            // Trigger effects
+            tl.add(() => triggerMantraReveal(), 1.8);
+            tl.add(() => emitParticles(), 1.8);
+        }
+
+        svg.addEventListener('click', handleClick);
+
+        // Start
+        startAnimations();
+
+        console.log('🙏 Prayer Wheel loaded! Click to spin.');
+    </script>
+</body>
+</html>
