@@ -61,6 +61,7 @@ export default function LeadersSection() {
           >
             <div className="leaders-header">
               <div className="rank">Rank</div>
+              <div className="name">Player</div>
               <div className="score">Score</div>
               <div className="level">Level</div>
               <div className="lines">Lines</div>
@@ -69,13 +70,16 @@ export default function LeadersSection() {
             {entries.map((entry, index) => (
               <motion.div
                 key={`${entry.timestamp}-${index}`}
-                className="leader-row"
+                className={`leader-row ${index === 0 ? 'leader-row--top' : ''}`}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
               >
-                <div className="rank">#{index + 1}</div>
+                <div className="rank">
+                  {index === 0 ? '👑' : `#${index + 1}`}
+                </div>
+                <div className="name">{entry.username}</div>
                 <div className="score">{entry.score.toLocaleString()}</div>
                 <div className="level">{entry.level}</div>
                 <div className="lines">{entry.lines}</div>

@@ -133,8 +133,9 @@ function clamp(value, min, max) {
 }
 
 class GameEngine {
-  constructor(onChange) {
+  constructor(onChange, username = 'Anonymous') {
     this.onChange = onChange
+    this.username = username
     this.board = createEmptyBoard()
     this.nextPiece = this.randomPiece()
     this.activePiece = null
@@ -361,11 +362,12 @@ class GameEngine {
       window.localStorage.setItem(STORAGE_KEY, String(this.score))
     }
     
-    // Save to leaderboard
+    // Save to leaderboard only when game ends
     try {
       const leaderboardData = window.localStorage.getItem(LEADERBOARD_KEY)
       const entries = leaderboardData ? JSON.parse(leaderboardData) : []
       entries.push({
+        username: this.username,
         score: this.score,
         level: this.level,
         lines: this.lines,
@@ -551,22 +553,37 @@ export default function PlaygroundSection() {
   const [announce, setAnnounce] = useState('')
   const [hasStarted, setHasStarted] = useState(false)
   const [autoPaused, setAutoPaused] = useState(false)
+  const [username, setUsername] = useState('')
+  const [showUsernamePrompt, setShowUsernamePrompt] = useState(false)
+  const [usernameInput, setUsernameInput] = useState('')
 
   const handleUpdate = useCallback((payload) => {
     setGameState((prev) => ({ ...prev, ...payload }))
   }, [])
 
+  const handleStartGame = useCallback(() => {
+    setShowUsernamePrompt(true)
+  }, [])
+
+  const confirmUsername = useCallback(() => {
+    const name = usernameInput.trim() || 'Anonymous'
+    setUsername(name)
+    setUsernameInput('')
+    setShowUsernamePrompt(false)
+    startGame()
+  }, [usernameInput, startGame])
+
   const startGame = useCallback(() => {
     if (engineRef.current) {
       engineRef.current.restart()
     } else {
-      const engine = new GameEngine(handleUpdate)
+      const engine = new GameEngine(handleUpdate, username)
       engineRef.current = engine
       engine.scheduleGravity()
     }
     setHasStarted(true)
     setAutoPaused(false)
-  }, [handleUpdate])
+  }, [handleUpdate, username])
 
   const resumeGame = useCallback(() => {
     const engine = engineRef.current
@@ -623,7 +640,7 @@ export default function PlaygroundSection() {
       if (!engineRef.current) {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
-          startGame()
+          handleStartGame()
         }
         return
       }
@@ -660,7 +677,7 @@ export default function PlaygroundSection() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [startGame])
+  }, [handleStartGame])
 
   const action = (name) => {
     const engine = engineRef.current
@@ -712,18 +729,34 @@ export default function PlaygroundSection() {
         <div className="card playground-game-card">
           <div className="playground-canvas-frame">
             <canvas ref={canvasRef} width="280" height="560" aria-label="Tetris game board" />
-            {!hasStarted ? (
+            {showUsernamePrompt ? (
+              <div className="playground-overlay">
+                <div className="playground-overlay-eyebrow">Enter your name</div>
+                <input
+                  type="text"
+                  className="playground-username-input"
+                  placeholder="Your name..."
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && confirmUsername()}
+                  autoFocus
+                />
+                <button className="playground-overlay-button" type="button" onClick={confirmUsername}>
+                  Start
+                </button>
+              </div>
+            ) : !hasStarted ? (
               <div className="playground-overlay">
                 <div className="playground-overlay-eyebrow">Tetris</div>
                 <div className="playground-overlay-copy">Ready to play?</div>
-                <button className="playground-overlay-button" type="button" onClick={startGame}>
+                <button className="playground-overlay-button" type="button" onClick={handleStartGame}>
                   Start Game
                 </button>
               </div>
             ) : gameState.isGameOver ? (
               <div className="playground-overlay">
                 <div className="playground-overlay-copy">Game Over</div>
-                <button className="playground-overlay-button" type="button" onClick={startGame}>
+                <button className="playground-overlay-button" type="button" onClick={handleStartGame}>
                   Restart
                 </button>
               </div>
