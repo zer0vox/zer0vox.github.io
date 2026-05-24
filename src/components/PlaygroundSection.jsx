@@ -565,14 +565,6 @@ export default function PlaygroundSection() {
     setShowUsernamePrompt(true)
   }, [])
 
-  const confirmUsername = useCallback(() => {
-    const name = usernameInput.trim() || 'Anonymous'
-    setUsername(name)
-    setUsernameInput('')
-    setShowUsernamePrompt(false)
-    startGame()
-  }, [usernameInput, startGame])
-
   const startGame = useCallback(() => {
     if (engineRef.current) {
       engineRef.current.restart()
@@ -584,6 +576,14 @@ export default function PlaygroundSection() {
     setHasStarted(true)
     setAutoPaused(false)
   }, [handleUpdate, username])
+
+  const confirmUsername = useCallback(() => {
+    const name = usernameInput.trim() || 'Anonymous'
+    setUsername(name)
+    setUsernameInput('')
+    setShowUsernamePrompt(false)
+    startGame()
+  }, [usernameInput, startGame])
 
   const resumeGame = useCallback(() => {
     const engine = engineRef.current
