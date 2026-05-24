@@ -9,6 +9,7 @@ const LEVEL_LINES = 10
 const MIN_SPEED_MS = 120
 const BASE_SPEED_MS = 800
 const STORAGE_KEY = 'tetrisHighScore'
+const LEADERBOARD_KEY = 'tetrisLeaderboard'
 
 const PIECES = {
   I: {
@@ -358,6 +359,25 @@ class GameEngine {
     const stored = Number(window.localStorage.getItem(STORAGE_KEY) || 0)
     if (this.score > stored) {
       window.localStorage.setItem(STORAGE_KEY, String(this.score))
+    }
+    
+    // Save to leaderboard
+    try {
+      const leaderboardData = window.localStorage.getItem(LEADERBOARD_KEY)
+      const entries = leaderboardData ? JSON.parse(leaderboardData) : []
+      entries.push({
+        score: this.score,
+        level: this.level,
+        lines: this.lines,
+        timestamp: Date.now()
+      })
+      // Keep only top 50 entries to avoid localStorage bloat
+      entries.sort((a, b) => b.score - a.score)
+      window.localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries.slice(0, 50)))
+      // Dispatch storage event for other components
+      window.dispatchEvent(new Event('leaderboardUpdate'))
+    } catch (e) {
+      console.error('Failed to save to leaderboard:', e)
     }
   }
 

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import FibonacciPsyBackground from '../components/FibonacciPsyBackground'
 import PlaygroundSection from '../components/PlaygroundSection'
+import LeadersSection from '../components/LeadersSection'
 import dnaImg from '../assets/dna.png'
 import visionImg from '../assets/vision.png'
 import logicImg from '../assets/logic.JPG'
@@ -78,6 +79,7 @@ export default function Home() {
             <li><a href="#index">Index</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#playground">Playground</a></li>
+            <li><a href="#leaders">Leaders</a></li>
           </ul>
           <div className="right">
             <a href="#">X</a>
@@ -153,6 +155,8 @@ export default function Home() {
       </section>
 
       <PlaygroundSection />
+
+      <LeadersSection />
 
       <section className="cta wrap" id="contact">
         <motion.h2
