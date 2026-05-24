@@ -6,8 +6,8 @@ import PlaygroundSection from '../components/PlaygroundSection'
 import LeadersSection from '../components/LeadersSection'
 import dnaImg from '../assets/dna.png'
 import visionImg from '../assets/vision.png'
-import logicImg from '../assets/logic.JPG'
-import limitlessImg from '../assets/limitless.JPG'
+import logicImg from '../assets/logic.jpg'
+import limitlessImg from '../assets/limitless.jpg'
 
 export default function Home() {
   const ctaHeadingRef = useRef(null)

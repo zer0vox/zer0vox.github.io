@@ -1277,16 +1277,4 @@ footer .baseline {
   .index-row .p-cat { display: none; }
   footer .cols { grid-template-columns: 1fr 1fr; }
   .blog-grid { grid-template-columns: 1fr; gap: 40px; }
-  nav.top ul { display: none; }
-  nav.top .inner { grid-template-columns: 1fr auto; }
-  nav.top .brand { font-size: 22px; }
-  nav.top .right { gap: 12px; font-size: 15px; }
-  .hero .copy { grid-template-columns: 1fr; gap: 12px; }
-  .work-grid { grid-template-columns: 1fr; gap: 22px; }
-  .work-head { grid-template-columns: 1fr; }
-  .index-row { grid-template-columns: 1fr 60px 28px; }
-  .index-row .p-client,
-  .index-row .p-cat { display: none; }
-  footer .cols { grid-template-columns: 1fr 1fr; }
-  .blog-grid { grid-template-columns: 1fr; gap: 40px; }
 }
