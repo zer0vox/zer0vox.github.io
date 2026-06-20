@@ -1,12 +1,12 @@
 # pzcel-proxy
 
-A tiny Cloudflare Worker that lets the pzcel Excel add-in use OpenAI **without
-putting the API key in the browser**. The add-in calls this Worker; the Worker
-holds the key as an encrypted secret and forwards the request to OpenAI. It also
-sets CORS headers, so Ask AI works in every browser.
+A tiny Cloudflare Worker that powers the pzcel Excel add-in's **Ask AI** using
+**Cloudflare Workers AI** — a free, built-in model that runs *inside* the Worker.
+No OpenAI account, no API key, no billing, and nothing secret in the browser.
+The Worker also sets CORS headers, so Ask AI works in every browser.
 
 ```
-Excel add-in  →  pzcel-proxy (Cloudflare Worker, holds the key)  →  OpenAI
+Excel add-in  →  pzcel-proxy (Cloudflare Worker, runs the model)  →  answer
 ```
 
 ## One-time deploy
@@ -14,11 +14,12 @@ Excel add-in  →  pzcel-proxy (Cloudflare Worker, holds the key)  →  OpenAI
 From this folder (`pzcel-proxy/`):
 
 ```bash
-npm install                       # installs wrangler locally
-npx wrangler login                # opens the browser to authorize Cloudflare (free account)
-npx wrangler secret put OPENAI_API_KEY   # paste your NEW OpenAI key when prompted
+npm install            # installs wrangler locally
+npx wrangler login     # opens the browser to authorize Cloudflare (free account)
 npx wrangler deploy
 ```
+
+That's it — **no secret to set**, because Workers AI needs no key.
 
 `wrangler deploy` prints a URL like:
 
@@ -26,25 +27,25 @@ npx wrangler deploy
 https://pzcel-proxy.<your-subdomain>.workers.dev
 ```
 
-That URL is **not** a secret — it's safe to share.
+That URL is safe to share (it's not a secret).
 
 ## Wire it into the add-in
 
 Paste the Worker URL into `PROXY_URL` in
 `../public/pzcel-addin/index.html`, then redeploy the site. After that, Ask AI
-works for everyone with no per-user key.
+works for everyone with no key required.
 
-## Important: cap your spending
+## Free tier
 
-This endpoint is reachable from the internet, so set a hard limit as a backstop:
-**platform.openai.com → Settings → Limits → set a monthly budget cap.**
-The `ALLOWED_ORIGINS` allowlist in `src/index.js` blocks other websites from
-calling it in a browser, but a usage cap is the real protection.
+Workers AI includes **10,000 Neurons/day** free — plenty for a personal tool.
+To use a stronger model, change `MODEL` in `src/index.js` (e.g.
+`@cf/meta/llama-3.3-70b-instruct-fp8-fast`); larger models spend more neurons.
 
-## Rotating the key
+## Other free options (if you ever want better quality)
 
-```bash
-npx wrangler secret put OPENAI_API_KEY   # paste the new key; overwrites the old
-```
+These need a (free) API key held as a Worker secret — same pattern, one extra step:
 
-No redeploy of the site needed — the key only lives in the Worker.
+- **Groq** — free, very fast, runs Llama 3.3 70B. `wrangler secret put GROQ_API_KEY`.
+- **Google Gemini** — free tier, Gemini 2.0 Flash. `wrangler secret put GEMINI_API_KEY`.
+
+Ask and I'll switch the Worker to either.

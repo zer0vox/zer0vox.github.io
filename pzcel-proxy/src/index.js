@@ -1,10 +1,10 @@
 /**
- * pzcel-proxy — Cloudflare Worker that forwards Ask AI requests to OpenAI.
+ * pzcel-proxy — Cloudflare Worker that answers Ask AI requests using
+ * Cloudflare Workers AI (free tier, no external API key).
  *
- * The OpenAI API key is stored as a Worker SECRET (env.OPENAI_API_KEY) and is
- * NEVER present in this file or the client. The add-in calls this Worker; the
- * Worker adds the key and calls OpenAI. This keeps the key off the public site
- * and fixes the in-browser CORS problem.
+ * The model runs inside the Worker via the `AI` binding (see wrangler.toml),
+ * so there is NO OpenAI key, no billing, and no key exposed to the browser.
+ * The Worker also sets CORS headers, so Ask AI works in every browser.
  *
  * Deploy: see ../README.md
  */
@@ -13,7 +13,11 @@
 // greenhueblues.me, so requests from the Excel task pane carry that Origin.
 const ALLOWED_ORIGINS = ["https://greenhueblues.me"];
 
-const MODEL = "gpt-4o-mini";
+// Workers AI model. Swap for a larger one (e.g.
+// "@cf/meta/llama-3.3-70b-instruct-fp8-fast") for stronger answers — uses more
+// of the daily free quota.
+const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+
 const SYSTEM_PROMPT =
   "You are pzcel, an assistant embedded in Microsoft Excel. Help the user " +
   "analyze, format, and reason about their spreadsheet data. Be concise and practical.";
@@ -29,8 +33,8 @@ export default {
       return json({ error: "Method not allowed" }, 405, request);
     }
 
-    if (!env.OPENAI_API_KEY) {
-      return json({ error: "Proxy is missing the OPENAI_API_KEY secret." }, 500, request);
+    if (!env.AI) {
+      return json({ error: "Workers AI binding 'AI' is not configured (see wrangler.toml)." }, 500, request);
     }
 
     let body;
@@ -46,33 +50,19 @@ export default {
       return json({ error: "Missing 'prompt'." }, 400, request);
     }
 
-    let openaiRes;
+    let aiResp;
     try {
-      openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: prompt + context },
-          ],
-        }),
+      aiResp = await env.AI.run(MODEL, {
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: prompt + context },
+        ],
       });
     } catch (err) {
-      return json({ error: "Upstream request failed: " + (err?.message || err) }, 502, request);
+      return json({ error: "AI request failed: " + (err?.message || err) }, 502, request);
     }
 
-    const data = await openaiRes.json().catch(() => ({}));
-    if (!openaiRes.ok) {
-      const msg = data?.error?.message || `OpenAI HTTP ${openaiRes.status}`;
-      return json({ error: msg }, openaiRes.status, request);
-    }
-
-    const answer = data?.choices?.[0]?.message?.content ?? "(No response returned.)";
+    const answer = (aiResp && aiResp.response) || "(No response returned.)";
     return json({ answer }, 200, request);
   },
 };

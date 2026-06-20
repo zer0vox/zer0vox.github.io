@@ -120,9 +120,9 @@
     <script type="text/javascript">
       // ── Config ────────────────────────────────────────────────────────────
       // Paste your deployed Cloudflare Worker URL here to enable keyless Ask AI
-      // for everyone — the OpenAI key stays server-side and CORS is handled, so
-      // it works in every browser. Leave blank to fall back to a per-user key
-      // saved in Settings.
+      // for everyone. The Worker runs a free Cloudflare Workers AI model server-
+      // side and handles CORS, so it works in every browser with no API key.
+      // Leave blank to fall back to a per-user OpenAI key saved in Settings.
       const PROXY_URL = "";
 
       // Ensure Office.js is fully initialized
