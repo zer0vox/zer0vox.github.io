@@ -5,12 +5,16 @@ import './Pzcel.css'
 
 const PASS_KEY = '7922'
 const ADDIN_PATH = '/pzcel-addin/index.html'
+// Bump on every task-pane change. The ?v= query makes Excel/Office treat it as
+// a brand-new URL, so it can never serve a stale cached copy of the pane.
+const ADDIN_VERSION = '1'
+const TASKPANE_URL = `${ADDIN_PATH}?v=${ADDIN_VERSION}`
 
 // Build the Office Add-in manifest pointed at whatever host the site is served
 // from, so the downloaded file always matches the live deployment (prod, a
 // preview URL, or localhost) — no hardcoded domain to drift out of sync.
 function buildManifest(origin) {
-  const taskpaneUrl = `${origin}${ADDIN_PATH}`
+  const taskpaneUrl = `${origin}${TASKPANE_URL}`
   return `<?xml version="1.0" encoding="UTF-8"?>
 <OfficeApp
           xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
@@ -21,7 +25,7 @@ function buildManifest(origin) {
 
   <!-- Basic Settings -->
   <Id>b4e2cb5a-cd93-47e2-a0e2-2a5b281f6c49</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.1</Version>
   <ProviderName>pzcel</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="pzcel AI" />
@@ -172,7 +176,7 @@ export default function Pzcel() {
           transition={{ duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
         >
           <span className="pzcel-label">01 / Excel Add-in</span>
-          <h1 className="pzcel-title">PZCEL <span className="pzcel-ver">v0</span></h1>
+          <h1 className="pzcel-title">PZCEL <span className="pzcel-ver">v{ADDIN_VERSION}</span></h1>
           <p className="pzcel-lead">
             An AI assistant that lives inside Excel — find duplicates, summarise
             selections, format currency, and run prompts against your data.
@@ -235,7 +239,7 @@ export default function Pzcel() {
                   <h2>Get the manifest</h2>
                   <p className="pzcel-note">
                     Generated for this host —{' '}
-                    <code>{window.location.origin}{ADDIN_PATH}</code> — so it
+                    <code>{window.location.origin}{TASKPANE_URL}</code> — so it
                     works the moment you upload it.
                   </p>
                   <div className="pzcel-actions">
@@ -244,7 +248,7 @@ export default function Pzcel() {
                     </button>
                     <a
                       className="pzcel-btn"
-                      href={ADDIN_PATH}
+                      href={TASKPANE_URL}
                       target="_blank"
                       rel="noreferrer"
                     >
