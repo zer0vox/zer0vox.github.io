@@ -46,6 +46,27 @@
       small { display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
       .response-box { margin-top: 1rem; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; font-size: 0.875rem; white-space: pre-wrap; }
       .response-box.hidden { display: none; }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 16px;
+        transform: translate(-50%, 16px);
+        background: #0f172a;
+        color: #fff;
+        font-size: 0.8125rem;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        max-width: 90%;
+        text-align: center;
+        z-index: 1000;
+      }
+      .toast.show { opacity: 1; transform: translate(-50%, 0); }
+      .toast.success { background: #15803d; }
+      .toast.error { background: #b91c1c; }
     </style>
   </head>
   <body>
@@ -93,6 +114,8 @@
 
     </div>
 
+    <div id="toast" class="toast"></div>
+
     <script type="text/javascript">
       // Ensure Office.js is fully initialized
       Office.onReady((info) => {
@@ -122,13 +145,18 @@
 
         // Settings
         document.getElementById("saveSettingsBtn").addEventListener("click", () => {
-          const key = document.getElementById("apiKey").value;
+          const key = document.getElementById("apiKey").value.trim();
+          if (!key) {
+            showToast("Enter an API key first.", "error");
+            return;
+          }
           Office.context.roamingSettings.set("openai_api_key", key);
           Office.context.roamingSettings.saveAsync((result) => {
             if (result.status === Office.AsyncResultStatus.Succeeded) {
-              alert("API Key saved securely!");
+              showToast("API key saved securely.", "success");
             } else {
-              alert("Failed to save API key.");
+              const msg = result.error && result.error.message ? result.error.message : "";
+              showToast("Failed to save API key. " + msg, "error");
             }
           });
         });
@@ -203,24 +231,78 @@
           }
         });
 
-        // AI Logic
-        document.getElementById("askAiBtn").addEventListener("click", async () => {
-          const prompt = document.getElementById("aiPrompt").value;
+        // AI Logic — calls OpenAI directly with the user's stored key.
+        const askBtn = document.getElementById("askAiBtn");
+        askBtn.addEventListener("click", async () => {
+          const prompt = document.getElementById("aiPrompt").value.trim();
           const apiKey = Office.context.roamingSettings.get("openai_api_key");
 
+          if (!prompt) {
+            showToast("Type a question first.", "error");
+            return;
+          }
           if (!apiKey) {
-            showResponse("Please set your OpenAI API key in the Settings first.");
+            showToast("Set your OpenAI API key in Settings first.", "error");
+            showResponse("No API key found. Open Settings (gear icon, top-right) and save your OpenAI key.");
             return;
           }
 
-          showResponse("Thinking...");
+          askBtn.disabled = true;
+          askBtn.textContent = "Thinking…";
+          showResponse("Thinking…");
 
-          // In a real implementation, you would call OpenAI here,
-          // generate Office.js scripts based on the prompt, and execute them.
-          // For now, we simulate a response:
-          setTimeout(() => {
-            showResponse(`(AI Simulation)\nI received your prompt: "${prompt}".\n\nTo implement true AI automation, we will pass this prompt + your selected table schema to the OpenAI API, and have it return a sequence of Excel.js operations.`);
-          }, 1000);
+          try {
+            // Include the current selection as context so answers are grounded
+            // in the user's data (best-effort — skipped if nothing is selected).
+            let context = "";
+            try {
+              await Excel.run(async (ctx) => {
+                const range = ctx.workbook.getSelectedRange();
+                range.load("address, values");
+                await ctx.sync();
+                const preview = JSON.stringify(range.values).slice(0, 4000);
+                context = `\n\nThe user has selected range ${range.address}. Its values (JSON):\n${preview}`;
+              });
+            } catch (e) {
+              // No active selection / running outside Excel — proceed without context.
+            }
+
+            const res = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + apiKey
+              },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                  { role: "system", content: "You are pzcel, an assistant embedded in Microsoft Excel. Help the user analyze, format, and reason about their spreadsheet data. Be concise and practical." },
+                  { role: "user", content: prompt + context }
+                ]
+              })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              const msg = data && data.error && data.error.message ? data.error.message : ("HTTP " + res.status);
+              showResponse("Error: " + msg);
+              showToast("Request failed.", "error");
+              return;
+            }
+
+            const answer = data.choices && data.choices[0] && data.choices[0].message
+              ? data.choices[0].message.content
+              : "(No response returned.)";
+            showResponse(answer);
+          } catch (err) {
+            console.error(err);
+            const detail = err && err.message ? err.message : String(err);
+            showResponse("Network error: " + detail + "\n\nIf this keeps happening, the OpenAI API may be blocking the in-browser request (CORS). In that case a small proxy is needed.");
+            showToast("Network error.", "error");
+          } finally {
+            askBtn.disabled = false;
+            askBtn.textContent = "Ask AI";
+          }
         });
       }
 
@@ -228,6 +310,16 @@
         const box = document.getElementById("aiResponse");
         box.innerText = text;
         box.classList.remove("hidden");
+      }
+
+      // In-pane toast — Office task panes do not support window.alert().
+      let toastTimer = null;
+      function showToast(text, type) {
+        const el = document.getElementById("toast");
+        el.textContent = text;
+        el.className = "toast show" + (type ? " " + type : "");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { el.className = "toast"; }, 3200);
       }
     </script>
   </body>
