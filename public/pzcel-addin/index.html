@@ -118,6 +118,13 @@
     <div id="toast" class="toast"></div>
 
     <script type="text/javascript">
+      // ── Config ────────────────────────────────────────────────────────────
+      // Paste your deployed Cloudflare Worker URL here to enable keyless Ask AI
+      // for everyone — the OpenAI key stays server-side and CORS is handled, so
+      // it works in every browser. Leave blank to fall back to a per-user key
+      // saved in Settings.
+      const PROXY_URL = "";
+
       // Ensure Office.js is fully initialized
       Office.onReady((info) => {
         if (info.host === Office.HostType.Excel) {
@@ -232,19 +239,20 @@
           }
         });
 
-        // AI Logic — calls OpenAI directly with the user's stored key.
+        // AI Logic — uses the server-side proxy when configured (keyless, works
+        // in all browsers); otherwise falls back to a per-user key from Settings.
         const askBtn = document.getElementById("askAiBtn");
         askBtn.addEventListener("click", async () => {
           const prompt = document.getElementById("aiPrompt").value.trim();
-          const apiKey = Office.context.roamingSettings.get("openai_api_key");
-
           if (!prompt) {
             showToast("Type a question first.", "error");
             return;
           }
-          if (!apiKey) {
+
+          const apiKey = Office.context.roamingSettings.get("openai_api_key");
+          if (!PROXY_URL && !apiKey) {
             showToast("Set your OpenAI API key in Settings first.", "error");
-            showResponse("No API key found. Open Settings (gear icon, top-right) and save your OpenAI key.");
+            showResponse("No proxy configured and no key saved. Either deploy the pzcel proxy, or open Settings (gear icon, top-right) and save an OpenAI key.");
             return;
           }
 
@@ -268,37 +276,52 @@
               // No active selection / running outside Excel — proceed without context.
             }
 
-            const res = await fetch("https://api.openai.com/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + apiKey
-              },
-              body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                  { role: "system", content: "You are pzcel, an assistant embedded in Microsoft Excel. Help the user analyze, format, and reason about their spreadsheet data. Be concise and practical." },
-                  { role: "user", content: prompt + context }
-                ]
-              })
-            });
-
-            const data = await res.json();
-            if (!res.ok) {
-              const msg = data && data.error && data.error.message ? data.error.message : ("HTTP " + res.status);
-              showResponse("Error: " + msg);
-              showToast("Request failed.", "error");
-              return;
+            if (PROXY_URL) {
+              // Keyless path — the proxy holds the key and forwards to OpenAI.
+              const res = await fetch(PROXY_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt, context })
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                showResponse("Error: " + (data && data.error ? data.error : "HTTP " + res.status));
+                showToast("Request failed.", "error");
+                return;
+              }
+              showResponse(data.answer || "(No response returned.)");
+            } else {
+              // Fallback — direct OpenAI call using the user's saved key.
+              const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer " + apiKey
+                },
+                body: JSON.stringify({
+                  model: "gpt-4o-mini",
+                  messages: [
+                    { role: "system", content: "You are pzcel, an assistant embedded in Microsoft Excel. Help the user analyze, format, and reason about their spreadsheet data. Be concise and practical." },
+                    { role: "user", content: prompt + context }
+                  ]
+                })
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                const msg = data && data.error && data.error.message ? data.error.message : ("HTTP " + res.status);
+                showResponse("Error: " + msg);
+                showToast("Request failed.", "error");
+                return;
+              }
+              const answer = data.choices && data.choices[0] && data.choices[0].message
+                ? data.choices[0].message.content
+                : "(No response returned.)";
+              showResponse(answer);
             }
-
-            const answer = data.choices && data.choices[0] && data.choices[0].message
-              ? data.choices[0].message.content
-              : "(No response returned.)";
-            showResponse(answer);
           } catch (err) {
             console.error(err);
             const detail = err && err.message ? err.message : String(err);
-            showResponse("Network error: " + detail + "\n\nIf this keeps happening, the OpenAI API may be blocking the in-browser request (CORS). In that case a small proxy is needed.");
+            showResponse("Network error: " + detail);
             showToast("Network error.", "error");
           } finally {
             askBtn.disabled = false;
