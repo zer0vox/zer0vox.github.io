@@ -1,0 +1,293 @@
+/* ─── PZCEL — standalone add-in distribution page ─────────────────────────── */
+/* Matches the main site: Inter, dark canvas, --line borders, --accent blue.   */
+
+.top .active {
+  color: var(--accent);
+}
+
+.pzcel {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding-top: clamp(140px, 18vh, 220px);
+  padding-bottom: clamp(80px, 12vw, 160px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(48px, 7vw, 96px);
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.pzcel-hero {
+  max-width: 60ch;
+}
+
+.pzcel-label {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+  margin-bottom: 20px;
+}
+
+.pzcel-title {
+  margin: 0 0 24px;
+  font-weight: 500;
+  font-size: var(--huge);
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+}
+
+.pzcel-lead {
+  margin: 0;
+  font-size: clamp(17px, 1.5vw, 21px);
+  line-height: 1.5;
+  color: var(--fg-mute);
+  max-width: 52ch;
+}
+
+/* ── Panel ───────────────────────────────────────────────────────────────── */
+.pzcel-panel {
+  max-width: 720px;
+  background: rgba(13, 13, 13, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+}
+
+.pzcel-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pzcel-status {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fg-dim);
+  transition: background 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+
+.pzcel-status.on {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(168, 199, 255, 0.16);
+}
+
+.pzcel-status-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+/* ── Gate (locked) ───────────────────────────────────────────────────────── */
+.pzcel-gate {
+  padding: 32px 24px 36px;
+}
+
+.pzcel-field-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--fg-mute);
+  margin-bottom: 14px;
+}
+
+.pzcel-field {
+  display: flex;
+  gap: 12px;
+}
+
+.pzcel-field input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 14px 22px;
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 18px;
+  letter-spacing: 0.3em;
+  outline: none;
+  transition: border-color 0.25s var(--ease);
+}
+
+.pzcel-field input::placeholder {
+  color: var(--fg-dim);
+  letter-spacing: 0.3em;
+}
+
+.pzcel-field input:focus {
+  border-color: var(--accent);
+}
+
+.pzcel-error {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: #ff8a93;
+}
+
+/* ── Content (unlocked) ──────────────────────────────────────────────────── */
+.pzcel-content {
+  padding: 8px 24px 36px;
+}
+
+.pzcel-block {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pzcel-block:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.pzcel-block-no {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--fg-dim);
+  padding-top: 4px;
+}
+
+.pzcel-block-body h2 {
+  margin: 0 0 16px;
+  font-weight: 500;
+  font-size: clamp(22px, 2.4vw, 30px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.pzcel-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pzcel-steps li {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--fg-mute);
+}
+
+.pzcel-note {
+  margin: 0 0 22px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--fg-mute);
+}
+
+.pzcel-note code {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.pzcel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* ── Buttons (site pill style) ───────────────────────────────────────────── */
+.pzcel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 13px 28px;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+
+.pzcel-btn:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+  opacity: 1;
+}
+
+.pzcel-btn.solid {
+  background: var(--fg);
+  color: #0d0d0d;
+  border-color: var(--fg);
+}
+
+.pzcel-btn.solid:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.pzcel-footer {
+  position: relative;
+  z-index: 1;
+  background: rgba(13, 13, 13, 0.7);
+  border-top: 1px solid var(--line);
+  padding: 28px var(--pad-x);
+}
+
+.pzcel-footer-inner {
+  max-width: var(--max);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pzcel-footer-brand {
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.pzcel-footer-brand .reg {
+  font-size: 0.55em;
+  vertical-align: super;
+  opacity: 0.85;
+}
+
+.pzcel-footer-copy {
+  font-size: 13px;
+  color: var(--fg-dim);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pzcel-field {
+    flex-direction: column;
+  }
+  .pzcel-field .pzcel-btn {
+    width: 100%;
+  }
+  .pzcel-actions .pzcel-btn {
+    flex: 1 1 100%;
+  }
+  .pzcel-block {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .pzcel-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

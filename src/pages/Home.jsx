@@ -4,8 +4,6 @@ import gsap from 'gsap'
 import FibonacciPsyBackground from '../components/FibonacciPsyBackground'
 import PlaygroundSection from '../components/PlaygroundSection'
 import LeadersSection from '../components/LeadersSection'
-import DevSection from '../components/DevSection'
-import AuthorizedSection from '../components/AuthorizedSection'
 import dnaImg from '../assets/dna.png'
 import visionImg from '../assets/vision.png'
 import logicImg from '../assets/logic.JPG'
@@ -14,6 +12,17 @@ import limitlessImg from '../assets/limitless.JPG'
 export default function Home() {
   const ctaHeadingRef = useRef(null)
   const footerWordRef = useRef(null)
+
+  // When arriving from another route (e.g. the PZCEL page) with a section
+  // hash in the URL, scroll to that section once Home has mounted.
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (id && id !== 'top' && id !== 'pzcel') {
+      requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView()
+      })
+    }
+  }, [])
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -82,8 +91,7 @@ export default function Home() {
             <li><a href="#about">About</a></li>
             <li><a href="#playground">Playground</a></li>
             <li><a href="#leaders">Leaders</a></li>
-            <li><a href="#dev">_dev</a></li>
-            <li><a href="#authorized">_authorized</a></li>
+            <li><a href="#pzcel">PZCEL</a></li>
           </ul>
           <div className="right">
             <a href="#">X</a>
@@ -162,10 +170,6 @@ export default function Home() {
 
       <LeadersSection />
 
-      <DevSection />
-
-      <AuthorizedSection />
-
       <section className="cta wrap" id="contact">
         <motion.h2
           ref={ctaHeadingRef}
@@ -186,6 +190,7 @@ export default function Home() {
               <a href="#work">Work</a>
               <a href="#index">Index</a>
               <a href="#playground">Playground</a>
+              <a href="#pzcel">PZCEL</a>
             </div>
             <div className="col">
               <div className="h">Studio</div>
