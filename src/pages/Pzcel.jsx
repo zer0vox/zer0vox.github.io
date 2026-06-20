@@ -172,7 +172,7 @@ export default function Pzcel() {
           transition={{ duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
         >
           <span className="pzcel-label">01 / Excel Add-in</span>
-          <h1 className="pzcel-title">PZCEL</h1>
+          <h1 className="pzcel-title">PZCEL <span className="pzcel-ver">v0</span></h1>
           <p className="pzcel-lead">
             An AI assistant that lives inside Excel — find duplicates, summarise
             selections, format currency, and run prompts against your data.

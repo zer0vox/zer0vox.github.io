@@ -38,6 +38,21 @@
   line-height: 0.92;
 }
 
+.pzcel-ver {
+  display: inline-block;
+  vertical-align: middle;
+  font-family: var(--mono);
+  font-size: 0.28em;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.35em 0.9em;
+  margin-left: 0.4em;
+  transform: translateY(-0.35em);
+}
+
 .pzcel-lead {
   margin: 0;
   font-size: clamp(17px, 1.5vw, 21px);
