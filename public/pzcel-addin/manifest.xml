@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+          xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+          xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+          xsi:type="TaskPaneApp">
+
+  <!-- Basic Settings -->
+  <Id>b4e2cb5a-cd93-47e2-a0e2-2a5b281f6c49</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>pzcel</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="pzcel AI" />
+  <Description DefaultValue="AI Assistant for Excel Data Manipulation"/>
+
+  <IconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-ui-fabric-core/master/src/components/Icon/icons/ExcelLogo_32x32.png" />
+  <HighResolutionIconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-ui-fabric-core/master/src/components/Icon/icons/ExcelLogo_80x80.png"/>
+
+  <!-- Permissions -->
+  <SupportUrl DefaultValue="https://greenhueblues.me/pzcel-addin/index.html"/>
+  <AppDomains>
+    <AppDomain>https://greenhueblues.me</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Workbook" />
+  </Hosts>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://greenhueblues.me/pzcel-addin/index.html" />
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        <DesktopFormFactor>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="pzcel.Group1">
+                <Label resid="pzcel.GroupLabel" />
+                <Icon>
+                  <bt:Image size="16" resid="pzcel.Icon" />
+                  <bt:Image size="32" resid="pzcel.Icon" />
+                  <bt:Image size="80" resid="pzcel.Icon" />
+                </Icon>
+                <Control xsi:type="Button" id="pzcel.TaskpaneButton">
+                  <Label resid="pzcel.TaskpaneButton.Label" />
+                  <Supertip>
+                    <Title resid="pzcel.TaskpaneButton.Label" />
+                    <Description resid="pzcel.TaskpaneButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="pzcel.Icon" />
+                    <bt:Image size="32" resid="pzcel.Icon" />
+                    <bt:Image size="80" resid="pzcel.Icon" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="pzcel.Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <bt:Image id="pzcel.Icon" DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-ui-fabric-core/master/src/components/Icon/icons/ExcelLogo_32x32.png" />
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="pzcel.Taskpane.Url" DefaultValue="https://greenhueblues.me/pzcel-addin/index.html" />
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="pzcel.GroupLabel" DefaultValue="pzcel AI" />
+        <bt:String id="pzcel.TaskpaneButton.Label" DefaultValue="Open pzcel" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="pzcel.TaskpaneButton.Tooltip" DefaultValue="Open the pzcel AI sidebar." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

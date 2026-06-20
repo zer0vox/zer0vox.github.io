@@ -1278,3 +1278,81 @@ footer .baseline {
   footer .cols { grid-template-columns: 1fr 1fr; }
   .blog-grid { grid-template-columns: 1fr; gap: 40px; }
 }
+
+@media (max-width: 480px) {
+  :root {
+    --section-y: clamp(56px, 10vw, 80px);
+  }
+
+  nav.top {
+    padding: 14px var(--pad-x);
+  }
+
+  nav.top .brand {
+    font-size: 17px;
+  }
+
+  nav.top .right {
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  nav.top .right a:not(:last-child) {
+    display: none;
+  }
+
+  .hero {
+    min-height: 100svh;
+  }
+
+  .about {
+    padding-block: clamp(72px, 14vw, 120px);
+  }
+
+  .index-row {
+    grid-template-columns: 1fr 28px;
+    gap: 10px;
+    padding: 16px 4px;
+  }
+
+  .index-row .p-yr {
+    display: none;
+  }
+
+  footer .cols {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-bottom: 32px;
+  }
+
+  footer .word {
+    font-size: clamp(36px, 9vw, 64px);
+  }
+
+  .cta h2 {
+    font-size: clamp(32px, 9vw, 48px);
+  }
+
+  .playground-canvas-frame {
+    max-width: 260px;
+  }
+
+  .playground-control-row button {
+    font-size: 11px;
+    padding: 8px 2px;
+  }
+
+  .leaders-container {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  nav.top .brand {
+    font-size: 15px;
+  }
+
+  footer .word {
+    font-size: 32px;
+  }
+}

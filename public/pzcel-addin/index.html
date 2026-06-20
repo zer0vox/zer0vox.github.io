@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pzcel Add-in</title>
+    <!-- Office.js library -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .container { padding: 1rem; max-width: 100%; }
+      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+      h1 { font-size: 1.25rem; font-weight: 600; color: var(--primary); }
+      .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0.25rem; border-radius: 4px; }
+      .icon-btn:hover { background-color: var(--border); color: var(--text); }
+      .view.hidden { display: none; }
+      .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+      h2 { font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600; }
+      .btn-group { display: flex; flex-direction: column; gap: 0.5rem; }
+      button { cursor: pointer; font-family: inherit; font-size: 0.875rem; border-radius: 6px; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.2s; }
+      .action-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); text-align: left; }
+      .action-btn:hover { border-color: var(--primary); color: var(--primary); }
+      .primary-btn { background: var(--primary); color: white; border: none; width: 100%; margin-top: 0.5rem; }
+      .primary-btn:hover { background: var(--primary-hover); }
+      .secondary-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); width: 100%; margin-top: 0.5rem; }
+      .secondary-btn:hover { background: var(--bg); }
+      .form-group { margin-bottom: 1rem; }
+      .form-group label { display: block; font-size: 0.875rem; margin-bottom: 0.25rem; color: var(--text-muted); }
+      input[type="password"], textarea { width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.875rem; }
+      textarea { resize: vertical; min-height: 80px; }
+      small { display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+      .response-box { margin-top: 1rem; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; font-size: 0.875rem; white-space: pre-wrap; }
+      .response-box.hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container">
+
+      <header class="header">
+        <h1>pzcel AI</h1>
+        <button id="settingsBtn" class="icon-btn" title="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+      </header>
+
+      <!-- Main Actions View -->
+      <main id="mainView" class="view active">
+        <div class="card">
+          <h2>Actions</h2>
+          <div class="btn-group">
+            <button id="findDuplicatesBtn" class="action-btn">Find Duplicates</button>
+            <button id="summaryStatsBtn" class="action-btn">Summary Stats</button>
+            <button id="formatCurrencyBtn" class="action-btn">Format Currency</button>
+          </div>
+        </div>
+
+        <div class="card ai-card">
+          <h2>AI Assistant</h2>
+          <textarea id="aiPrompt" placeholder="Ask pzcel to format, analyze, or edit your data..."></textarea>
+          <button id="askAiBtn" class="primary-btn">Ask AI</button>
+          <div id="aiResponse" class="response-box hidden"></div>
+        </div>
+      </main>
+
+      <!-- Settings View -->
+      <main id="settingsView" class="view hidden">
+        <div class="card">
+          <h2>Settings</h2>
+          <div class="form-group">
+            <label for="apiKey">OpenAI API Key</label>
+            <input type="password" id="apiKey" placeholder="sk-..." />
+            <small>Stored securely in your local Excel settings.</small>
+          </div>
+          <button id="saveSettingsBtn" class="primary-btn">Save Key</button>
+          <button id="backBtn" class="secondary-btn">Back</button>
+        </div>
+      </main>
+
+    </div>
+
+    <script type="text/javascript">
+      // Ensure Office.js is fully initialized
+      Office.onReady((info) => {
+        if (info.host === Office.HostType.Excel) {
+          document.getElementById("app").style.display = "block";
+          setupEvents();
+        }
+      });
+
+      function setupEvents() {
+        // Navigation
+        document.getElementById("settingsBtn").addEventListener("click", () => {
+          document.getElementById("mainView").classList.add("hidden");
+          document.getElementById("settingsView").classList.remove("hidden");
+
+          // Load existing key
+          const existingKey = Office.context.roamingSettings.get("openai_api_key");
+          if (existingKey) {
+            document.getElementById("apiKey").value = existingKey;
+          }
+        });
+
+        document.getElementById("backBtn").addEventListener("click", () => {
+          document.getElementById("settingsView").classList.add("hidden");
+          document.getElementById("mainView").classList.remove("hidden");
+        });
+
+        // Settings
+        document.getElementById("saveSettingsBtn").addEventListener("click", () => {
+          const key = document.getElementById("apiKey").value;
+          Office.context.roamingSettings.set("openai_api_key", key);
+          Office.context.roamingSettings.saveAsync((result) => {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+              alert("API Key saved securely!");
+            } else {
+              alert("Failed to save API key.");
+            }
+          });
+        });
+
+        // Actions
+        document.getElementById("formatCurrencyBtn").addEventListener("click", async () => {
+          try {
+            await Excel.run(async (context) => {
+              const range = context.workbook.getSelectedRange();
+              range.numberFormat = [["$#,##0.00"]];
+              await context.sync();
+            });
+          } catch (error) {
+            console.error(error);
+          }
+        });
+
+        document.getElementById("findDuplicatesBtn").addEventListener("click", async () => {
+          try {
+            await Excel.run(async (context) => {
+              const range = context.workbook.getSelectedRange();
+              range.load("values, address");
+              await context.sync();
+
+              const values = range.values;
+              const seen = new Set();
+              let duplicates = 0;
+
+              for (let i = 0; i < values.length; i++) {
+                const rowStr = JSON.stringify(values[i]);
+                if (seen.has(rowStr)) {
+                  // Highlight duplicate
+                  range.getCell(i, 0).getResizedRange(0, values[i].length - 1).format.fill.color = "yellow";
+                  duplicates++;
+                } else {
+                  seen.add(rowStr);
+                }
+              }
+              await context.sync();
+
+              showResponse(`Highlighted ${duplicates} duplicate row(s) in yellow.`);
+            });
+          } catch (error) {
+            console.error(error);
+            showResponse(`Error: ${error}`);
+          }
+        });
+
+        document.getElementById("summaryStatsBtn").addEventListener("click", async () => {
+          try {
+            await Excel.run(async (context) => {
+              const range = context.workbook.getSelectedRange();
+              range.load("values");
+              await context.sync();
+
+              let sum = 0;
+              let count = 0;
+
+              for (const row of range.values) {
+                for (const cell of row) {
+                  if (typeof cell === "number") {
+                    sum += cell;
+                    count++;
+                  }
+                }
+              }
+
+              showResponse(`Summary of selection:\nCount: ${count}\nSum: ${sum.toFixed(2)}\nAverage: ${count > 0 ? (sum / count).toFixed(2) : 0}`);
+            });
+          } catch (error) {
+            console.error(error);
+          }
+        });
+
+        // AI Logic
+        document.getElementById("askAiBtn").addEventListener("click", async () => {
+          const prompt = document.getElementById("aiPrompt").value;
+          const apiKey = Office.context.roamingSettings.get("openai_api_key");
+
+          if (!apiKey) {
+            showResponse("Please set your OpenAI API key in the Settings first.");
+            return;
+          }
+
+          showResponse("Thinking...");
+
+          // In a real implementation, you would call OpenAI here,
+          // generate Office.js scripts based on the prompt, and execute them.
+          // For now, we simulate a response:
+          setTimeout(() => {
+            showResponse(`(AI Simulation)\nI received your prompt: "${prompt}".\n\nTo implement true AI automation, we will pass this prompt + your selected table schema to the OpenAI API, and have it return a sequence of Excel.js operations.`);
+          }, 1000);
+        });
+      }
+
+      function showResponse(text) {
+        const box = document.getElementById("aiResponse");
+        box.innerText = text;
+        box.classList.remove("hidden");
+      }
+    </script>
+  </body>
+</html>

@@ -33,7 +33,7 @@ const PIECES = {
   T: {
     states: [
       [[1, 1], [0, 2], [1, 2], [2, 2]],
-      [[1, 1], [1, 2], [2, 1], [1, 3]],
+      [[1, 1], [1, 2], [2, 2], [1, 3]],
       [[0, 2], [1, 2], [2, 2], [1, 3]],
       [[1, 1], [0, 2], [1, 2], [1, 3]]
     ],
@@ -506,15 +506,19 @@ class Renderer {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
     this.clear(ctx, width, height)
     const cellSize = Math.floor(Math.min(width / 6, height / 6))
-    const offsetX = (width - cellSize * 4) / 2
-    const offsetY = (height - cellSize * 4) / 2
+    const minX = Math.min(...next.cells.map(c => c.x))
+    const minY = Math.min(...next.cells.map(c => c.y))
+    const maxX = Math.max(...next.cells.map(c => c.x))
+    const maxY = Math.max(...next.cells.map(c => c.y))
+    const pieceW = maxX - minX + 1
+    const pieceH = maxY - minY + 1
+    const offsetX = (width - cellSize * pieceW) / 2
+    const offsetY = (height - cellSize * pieceH) / 2
     next.cells.forEach(({ x, y }) => {
-      const px = x - 3
-      const py = y - 1
       ctx.fillStyle = PIECES[next.type].color
       ctx.fillRect(
-        offsetX + px * cellSize + 1,
-        offsetY + py * cellSize + 1,
+        offsetX + (x - minX) * cellSize + 1,
+        offsetY + (y - minY) * cellSize + 1,
         cellSize - 2,
         cellSize - 2
       )
