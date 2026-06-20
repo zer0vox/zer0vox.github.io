@@ -7,7 +7,7 @@ const PASS_KEY = '7922'
 const ADDIN_PATH = '/pzcel-addin/index.html'
 // Bump on every task-pane change. The ?v= query makes Excel/Office treat it as
 // a brand-new URL, so it can never serve a stale cached copy of the pane.
-const ADDIN_VERSION = '1'
+const ADDIN_VERSION = '2'
 const TASKPANE_URL = `${ADDIN_PATH}?v=${ADDIN_VERSION}`
 
 // Build the Office Add-in manifest pointed at whatever host the site is served
@@ -25,7 +25,7 @@ function buildManifest(origin) {
 
   <!-- Basic Settings -->
   <Id>b4e2cb5a-cd93-47e2-a0e2-2a5b281f6c49</Id>
-  <Version>1.0.0.1</Version>
+  <Version>1.0.0.2</Version>
   <ProviderName>pzcel</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="pzcel AI" />
