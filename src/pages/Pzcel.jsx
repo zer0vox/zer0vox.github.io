@@ -31,8 +31,8 @@ function buildManifest(origin) {
   <DisplayName DefaultValue="pzcel AI" />
   <Description DefaultValue="AI Assistant for Excel Data Manipulation"/>
 
-  <IconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-ui-fabric-core/master/src/components/Icon/icons/ExcelLogo_32x32.png" />
-  <HighResolutionIconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-ui-fabric-core/master/src/components/Icon/icons/ExcelLogo_80x80.png"/>
+  <IconUrl DefaultValue="${origin}/pzcel-addin/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="${origin}/pzcel-addin/icon-80.png"/>
 
   <!-- Permissions -->
   <SupportUrl DefaultValue="${taskpaneUrl}"/>
@@ -59,9 +59,9 @@ function buildManifest(origin) {
               <Group id="pzcel.Group1">
                 <Label resid="pzcel.GroupLabel" />
                 <Icon>
-                  <bt:Image size="16" resid="pzcel.Icon" />
+                  <bt:Image size="16" resid="pzcel.Icon16" />
                   <bt:Image size="32" resid="pzcel.Icon" />
-                  <bt:Image size="80" resid="pzcel.Icon" />
+                  <bt:Image size="80" resid="pzcel.Icon80" />
                 </Icon>
                 <Control xsi:type="Button" id="pzcel.TaskpaneButton">
                   <Label resid="pzcel.TaskpaneButton.Label" />
@@ -88,7 +88,9 @@ function buildManifest(origin) {
 
     <Resources>
       <bt:Images>
-        <bt:Image id="pzcel.Icon" DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-ui-fabric-core/master/src/components/Icon/icons/ExcelLogo_32x32.png" />
+        <bt:Image id="pzcel.Icon16" DefaultValue="${origin}/pzcel-addin/icon-16.png" />
+        <bt:Image id="pzcel.Icon" DefaultValue="${origin}/pzcel-addin/icon-32.png" />
+        <bt:Image id="pzcel.Icon80" DefaultValue="${origin}/pzcel-addin/icon-80.png" />
       </bt:Images>
       <bt:Urls>
         <bt:Url id="pzcel.Taskpane.Url" DefaultValue="${taskpaneUrl}" />
@@ -153,10 +155,7 @@ export default function Pzcel() {
           <a href="#top" className="brand">greenhueblues<span className="reg">®</span></a>
           <ul>
             <li><a href="#work">Work</a></li>
-            <li><a href="#index">Index</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#playground">Playground</a></li>
-            <li><a href="#leaders">Leaders</a></li>
             <li><a href="#pzcel" className="active" aria-current="page">PZCEL</a></li>
           </ul>
           <div className="right">

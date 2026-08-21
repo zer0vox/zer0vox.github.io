@@ -2,16 +2,35 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import FibonacciPsyBackground from '../components/FibonacciPsyBackground'
-import PlaygroundSection from '../components/PlaygroundSection'
-import LeadersSection from '../components/LeadersSection'
+import { useHeroGlare } from '../components/useHeroGlare'
 import dnaImg from '../assets/dna.png'
 import visionImg from '../assets/vision.png'
 import logicImg from '../assets/logic.JPG'
 import limitlessImg from '../assets/limitless.JPG'
 
+// Reveals a panel's number/name as it scrolls into view. The parent span keeps
+// its translateY(-50%) centering; this inner span animates on its own axis, so
+// the two transforms never conflict.
+function PanelReveal({ children, delay = 0, from = 'left' }) {
+  const offset = from === 'right' ? 40 : -40
+  return (
+    <motion.span
+      style={{ display: 'inline-block' }}
+      initial={{ opacity: 0, x: offset }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.5 }}
+      transition={{ duration: 0.7, ease: [0.22, 0.7, 0.18, 1], delay }}
+    >
+      {children}
+    </motion.span>
+  )
+}
+
 export default function Home() {
   const ctaHeadingRef = useRef(null)
   const footerWordRef = useRef(null)
+  const heroRef = useRef(null)
+  useHeroGlare(heroRef)
 
   // When arriving from another route (e.g. the PZCEL page) with a section
   // hash in the URL, scroll to that section once Home has mounted.
@@ -72,26 +91,24 @@ export default function Home() {
     )
   }, [])
 
-  const indexRows = [
-    ['E-Sikshya', 'React.js · Node.js · Google PaLM · Python', 'Full-Stack, AI/ML', '2025'],
-    ['Blockchain Auth System', 'Solidity · Web3.js · React.js · Node.js', 'Blockchain, Full-Stack', '2025'],
-    ['KaskoIsP', 'React.js · Node.js · REST API', 'Full-Stack, Web', '2025'],
-    ['Coffee Vending FSM', 'Verilog · Xilinx ISE · FSM Design', 'Hardware, Simulation', '2024'],
-  ]
 
   return (
     <>
       <FibonacciPsyBackground />
-      <nav className="top" id="nav">
+      <motion.nav
+        className="top"
+        id="nav"
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+      >
         <div className="inner">
           <a href="#top" className="brand">greenhueblues<span className="reg">®</span></a>
           <ul>
             <li><a href="#work">Work</a></li>
-            <li><a href="#index">Index</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#playground">Playground</a></li>
-            <li><a href="#leaders">Leaders</a></li>
             <li><a href="#pzcel">PZCEL</a></li>
+            <li><a href="#mx">MX</a></li>
           </ul>
           <div className="right">
             <a href="#">X</a>
@@ -100,11 +117,16 @@ export default function Home() {
             <a href="#contact">Contact</a>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
-      <header className="hero" id="top">
+      <header className="hero" id="top" ref={heroRef}>
         <div className="bg" />
         <div className="hero-pattern" />
+        <div className="hero-iridescence" aria-hidden="true">
+          <span className="irid irid--a" />
+          <span className="irid irid--b" />
+        </div>
+        <div className="hero-glare" aria-hidden="true" />
         <div className="copy">
           <h1 id="heroTitle">
             <span className="line"><span className="inner">Building mindful systems for a</span></span>
@@ -115,11 +137,11 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="panels" id="featured" aria-label="Featured projects">
+      <section className="panels" id="work" aria-label="Featured projects">
         <article className="panel p1">
           <div className="pbg" style={{ background: `linear-gradient(rgba(0,0,0,0.38), rgba(0,0,0,0.38)), url(${dnaImg}) center/cover no-repeat` }} />
-          <span className="label">1</span>
-          <span className="name">DNA</span>
+          <span className="label"><PanelReveal>1</PanelReveal></span>
+          <span className="name"><PanelReveal delay={0.08} from="right">DNA</PanelReveal></span>
         </article>
         <article className="panel p2">
           <div className="pbg" style={{ background: `linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.42)), url(${visionImg}) center/cover no-repeat` }}>
@@ -129,18 +151,18 @@ export default function Home() {
               <path d="M0 100 C 80 50, 160 150, 240 100 S 400 50, 480 100 S 640 150, 720 100 S 880 50, 960 100 S 1120 150, 1200 100" fill="none" stroke="rgba(244,208,63,.35)" strokeWidth="1.5" />
             </svg>
           </div>
-          <span className="label">2</span>
-          <span className="name">Vision</span>
+          <span className="label"><PanelReveal>2</PanelReveal></span>
+          <span className="name"><PanelReveal delay={0.08} from="right">Vision</PanelReveal></span>
         </article>
         <article className="panel p3">
           <div className="pbg" style={{ background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${logicImg}) center/cover no-repeat` }} />
-          <span className="label">3</span>
-          <span className="name">Logic</span>
+          <span className="label"><PanelReveal>3</PanelReveal></span>
+          <span className="name"><PanelReveal delay={0.08} from="right">Logic</PanelReveal></span>
         </article>
         <article className="panel p4">
           <div className="pbg" style={{ background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${limitlessImg}) center/cover no-repeat` }} />
-          <span className="label">4</span>
-          <span className="name">Limitless</span>
+          <span className="label"><PanelReveal>4</PanelReveal></span>
+          <span className="name"><PanelReveal delay={0.08} from="right">Limitless</PanelReveal></span>
         </article>
       </section>
 
@@ -151,24 +173,6 @@ export default function Home() {
         <a href="#about" className="about-more">More About Us →</a>
       </section>
 
-      <section className="index-sect wrap" id="work">
-        <h2 id="index">Index</h2>
-        <div className="index-table">
-          {indexRows.map(([name, tech, cat, year]) => (
-            <a className="index-row" href="#" key={name}>
-              <span className="p-name">{name}</span>
-              <span className="p-client">{tech}</span>
-              <span className="p-cat">{cat}</span>
-              <span className="p-yr">{year}</span>
-              <span className="p-arr">→</span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <PlaygroundSection />
-
-      <LeadersSection />
 
       <section className="cta wrap" id="contact">
         <motion.h2
@@ -188,9 +192,8 @@ export default function Home() {
             <div className="col">
               <div className="h">Sitemap</div>
               <a href="#work">Work</a>
-              <a href="#index">Index</a>
-              <a href="#playground">Playground</a>
               <a href="#pzcel">PZCEL</a>
+              <a href="#mx">MX</a>
             </div>
             <div className="col">
               <div className="h">Studio</div>

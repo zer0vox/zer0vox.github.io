@@ -1,12 +1,18 @@
 import Home from './pages/Home.jsx'
 import Pzcel from './pages/Pzcel.jsx'
+import Mx from './pages/Mx.jsx'
+import AudioProvider from './audio/AudioProvider.jsx'
+import MiniPlayer from './components/MiniPlayer.jsx'
 import { useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 
-// Only `#pzcel` is a route; every other hash (#work, #about, …) is an
+// `#pzcel` and `#mx` are routes; every other hash (#work, #about, …) is an
 // in-page anchor on Home.
+const ROUTES = ['pzcel', 'mx']
+
 function getRoute() {
-  return window.location.hash.replace(/^#\/?/, '') === 'pzcel' ? 'pzcel' : 'home'
+  const hash = window.location.hash.replace(/^#\/?/, '')
+  return ROUTES.includes(hash) ? hash : 'home'
 }
 
 export default function App() {
@@ -40,11 +46,18 @@ export default function App() {
     const onHash = () => {
       const next = getRoute()
       setRoute(next)
-      if (next === 'pzcel') lenisRef.current?.scrollTo(0, { immediate: true })
+      if (next !== 'home') lenisRef.current?.scrollTo(0, { immediate: true })
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  return route === 'pzcel' ? <Pzcel /> : <Home />
+  // The provider sits above the router so its <audio> element survives every
+  // route change — leaving /mx pauses nothing.
+  return (
+    <AudioProvider>
+      {route === 'pzcel' ? <Pzcel /> : route === 'mx' ? <Mx /> : <Home />}
+      <MiniPlayer hidden={route === 'mx'} />
+    </AudioProvider>
+  )
 }

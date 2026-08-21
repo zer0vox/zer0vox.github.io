@@ -195,6 +195,11 @@ nav.top .right {
   height: 100vh;
   min-height: 640px;
   overflow: hidden;
+  /* Live glare vars — written by useHeroGlare's rAF loop, inherited by
+     .hero-glare. Defaults keep the glare invisible (--gi 0) until interaction. */
+  --gx: 0.2;
+  --gy: 0.15;
+  --gi: 0;
 }
 
 .hero .hero-pattern {
@@ -202,6 +207,295 @@ nav.top .right {
   inset: 0;
   background: url("./assets/first page.svg") center / 100% auto no-repeat;
   opacity: 1;
+  /* Faint-flame life: an irregular flicker (opacity + brightness + a warm ember
+     glow, all in ONE filter so they compose) plus a slow heat-shimmer rise.
+     Uneven keyframe stops are what make it read as a living flame, not a smooth
+     pulse. Scaled from the base so it "rises" like heat. */
+  transform-origin: 50% 100%;
+  will-change: opacity, filter, transform;
+  animation:
+    heroFlameFlicker 13s ease-in-out infinite,
+    heroFlameRise 22s ease-in-out infinite;
+}
+
+/* The flicker — opacity + a single filter chain (brightness carries the flicker,
+   drop-shadow the warm ember glow, hue-rotate a faint warm drift). Because it is
+   one `filter` value per stop, the parts compose instead of overriding. Kept very
+   shallow: opacity stays near 1, brightness near 1, glow barely there. */
+@keyframes heroFlameFlicker {
+  0% {
+    opacity: 0.95;
+    filter: brightness(0.97) hue-rotate(0deg) drop-shadow(0 0 0 rgba(255, 158, 74, 0));
+  }
+  12% {
+    opacity: 1;
+    filter: brightness(1.03) hue-rotate(-2deg) drop-shadow(0 -3px 14px rgba(255, 158, 74, 0.06));
+  }
+  21% {
+    opacity: 0.97;
+    filter: brightness(0.99) hue-rotate(-1deg) drop-shadow(0 -2px 9px rgba(168, 199, 255, 0.05));
+  }
+  38% {
+    opacity: 1;
+    filter: brightness(1.05) hue-rotate(-3deg) drop-shadow(0 -4px 18px rgba(255, 150, 66, 0.08));
+  }
+  47% {
+    opacity: 0.94;
+    filter: brightness(0.96) hue-rotate(0deg) drop-shadow(0 -1px 6px rgba(255, 176, 92, 0.03));
+  }
+  63% {
+    opacity: 0.99;
+    filter: brightness(1.02) hue-rotate(-2deg) drop-shadow(0 -3px 15px rgba(255, 158, 74, 0.06));
+  }
+  76% {
+    opacity: 0.96;
+    filter: brightness(0.98) hue-rotate(-1deg) drop-shadow(0 -2px 9px rgba(168, 199, 255, 0.05));
+  }
+  89% {
+    opacity: 1;
+    filter: brightness(1.04) hue-rotate(-3deg) drop-shadow(0 -3px 16px rgba(255, 150, 66, 0.07));
+  }
+  100% {
+    opacity: 0.95;
+    filter: brightness(0.97) hue-rotate(0deg) drop-shadow(0 0 0 rgba(255, 158, 74, 0));
+  }
+}
+
+/* Slow heat-shimmer rise: barely-there vertical scale + lift, from the base. */
+@keyframes heroFlameRise {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50%      { transform: translateY(-0.3%) scaleY(1.006); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .hero-pattern {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* ── Iridescent wave layer ─────────────────────────────────────────────────
+   A soap-film / oil-slick sheen that travels across the line-art. The craft:
+   - Two desynced wave layers (a slow, b faster & counter-rotating) → parallax,
+     no visible resync.
+   - Each layer is a stack of offset conic + linear hue gradients so the colour
+     appears to SHIFT as it moves (angle-dependent iridescence), not a static
+     rainbow sliding by.
+   - mix-blend-mode: screen makes the sheen catch only the bright strokes of the
+     pattern underneath — it interacts with the texture instead of coating it.
+   - A radial mask keeps it off the headline (bottom-left) and fades the edges,
+     so it reads as a deliberate sheen, not a wash. Kept low-opacity to sit with
+     the calm periwinkle palette. */
+.hero .hero-iridescence {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Keep the sheen OFF the centre (where the text + the geometry's focal knot
+     live) and pool it toward the frame — a soft ring that fades to nothing in
+     the middle and at the edges. This is what turns a fog into a sheen. */
+  -webkit-mask-image: radial-gradient(115% 92% at 55% 40%, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.55) 55%, #000 74%, transparent 100%);
+          mask-image: radial-gradient(115% 92% at 55% 40%, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.55) 55%, #000 74%, transparent 100%);
+}
+
+.hero .irid {
+  position: absolute;
+  /* oversize so rotation/drift never exposes an edge */
+  inset: -40%;
+  display: block;
+  mix-blend-mode: screen;
+  will-change: transform, background-position, filter;
+  /* heavy blur = the colour reads as an atmospheric sheen, not visible bands */
+  filter: blur(40px) saturate(150%);
+}
+
+/* Layer A — slow, wide bands. The three gradients are hue-offset so their
+   overlap produces the shifting spectral colour of a soap film. */
+.hero .irid--a {
+  opacity: 0.22;
+  background:
+    conic-gradient(from 210deg at 40% 55%,
+      rgba(168, 199, 255, 0.0) 0deg,
+      rgba(120, 220, 255, 0.5) 70deg,
+      rgba(190, 150, 255, 0.45) 150deg,
+      rgba(120, 255, 210, 0.4) 230deg,
+      rgba(168, 199, 255, 0.0) 320deg,
+      rgba(168, 199, 255, 0.0) 360deg),
+    linear-gradient(115deg,
+      rgba(140, 190, 255, 0.35) 0%,
+      rgba(180, 140, 255, 0.0) 40%,
+      rgba(120, 255, 220, 0.3) 75%,
+      rgba(140, 190, 255, 0.0) 100%);
+  background-size: 160% 160%, 200% 200%;
+  animation: iridDriftA 26s ease-in-out infinite;
+}
+
+/* Layer B — faster, finer, counter-rotating for depth and colour beats. */
+.hero .irid--b {
+  opacity: 0.16;
+  background:
+    conic-gradient(from 20deg at 62% 42%,
+      rgba(120, 255, 230, 0.0) 0deg,
+      rgba(200, 160, 255, 0.5) 90deg,
+      rgba(120, 210, 255, 0.42) 180deg,
+      rgba(255, 190, 150, 0.28) 260deg,
+      rgba(120, 255, 230, 0.0) 360deg),
+    linear-gradient(295deg,
+      rgba(190, 150, 255, 0.3) 0%,
+      rgba(120, 220, 255, 0.0) 45%,
+      rgba(160, 255, 210, 0.28) 80%,
+      rgba(190, 150, 255, 0.0) 100%);
+  background-size: 150% 150%, 190% 190%;
+  animation: iridDriftB 18s ease-in-out infinite;
+}
+
+/* Drift = travel the gradient position AND rotate slightly AND hue-rotate, so
+   the colours move across the surface while their spectrum also shifts. */
+@keyframes iridDriftA {
+  0% {
+    background-position: 0% 50%, 100% 0%;
+    transform: rotate(0deg) scale(1);
+    filter: blur(40px) saturate(150%) hue-rotate(0deg);
+  }
+  50% {
+    background-position: 100% 50%, 0% 100%;
+    transform: rotate(6deg) scale(1.06);
+    filter: blur(46px) saturate(165%) hue-rotate(40deg);
+  }
+  100% {
+    background-position: 0% 50%, 100% 0%;
+    transform: rotate(0deg) scale(1);
+    filter: blur(40px) saturate(150%) hue-rotate(0deg);
+  }
+}
+
+@keyframes iridDriftB {
+  0% {
+    background-position: 100% 50%, 0% 100%;
+    transform: rotate(0deg) scale(1.04);
+    filter: blur(38px) saturate(150%) hue-rotate(0deg);
+  }
+  50% {
+    background-position: 0% 50%, 100% 0%;
+    transform: rotate(-7deg) scale(1);
+    filter: blur(44px) saturate(170%) hue-rotate(-50deg);
+  }
+  100% {
+    background-position: 100% 50%, 0% 100%;
+    transform: rotate(0deg) scale(1.04);
+    filter: blur(38px) saturate(150%) hue-rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .irid {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* ── "Oasis Faded-Sun Haze" hero glow ──────────────────────────────────────
+   Replaces the earlier lens flare (which clashed — too cinematic for this calm,
+   periwinkle, sacred-geometry site). The vibe: Pink Floyd's prism as DIFFUSION
+   not refraction; Oasis's washed-out remembered sun; Japanese city-pop dusk and
+   ma. Late-afternoon light seeping through an un-cleaned 90s window — a soft
+   bloom pooling where the cursor rests, gold at heart cooling to periwinkle →
+   violet → teal at the edges, under fine film grain and a lifted black so the
+   mandala glows from within like a sun-faded photograph. Slow to arrive, slow
+   to leave; never announces itself.
+
+   Reads inherited --gx/--gy/--gi ONLY — NEVER re-declares them (that shadows the
+   live rAF values and freezes the effect at opacity 0). Source-over everywhere
+   (no screen/plus-lighter — they no-op once the layer is promoted). Every
+   `circle` radius is a length (vmax); `%` only on `ellipse`. */
+.hero .hero-glare {
+  /* Positioning — MUST be here (a prior splice dropped these, which collapsed
+     the element to zero size / static flow so nothing painted). Sits above the
+     line-art, below the headline text (z-index:0 vs .copy's z-index:1). */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* the warm→cool sun bloom; alphas scale with --gi so at rest it whispers */
+  background:
+    radial-gradient(
+      circle 1.8vmax at calc(var(--gx) * 100%) calc(var(--gy) * 100%),
+      rgba(248, 216, 158, calc(0.05 + 0.20 * var(--gi)))  0%,   /* faded sun core   */
+      rgba(235, 176, 124, calc(0.035 + 0.15 * var(--gi))) 14%,  /* amber whisper    */
+      rgba(168, 199, 255, calc(0.025 + 0.12 * var(--gi))) 34%,  /* periwinkle pivot */
+      rgba(157, 143, 214, calc(0.015 + 0.085 * var(--gi))) 56%, /* soft violet dusk */
+      rgba(127, 184, 176, calc(0.01 + 0.065 * var(--gi))) 78%,  /* gentle teal rim  */
+      rgba(127, 184, 176, 0)                              100%);
+  /* gentle "gravitational" lean toward the cursor — the light leans, not slides */
+  transform: translate3d(
+    calc((var(--gx) - 0.5) * 2.5%),
+    calc((var(--gy) - 0.5) * 2.5%), 0);
+  transition: transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  opacity: 1;               /* visibility rides --gi in the alphas, not opacity */
+  mix-blend-mode: normal;
+  will-change: transform;
+}
+
+/* ::before — a whisper of chromatic dispersion (Floyd nod) + lifted blacks so
+   the line-art glows rather than sitting on dead black. */
+.hero .hero-glare::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle 2.4vmax at calc(var(--gx) * 100% + 2px) calc(var(--gy) * 100% + 1.5px),
+      rgba(233, 185, 138, calc(0.045 * var(--gi))) 0%,
+      rgba(233, 185, 138, 0)                       62%),
+    radial-gradient(
+      circle 2.4vmax at calc(var(--gx) * 100% - 2px) calc(var(--gy) * 100% - 1.5px),
+      rgba(127, 184, 176, calc(0.045 * var(--gi))) 0%,
+      rgba(127, 184, 176, 0)                       62%),
+    radial-gradient(
+      ellipse 120% 120% at calc(var(--gx) * 100%) calc(var(--gy) * 100%),
+      rgba(23, 26, 38, calc(0.05  * var(--gi))) 0%,
+      rgba(23, 26, 38, calc(0.028 * var(--gi))) 45%,
+      rgba(23, 26, 38, 0)                        100%);
+  mix-blend-mode: normal;
+}
+
+/* ::after — cheap film grain (tiled SVG fractal-noise data-URI, fully encoded) */
+.hero .hero-glare::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='90' height='90' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: calc(0.04 + 0.02 * var(--gi));
+  mix-blend-mode: normal;
+}
+
+/* Reduced motion: a calm, centred steady glow — kept visible, not hidden. */
+@media (prefers-reduced-motion: reduce) {
+  .hero .hero-glare {
+    background:
+      radial-gradient(
+        circle 1.8vmax at 50% 42%,
+        rgba(246, 214, 158, 0.09) 0%,
+        rgba(233, 178, 128, 0.06) 14%,
+        rgba(168, 199, 255, 0.05) 34%,
+        rgba(157, 143, 214, 0.035) 56%,
+        rgba(127, 184, 176, 0.03) 78%,
+        rgba(127, 184, 176, 0)    100%);
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+  .hero .hero-glare::before {
+    background:
+      radial-gradient(ellipse 120% 120% at 50% 42%,
+        rgba(23, 26, 38, 0.04) 0%,
+        rgba(23, 26, 38, 0)   100%);
+  }
+  .hero .hero-glare::after { opacity: 0.045; }
 }
 
 .hero .bg {

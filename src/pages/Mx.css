@@ -1,0 +1,610 @@
+/* ─── MX — after office hours ─────────────────────────────────────────────── */
+/* A fixed, non-scrolling window. Everything is stacked in one viewport: the    */
+/* photograph, the weather on the glass, then the interface floating over it.   */
+
+html.mx-locked,
+html.mx-locked body {
+  overflow: hidden;
+}
+
+.mx {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: #05070a;
+  color: var(--fg);
+  --mx-key: #ffb872;
+  --mx-ink: rgba(255, 255, 255, 0.58);
+}
+
+.mx[data-mode='badal'] {
+  --mx-key: #8fb6e8;
+}
+
+/* ── The view ─────────────────────────────────────────────────────────────── */
+
+.mx-scene {
+  position: absolute;
+  inset: -3%;
+  --mx-px: 0;
+  --mx-py: 0;
+  transform: translate3d(calc(var(--mx-px) * -14px), calc(var(--mx-py) * -10px), 0) scale(1.02);
+  transition: transform 1.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+
+.mx-photo {
+  position: absolute;
+  inset: 0;
+  background-position: center 58%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  filter: brightness(1.18) saturate(1.04);
+  transition: opacity 2s var(--ease);
+  animation: mx-drift 68s ease-in-out infinite alternate;
+}
+
+.mx-photo--badal {
+  background-image: url('/mx/office-badal.png');
+}
+
+.mx-photo--clear {
+  background-image: url('/mx/office-clear.png');
+}
+
+.mx[data-mode='badal'] .mx-photo--badal,
+.mx[data-mode='clear'] .mx-photo--clear {
+  opacity: 1;
+}
+
+@keyframes mx-drift {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.09) translate3d(-1.2%, -0.8%, 0);
+  }
+}
+
+/* Colour grade + the darkness that makes type readable over a photograph. */
+.mx-grade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(2, 4, 7, 0.9) 0%, rgba(2, 4, 7, 0.56) 20%, transparent 40%),
+    radial-gradient(115% 85% at 50% 40%, transparent 60%, rgba(3, 5, 9, 0.34) 100%),
+    linear-gradient(to bottom, rgba(4, 6, 10, 0.4) 0%, transparent 20%);
+}
+
+.mx[data-mode='clear'] .mx-grade {
+  background:
+    linear-gradient(to top, rgba(6, 4, 3, 0.92) 0%, rgba(6, 4, 3, 0.62) 21%, transparent 42%),
+    radial-gradient(115% 85% at 50% 44%, transparent 60%, rgba(10, 6, 4, 0.32) 100%),
+    linear-gradient(to bottom, rgba(8, 5, 4, 0.38) 0%, transparent 22%);
+}
+
+.mx-weather {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* Light sliding across the pane — the reflection you only notice when you stop
+   reading and look at the glass itself. */
+.mx-glass {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    104deg,
+    transparent 38%,
+    rgba(190, 214, 255, 0.055) 47%,
+    rgba(190, 214, 255, 0.012) 55%,
+    transparent 64%
+  );
+  mix-blend-mode: screen;
+  animation: mx-sheen 34s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes mx-sheen {
+  from {
+    transform: translate3d(-14%, 0, 0);
+  }
+  to {
+    transform: translate3d(14%, 0, 0);
+  }
+}
+
+/* Monitor spill from the desk that is notionally right in front of you. */
+.mx-monitor {
+  position: absolute;
+  left: 50%;
+  bottom: -34vh;
+  width: min(1100px, 120vw);
+  height: 62vh;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(150, 190, 255, 0.14), transparent 70%);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: mx-flicker 7s ease-in-out infinite;
+}
+
+.mx[data-mode='clear'] .mx-monitor {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 186, 120, 0.16), transparent 70%);
+}
+
+@keyframes mx-flicker {
+  0%, 100% { opacity: 0.5; }
+  46% { opacity: 0.58; }
+  48% { opacity: 0.42; }
+  52% { opacity: 0.6; }
+}
+
+.mx[data-playing='false'] .mx-glass,
+.mx[data-playing='false'] .mx-monitor {
+  animation-play-state: paused;
+}
+
+/* ── Interface ────────────────────────────────────────────────────────────── */
+
+.mx-ui {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7), 0 0 3px rgba(0, 0, 0, 0.4);
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 24px;
+  padding: clamp(20px, 3.2vw, 40px) clamp(16px, 4vw, 56px) clamp(22px, 3vw, 40px);
+  max-width: var(--max);
+  margin-inline: auto;
+}
+
+.mx-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mx-back {
+  justify-self: start;
+  color: var(--fg-dim);
+}
+
+.mx-back:hover {
+  color: var(--fg);
+  opacity: 1;
+}
+
+.mx-mark {
+  justify-self: center;
+  font-family: var(--sans);
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: var(--fg);
+}
+
+.mx-mode {
+  justify-self: end;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 6px 2px;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mx-mode .on {
+  color: var(--mx-key);
+}
+
+.mx-mode .sep {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── The quiet middle ─────────────────────────────────────────────────────── */
+
+.mx-center {
+  position: relative;
+  align-self: end;
+  justify-self: center;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  padding-bottom: clamp(6px, 1.5vh, 18px);
+}
+
+.mx-center::before {
+  content: '';
+  position: absolute;
+  inset: -18% -22%;
+  z-index: -1;
+  background: radial-gradient(ellipse 55% 60% at 50% 55%, rgba(0, 0, 0, 0.5), transparent 72%);
+  pointer-events: none;
+}
+
+.mx-clock {
+  margin: 0;
+  font-weight: 200;
+  font-size: clamp(40px, 5.4vw, 74px);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mx-clock .sec {
+  font-family: var(--mono);
+  font-size: clamp(13px, 1.2vw, 17px);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.mx-phrase-slot {
+  min-height: 1.7em;
+  display: grid;
+  place-items: center;
+}
+
+.mx-phrase {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: clamp(14px, 1.35vw, 18px);
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.mx-quote-slot {
+  min-height: 1.6em;
+  display: grid;
+  place-items: center;
+}
+
+.mx-quote {
+  margin: 0;
+  font-family: var(--script);
+  font-size: clamp(19px, 2vw, 26px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--mx-key);
+  opacity: 1;
+}
+
+/* ── Console ──────────────────────────────────────────────────────────────── */
+
+.mx-console {
+  display: grid;
+  gap: clamp(14px, 1.6vw, 22px);
+}
+
+.mx-telemetry {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px clamp(18px, 3vw, 44px);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.mx-telemetry > div {
+  display: flex;
+  gap: 8px;
+}
+
+.mx-telemetry dt {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.mx-telemetry dd {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mx-telemetry dd.ok {
+  color: #93d3a2;
+}
+
+.mx-player {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(240px, 2.1fr) auto auto;
+  align-items: center;
+  gap: clamp(18px, 2.6vw, 40px);
+  padding-top: clamp(14px, 1.8vw, 22px);
+  border-top: 1px solid var(--line);
+}
+
+.mx-now {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mx-now-title {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mx-now-artist {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mx-seek {
+  display: grid;
+  gap: 7px;
+}
+
+.mx-times {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One slider treatment for seek, volume and street. */
+.mx input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mx input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--mx-key) 0 var(--mx-progress, 0%),
+    rgba(255, 255, 255, 0.16) var(--mx-progress, 0%) 100%
+  );
+}
+
+.mx input[type='range']::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--mx-key) 0 var(--mx-progress, 0%),
+    rgba(255, 255, 255, 0.16) var(--mx-progress, 0%) 100%
+  );
+}
+
+.mx input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 9px;
+  height: 9px;
+  margin-top: -3.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fg);
+  transition: transform 0.2s var(--ease);
+}
+
+.mx input[type='range']::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
+.mx input[type='range']:hover::-webkit-slider-thumb {
+  transform: scale(1.35);
+}
+
+.mx-transport {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 18px);
+}
+
+.mx-transport button {
+  background: none;
+  border: 0;
+  padding: 8px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.25s var(--ease);
+}
+
+.mx-transport button:hover {
+  color: var(--fg);
+}
+
+.mx-transport .mx-play {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--fg);
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+}
+
+.mx-transport .mx-play:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mx-levels {
+  display: grid;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.mx-level {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.mx-level-key {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+button.mx-level-key:hover {
+  color: var(--fg);
+}
+
+/* ── Focus ────────────────────────────────────────────────────────────────── */
+
+.mx :focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* ── Mobile: a smaller window, recomposed ─────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .mx-ui {
+    gap: 16px;
+    padding: 18px 18px 22px;
+  }
+
+  .mx-center {
+    padding-bottom: 1vh;
+    gap: 9px;
+  }
+
+  .mx-photo {
+    background-position: 62% 56%;
+  }
+
+  .mx-player {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .mx-now {
+    text-align: center;
+    justify-items: center;
+  }
+
+  /* Transport gets big, thumb-friendly targets and sits above the levels. */
+  .mx-transport {
+    justify-content: center;
+    gap: 26px;
+  }
+
+  .mx-transport .mx-play {
+    width: 60px;
+    height: 60px;
+    font-size: 15px;
+  }
+
+  .mx-transport button {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .mx-levels {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .mx-level {
+    grid-template-columns: 42px 1fr;
+  }
+
+  /* Fatter hit area for thumbs, without changing the hairline track. */
+  .mx input[type='range'] {
+    height: 26px;
+  }
+
+  .mx input[type='range']::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+    margin-top: -5px;
+  }
+
+  .mx input[type='range']::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+  }
+
+  .mx-telemetry {
+    font-size: 10px;
+    gap: 4px 16px;
+  }
+
+  /* Keep only the essentials outside the window frame. */
+  .mx-telemetry > div:nth-child(n + 5) {
+    display: none;
+  }
+
+}
+
+@media (max-width: 420px) {
+  .mx-back span {
+    display: none;
+  }
+
+  .mx-quote {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mx-photo,
+  .mx-glass,
+  .mx-monitor {
+    animation: none;
+  }
+
+  .mx-scene {
+    transition: none;
+  }
+}
