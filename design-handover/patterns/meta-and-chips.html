@@ -1,0 +1,119 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meta &amp; Chips — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 48px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+  .stage{border:1px solid var(--line);border-radius:8px;padding:32px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;background:rgba(255,255,255,.02)}
+  .stage.col{display:block}
+
+  /* ── the patterns ─────────────────────────────────────────── */
+  .meta-label{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim)}
+  .meta-13{font-family:var(--mono);font-size:13px;color:var(--fg-dim)}
+  .ph-tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55);background:rgba(13,13,13,.55);padding:6px 12px;border:1px dashed rgba(255,255,255,.22);border-radius:6px}
+  .ph-tag--onart{color:rgba(255,255,255,.6);background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.25)}
+  .pill{display:inline-block;border-radius:999px;border:1px solid rgba(255,255,255,.15);padding:14px 24px;background:#0d0d0d;font-size:16px;font-weight:500;color:var(--fg);text-decoration:none;transition:background .25s var(--ease),border-color .25s var(--ease)}
+  .pill:hover{background:rgba(168,199,255,.05);border-color:rgba(168,199,255,.5)}
+  .pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .pill--sm{padding:10px 20px;font-size:14px}
+  .paren{font-weight:500;font-size:18px}
+  .paren .par{color:var(--fg-dim)}
+  .onart{background:radial-gradient(80% 60% at 30% 30%,#2a3aa8,#131a5c 55%,#06082a);border-radius:8px;padding:40px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;justify-content:center}
+
+  table{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  td{padding:16px 16px 16px 0;border-bottom:1px solid var(--line);color:var(--fg-mute);line-height:1.45;vertical-align:top}
+  tr:first-child td{border-top:1px solid var(--line)}
+  td.tok{font-family:var(--mono);font-size:13px;color:var(--fg);white-space:nowrap;width:190px}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+  pre{margin:8px 0 0;padding:20px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03);overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--fg-mute)}
+  pre b{color:var(--accent);font-weight:400}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Patterns / Meta</p>
+  <h1 class="pt">Meta &amp; chips</h1>
+  <p class="lede">The mono-uppercase label is the recurring &ldquo;system&rdquo; texture &mdash; it is what makes the site feel engineered rather than merely dark. Every eyebrow, date, category, column head and tag uses it.</p>
+
+  <h2>Meta label &mdash; the canonical treatment</h2>
+  <div class="stage">
+    <span class="meta-label">Selected work</span>
+    <span class="meta-label">Kathmandu</span>
+    <span class="meta-label">2026</span>
+    <span class="meta-label">Identity &middot; Web</span>
+  </div>
+  <pre>font-family: <b>var(--mono)</b>;
+font-size: <b>11px</b>;          /* 13px for column heads and section labels */
+letter-spacing: <b>.15em</b>;    /* .12em–.16em */
+text-transform: <b>uppercase</b>;
+color: <b>var(--fg-dim)</b>;</pre>
+
+  <h2>13px variant</h2>
+  <p class="note">Section labels and footer column heads use 13px mono with no tracking bump and no uppercase &mdash; e.g. <code>.work-head .label</code> and <code>footer .col .h</code>.</p>
+  <div class="stage"><span class="meta-13">Sitemap</span><span class="meta-13">Studio</span><span class="meta-13">Social</span></div>
+
+  <h2>Placeholder chip</h2>
+  <p class="note">Dashed, mono, centred &mdash; the honest marker for artwork or content that is not in yet. It is the only place a dashed border appears.</p>
+  <div class="stage"><span class="ph-tag">Artwork pending</span><span class="ph-tag">1600 &times; 900 image</span></div>
+  <div class="onart" style="margin-top:20px"><span class="ph-tag ph-tag--onart">On artwork &mdash; rgba(0,0,0,.45) fill</span></div>
+
+  <h2>Pill</h2>
+  <p class="note">Fully rounded, hairline border, solid <code>#0d0d0d</code> fill so it stays legible over artwork. Used as the hover reveal on media and as a low-emphasis action.</p>
+  <div class="stage">
+    <a href="#" class="pill">View project</a>
+    <a href="#" class="pill pill--sm">2026</a>
+  </div>
+  <pre>border-radius: <b>999px</b>;
+border: <b>1px solid rgba(255,255,255,.15)</b>;
+padding: <b>14px 24px</b>;
+background: <b>#0d0d0d</b>;</pre>
+
+  <h2>Parenthetical cue</h2>
+  <p class="note">Dim the parentheses, keep the word at full strength. Used for the hero scroll cue; reuse it for any inline aside.</p>
+  <div class="stage">
+    <span class="paren"><span class="par">(</span>Scroll<span class="par">)</span></span>
+    <span class="paren"><span class="par">(</span>4 projects<span class="par">)</span></span>
+  </div>
+
+  <h2>Spec</h2>
+  <table>
+    <tbody>
+      <tr><td class="tok">Radii</td><td><code>4px</code> inputs / small buttons &middot; <code>6px</code> tags and chips &middot; <code>8px</code> cards and tables &middot; <code>999px</code> pills. Media thumbs are deliberately square.</td></tr>
+      <tr><td class="tok">Borders</td><td>Hairline <code>1px solid var(--line)</code> everywhere. <code>1px dashed rgba(255,255,255,.22)</code> is reserved for placeholder chips.</td></tr>
+      <tr><td class="tok">Shadows</td><td>Only over artwork, and only on text: <code>text-shadow: 0 2px 24px rgba(0,0,0,.55)</code>. No box-shadows on flat UI.</td></tr>
+      <tr><td class="tok">Focus</td><td><code>outline: 2px solid var(--accent); outline-offset: 2px</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>If a piece of text is <b>about</b> content rather than content itself, it is mono. No exceptions.</li>
+    <li>Never uppercase display or body type &mdash; uppercase belongs to mono meta only.</li>
+    <li>Chips and pills never get a fill from the accent at rest; the accent appears on hover as a <b>.05</b> tint and a <b>.5</b> border.</li>
+  </ul>
+</div>
+</body>
+</html>

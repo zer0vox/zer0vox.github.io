@@ -1,0 +1,121 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sections — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --max:1600px; --pad-x:16px; --section-y:clamp(80px,10vw,160px);
+    --display:clamp(40px,5vw,70px); --huge:clamp(44px,7.2vw,112px); --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 48px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+  .frame{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(70,84,170,.22),rgba(13,13,13,.8) 48%,rgba(8,8,12,1) 100%)}
+  .frame .vp{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-dim);padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(13,13,13,.6)}
+
+  /* ── the patterns (vertical padding reduced for the preview) ─── */
+  .wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--pad-x)}
+
+  .shell{background:rgba(13,13,13,.5);padding-block:56px;position:relative;z-index:1}
+  .shell h2.sec{margin:0 0 24px;font-weight:500;font-size:clamp(30px,4vw,54px);letter-spacing:-.035em;line-height:1;text-wrap:balance}
+  .shell .label{font-family:var(--mono);font-size:13px;color:var(--fg-dim);margin-bottom:14px}
+  .shell p{margin:0;max-width:52ch;color:var(--fg-mute);line-height:1.5}
+
+  .about{background:rgba(13,13,13,.52);padding-block:72px;position:relative;z-index:2}
+  .about p{margin:0;font-weight:500;font-size:clamp(28px,4.4vw,60px);letter-spacing:-.03em;line-height:1.02;text-wrap:balance}
+  .about p .w{color:rgba(255,255,255,.18);transition:color .3s var(--ease)}
+  .about p .w.lit{color:#fff}
+  .about-more{display:inline-block;margin-top:40px;font-size:18px;font-weight:500;border-bottom:1px solid #fff;padding-bottom:4px;color:inherit;text-decoration:none;transition:opacity .25s var(--ease)}
+  .about-more:hover{opacity:.7}
+
+  .cta{background:rgba(13,13,13,.45);padding:80px 0 40px}
+  .cta h2.big{margin:0;font-weight:500;font-size:clamp(34px,6.4vw,88px);letter-spacing:-.045em;line-height:.94;max-width:14ch}
+
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+  pre{margin:8px 0 0;padding:20px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03);overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--fg-mute)}
+  pre b{color:var(--accent);font-weight:400}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Patterns / Sections</p>
+  <h1 class="pt">Sections</h1>
+  <p class="lede">Every section is a translucent near-black band over the fixed Fibonacci background, with its content in a <code>.wrap</code>. The alpha is the only thing that changes between them.</p>
+
+  <h2>Section shell</h2>
+  <p class="note">The default. <code>background: rgba(13,13,13,.5)</code> &middot; <code>padding-block: var(--section-y)</code> &middot; <code>position: relative</code> &middot; <code>z-index: 1</code></p>
+  <div class="frame">
+    <div class="vp">section shell</div>
+    <section class="shell">
+      <div class="wrap">
+        <div class="label">Selected work</div>
+        <h2 class="sec">Index</h2>
+        <p>Body copy inside a section is <code>--fg-mute</code> at line-height 1.5, capped at 52ch. The heading takes <code>--display</code>.</p>
+      </div>
+    </section>
+  </div>
+  <pre>&lt;section class="my-section"&gt;
+  &lt;div class="wrap"&gt;
+    &lt;h2&gt;<b>/* --display */</b>&lt;/h2&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+.my-section {
+  background: <b>rgba(13, 13, 13, .5)</b>;
+  padding-block: <b>var(--section-y)</b>;
+  position: relative;
+  z-index: 1;
+}</pre>
+
+  <h2>Statement / about</h2>
+  <p class="note"><code>rgba(13,13,13,.52)</code> &middot; <code>padding-block: clamp(140px, 20vw, 260px)</code> &middot; <code>z-index: 2</code>. The copy is one sentence, split into <code>&lt;span class="w"&gt;</code> words that light from <code>rgba(255,255,255,.18)</code> to <code>#fff</code> as the section crosses the viewport (progress measured from 75vh to 25vh, words lit by a floor cutoff).</p>
+  <div class="frame">
+    <div class="vp">about &mdash; mid-scroll</div>
+    <section class="about wrap">
+      <p>
+        <span class="w lit">greenhueblues</span> <span class="w lit">is</span> <span class="w lit">an</span> <span class="w lit">independent</span> <span class="w lit">design</span> <span class="w lit">studio</span> <span class="w lit">based</span> <span class="w lit">in</span> <span class="w lit">Kathmandu,</span> <span class="w">working</span> <span class="w">globally</span> <span class="w">with</span> <span class="w">brands</span> <span class="w">and</span> <span class="w">cultural</span> <span class="w">institutions.</span>
+      </p>
+      <a href="#about" class="about-more">More About Us &rarr;</a>
+    </section>
+  </div>
+
+  <h2>CTA</h2>
+  <p class="note"><code>rgba(13,13,13,.45)</code> &middot; <code>padding: clamp(120px,18vw,240px) 0 clamp(40px,6vw,80px)</code> &mdash; heavy top, light bottom, because it leads straight into the footer. Heading is <code>--huge</code>, weight 500, tracking -.045em, line-height .94, <code>max-width: 14ch</code>. Enters from <code>y: 20</code> over .65s <code>easeOut</code> at 55% in view. Drops to <code>clamp(32px,9vw,48px)</code> below 480px.</p>
+  <div class="frame">
+    <div class="vp">cta</div>
+    <section class="cta wrap">
+      <h2 class="big">Let&rsquo;s work together.</h2>
+    </section>
+  </div>
+
+  <h2>Inline text link</h2>
+  <p class="note">The only link style with an underline: a real <code>border-bottom: 1px solid #fff</code> with <code>padding-bottom: 4px</code>, 18px weight 500, plus a trailing <code>&rarr;</code>. Everything else relies on <code>opacity .7</code> on hover.</p>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>Section alphas run <b>.45 &rarr; .70</b> from the CTA down to the footer. Keep new sections inside that range so the background reads continuously.</li>
+    <li>Every section needs <code>position: relative</code> and a <code>z-index</code> of at least 1, or the fixed background paints over it.</li>
+    <li>One idea per section. There is no two-column body copy anywhere in this system.</li>
+    <li>Section headings use <code>--display</code>; only the CTA and the footer wordmark earn <code>--huge</code>.</li>
+  </ul>
+</div>
+</body>
+</html>

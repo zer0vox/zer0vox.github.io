@@ -1,0 +1,109 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hero — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --max:1600px; --pad-x:16px; --hero-size:clamp(22px,2.8vw,40px); --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 48px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+
+  /* ── the pattern (proportional stand-in for a 100vh hero) ──── */
+  .hero{position:relative;height:420px;min-height:320px;overflow:hidden;border:1px solid var(--line);border-radius:8px;--gx:.34;--gy:.3;--gi:1}
+  .hero .bg{position:absolute;inset:0;background:#000}
+  .hero .art{position:absolute;inset:0;display:grid;place-items:center;opacity:.95}
+  .hero .art svg{width:min(62%,340px);height:auto;opacity:.85}
+  .hero .irid{position:absolute;inset:-40%;mix-blend-mode:screen;filter:blur(40px) saturate(150%);pointer-events:none}
+  .hero .irid--a{opacity:.22;background:conic-gradient(from 210deg at 40% 55%,rgba(168,199,255,0) 0deg,rgba(120,220,255,.5) 70deg,rgba(190,150,255,.45) 150deg,rgba(120,255,210,.4) 230deg,rgba(168,199,255,0) 320deg,rgba(168,199,255,0) 360deg)}
+  .hero .irid--b{opacity:.16;background:conic-gradient(from 20deg at 62% 42%,rgba(120,255,230,0) 0deg,rgba(200,160,255,.5) 90deg,rgba(120,210,255,.42) 180deg,rgba(255,190,150,.28) 260deg,rgba(120,255,230,0) 360deg)}
+  .hero .mask{position:absolute;inset:0;pointer-events:none;-webkit-mask-image:radial-gradient(115% 92% at 55% 40%,transparent 0%,transparent 30%,rgba(0,0,0,.55) 55%,#000 74%,transparent 100%);mask-image:radial-gradient(115% 92% at 55% 40%,transparent 0%,transparent 30%,rgba(0,0,0,.55) 55%,#000 74%,transparent 100%);overflow:hidden}
+  .hero .glare{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle 1.8vmax at calc(var(--gx)*100%) calc(var(--gy)*100%),rgba(248,216,158,calc(.05 + .2*var(--gi))) 0%,rgba(235,176,124,calc(.035 + .15*var(--gi))) 14%,rgba(168,199,255,calc(.025 + .12*var(--gi))) 34%,rgba(157,143,214,calc(.015 + .085*var(--gi))) 56%,rgba(127,184,176,calc(.01 + .065*var(--gi))) 78%,rgba(127,184,176,0) 100%)}
+  .hero .grain{position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='90' height='90' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat}
+  .hero .copy{position:absolute;left:0;right:0;bottom:36px;z-index:1;padding-inline:var(--pad-x);max-width:var(--max);margin-inline:auto;display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px}
+  .hero h1{margin:0;font-weight:400;font-size:clamp(18px,2.4vw,30px);letter-spacing:-.04em;line-height:1.05;color:var(--accent);max-width:22ch;text-wrap:balance}
+  .hero .scroll{font-weight:500;font-size:18px}
+  .hero .scroll .par{color:var(--fg-dim)}
+
+  .layers{margin-top:24px;border-top:1px solid var(--line)}
+  .layers .l{display:grid;grid-template-columns:38px 150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);align-items:baseline}
+  .layers .z{font-family:var(--mono);font-size:12px;color:var(--accent)}
+  .layers .nm{font-family:var(--mono);font-size:13px;color:var(--fg)}
+  .layers .ds{font-size:15px;color:var(--fg-mute);line-height:1.5}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Patterns / Hero</p>
+  <h1 class="pt">Hero</h1>
+  <p class="lede">A full-viewport black stage holding sacred-geometry line art, with the headline parked bottom-left and a scroll cue bottom-right. The headline is small, periwinkle and calm &mdash; the artwork carries the scale.</p>
+
+  <div class="hero">
+    <div class="bg"></div>
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="none" stroke="rgba(255,255,255,.42)" stroke-width=".8">
+        <circle cx="100" cy="100" r="88"/><circle cx="100" cy="100" r="62"/><circle cx="100" cy="100" r="38"/>
+        <circle cx="100" cy="62" r="38"/><circle cx="100" cy="138" r="38"/>
+        <circle cx="67" cy="81" r="38"/><circle cx="133" cy="81" r="38"/>
+        <circle cx="67" cy="119" r="38"/><circle cx="133" cy="119" r="38"/>
+        <path d="M100 12 L179 56 L179 144 L100 188 L21 144 L21 56 Z"/>
+        <path d="M21 56 L179 144 M179 56 L21 144 M100 12 L100 188"/>
+      </svg>
+    </div>
+    <div class="mask" aria-hidden="true"><span class="irid irid--a"></span><span class="irid irid--b"></span></div>
+    <div class="glare" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="copy">
+      <h1>Building mindful systems for a conscious world. Shaping enlightened design with purposeful vision.</h1>
+      <span class="scroll"><span class="par">(</span>Scroll<span class="par">)</span></span>
+    </div>
+  </div>
+  <p class="note" style="margin-top:14px">Shown at 420px tall with a stand-in mandala. Live: <code>height: 100vh</code>, <code>min-height: 640px</code> (<code>100svh</code> below 480px), art is <code>src/assets/first page.svg</code> at <code>center / 100% auto</code>.</p>
+
+  <h2>Layer stack</h2>
+  <div class="layers">
+    <div class="l"><span class="z">0</span><span class="nm">.bg</span><span class="ds">Solid <code>#000</code> &mdash; darker than <code>--bg</code>, so the hero reads as a separate stage.</span></div>
+    <div class="l"><span class="z">0</span><span class="nm">.hero-pattern</span><span class="ds">The line-art SVG. Breathes on two desynced loops: <code>heroFlameFlicker</code> 13s (opacity .94&ndash;1 plus one composed <code>filter</code> chain carrying brightness, a warm ember <code>drop-shadow</code> and a faint hue drift) and <code>heroFlameRise</code> 22s (translateY -0.3%, scaleY 1.006, origin 50% 100%).</span></div>
+    <div class="l"><span class="z">0</span><span class="nm">.hero-iridescence</span><span class="ds">Two counter-rotating conic + linear gradient layers (26s / 18s), <code>blur(40px) saturate(150%)</code>, <code>mix-blend-mode: screen</code> so the sheen catches only the bright strokes. A radial mask keeps it off the centre and the edges &mdash; a ring, not a wash.</span></div>
+    <div class="l"><span class="z">0</span><span class="nm">.hero-glare</span><span class="ds">Cursor-following faded-sun bloom: gold core &rarr; amber &rarr; periwinkle &rarr; violet &rarr; teal rim. Driven by inherited <code>--gx</code>/<code>--gy</code>/<code>--gi</code> written by a rAF loop; alphas scale with <code>--gi</code> so it whispers at rest. Plus a two-offset chromatic whisper and lifted blacks (<code>::before</code>) and film grain (<code>::after</code>).</span></div>
+    <div class="l"><span class="z">1</span><span class="nm">.copy</span><span class="ds">Grid <code>1fr auto</code>, aligned to the baseline, <code>bottom: 36px</code>, <code>max-width: var(--max)</code>. Stacks to one column at 810px with a 12px gap.</span></div>
+  </div>
+
+  <h2>Headline</h2>
+  <div class="layers">
+    <div class="l"><span class="z">type</span><span class="nm">h1</span><span class="ds"><code>--hero-size</code> clamp(22px, 2.8vw, 40px), weight 400, tracking -.04em, line-height 1.05, color <code>--accent</code>, <code>max-width: 22ch</code>, <code>text-wrap: balance</code>.</span></div>
+    <div class="l"><span class="z">anim</span><span class="nm">.line .inner</span><span class="ds">Each line is a clipped <code>.line</code> wrapping an <code>.inner</code> that rises from <code>translateY(110%)</code> + opacity 0 over 1s <code>cubic-bezier(.22,.7,.18,1)</code>. Delays .05s / .20s / .34s. Break the copy into three lines by hand.</span></div>
+    <div class="l"><span class="z">cue</span><span class="nm">.scroll</span><span class="ds">18px weight 500, the literal string <code>(Scroll)</code> with the parentheses dimmed to <code>--fg-dim</code>. That bracket treatment is a recurring device &mdash; reuse it for other inline cues.</span></div>
+  </div>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>The hero has <b>no CTA button</b>. The scroll cue is the only affordance.</li>
+    <li>Never scale the headline up to compete with the artwork. If it needs more presence, give it more space.</li>
+    <li>The glare must <b>read</b> the live <code>--gx/--gy/--gi</code>, never re-declare them &mdash; re-declaring shadows the rAF values and freezes the effect invisible.</li>
+    <li>Every <code>circle</code> radius in the glare gradients is a length (<code>vmax</code>); percentages are only valid on <code>ellipse</code>.</li>
+    <li>Under reduced motion: flicker and drift stop, and the glare becomes a fixed centred bloom at 50%/42%. <b>Nothing is hidden.</b></li>
+  </ul>
+</div>
+</body>
+</html>

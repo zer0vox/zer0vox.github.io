@@ -1,0 +1,126 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Typography — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fragment+Mono&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --script:"Caveat","Brush Script MT",cursive;
+    --hero-size:clamp(22px,2.8vw,40px); --display:clamp(40px,5vw,70px);
+    --huge:clamp(44px,7.2vw,112px); --body:18px;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:var(--body);line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 56px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  .fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:64px}
+  .fam .card{border:1px solid var(--line);border-radius:8px;padding:22px}
+  .fam .tok{font-family:var(--mono);font-size:12px;color:var(--fg-dim);letter-spacing:.1em;text-transform:uppercase}
+  .fam .name{margin-top:10px;font-size:28px;font-weight:500;letter-spacing:-.025em}
+  .fam .role{margin-top:10px;font-size:15px;color:var(--fg-mute);line-height:1.45}
+  .fam .aa{margin-top:16px;font-size:40px;line-height:1;color:var(--fg-dim)}
+  .row{border-top:1px solid var(--line);padding:32px 0}
+  .row:last-of-type{border-bottom:1px solid var(--line)}
+  .row .spec{font-family:var(--mono);font-size:12px;color:var(--fg-dim);letter-spacing:.08em;margin-bottom:18px;line-height:1.6}
+  .row .spec b{color:var(--accent);font-weight:400}
+  .huge{font-size:var(--huge);font-weight:700;letter-spacing:-.05em;line-height:.9}
+  .display{font-size:var(--display);font-weight:500;letter-spacing:-.035em;line-height:1;text-wrap:balance}
+  .heroline{font-size:var(--hero-size);font-weight:400;letter-spacing:-.04em;line-height:1.05;color:var(--accent);max-width:22ch;text-wrap:balance}
+  .bodycopy{font-size:var(--body);font-weight:400;line-height:1.5;color:var(--fg-mute);max-width:52ch}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim)}
+  .scriptspec{font-family:var(--script);font-weight:700;font-size:clamp(56px,9vw,120px);line-height:.9;color:#0e3326;background:radial-gradient(120% 70% at 30% 30%,#6dd9a8,#2c8b6a);display:inline-block;padding:8px 24px;border-radius:8px}
+  h2{margin:64px 0 20px;font-weight:500;font-size:24px;letter-spacing:-.02em}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Foundations / 02</p>
+  <h1 class="pt">Typography</h1>
+  <p class="lede">Big type, tight tracking, calm body. Monospace carries every piece of meta &mdash; that recurring uppercase texture is the signature of the system.</p>
+
+  <div class="fam">
+    <div class="card">
+      <div class="tok">--sans</div>
+      <div class="name" style="font-family:var(--sans)">Inter</div>
+      <div class="role">Everything by default &mdash; UI, headings, body. Weights 400&ndash;800.</div>
+      <div class="aa" style="font-family:var(--sans)">Aa Gg 123</div>
+    </div>
+    <div class="card">
+      <div class="tok">--mono</div>
+      <div class="name" style="font-family:var(--mono)">Fragment Mono</div>
+      <div class="role">Meta only: labels, eyebrows, dates, tags, table headers.</div>
+      <div class="aa" style="font-family:var(--mono)">Aa Gg 123</div>
+    </div>
+    <div class="card">
+      <div class="tok">--script</div>
+      <div class="name" style="font-family:var(--script)">Caveat</div>
+      <div class="role">Rare expressive display accents only (panel scripts). Never UI.</div>
+      <div class="aa" style="font-family:var(--script)">Aa Gg 123</div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:0">Scale</h2>
+
+  <div class="row">
+    <div class="spec">--huge &middot; <b>clamp(44px, 7.2vw, 112px)</b> &middot; weight 500&ndash;700 &middot; tracking -.045em to -.05em &middot; line-height .9&ndash;.94</div>
+    <div class="huge">greenhueblues<span style="font-size:.45em;vertical-align:super">®</span></div>
+  </div>
+
+  <div class="row">
+    <div class="spec">--display &middot; <b>clamp(40px, 5vw, 70px)</b> &middot; weight 500 &middot; tracking -.035em &middot; line-height 1 &middot; text-wrap balance</div>
+    <div class="display">Let&rsquo;s work together.</div>
+  </div>
+
+  <div class="row">
+    <div class="spec">--hero-size &middot; <b>clamp(22px, 2.8vw, 40px)</b> &middot; weight 400 &middot; tracking -.04em &middot; line-height 1.05 &middot; color --accent &middot; max-width 22ch</div>
+    <div class="heroline">Building mindful systems for a conscious world. Shaping enlightened design with purposeful vision.</div>
+  </div>
+
+  <div class="row">
+    <div class="spec">Statement copy &middot; <b>clamp(36px, 6vw, 88px)</b> &middot; weight 500 &middot; tracking -.03em &middot; line-height 1.02 &mdash; words start at <code>rgba(255,255,255,.18)</code> and light to <code>#fff</code> as the section scrolls</div>
+    <div style="font-size:clamp(28px,4.4vw,60px);font-weight:500;letter-spacing:-.03em;line-height:1.02;text-wrap:balance">
+      <span style="color:#fff">greenhueblues is an independent design studio</span>
+      <span style="color:rgba(255,255,255,.18)">based in Kathmandu, working globally with brands and cultural institutions.</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="spec">--body &middot; <b>18px</b> &middot; weight 400&ndash;500 &middot; line-height 1.2 default, 1.5 for reading copy &middot; cap 52ch</div>
+    <div class="bodycopy">Restraint over decoration. Whitespace, hairline borders, and typography do the work. Motion is a whisper &mdash; slow easing, low opacity, nothing announces itself.</div>
+  </div>
+
+  <div class="row">
+    <div class="spec">Mono meta &middot; <b>11&ndash;13px</b> &middot; tracking .12em&ndash;.16em &middot; uppercase &middot; color --fg-dim</div>
+    <div class="meta">Foundations &nbsp;&middot;&nbsp; Kathmandu &nbsp;&middot;&nbsp; 2026 &nbsp;&middot;&nbsp; Sitemap</div>
+  </div>
+
+  <div class="row">
+    <div class="spec">--script &middot; <b>clamp(80px, 13vw, 220px)</b> &middot; weight 700 &middot; line-height .9 &mdash; decorative panel accents only</div>
+    <div class="scriptspec">DNA</div>
+  </div>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>The hero <code>h1</code> is deliberately <b>not</b> the biggest type on the page &mdash; it is accent-colored and quiet. <code>--huge</code> belongs to the CTA and the footer word.</li>
+    <li>Reuse the mono meta pattern verbatim for every label: <code>font-family:var(--mono); font-size:11&ndash;13px; letter-spacing:.12em&ndash;.16em; text-transform:uppercase; color:var(--fg-dim);</code></li>
+    <li>Cap reading measure between <b>22ch</b> (hero) and <b>52ch</b> (body). Use <code>text-wrap:balance</code> on large headings.</li>
+    <li><b>No new fonts.</b> Three families is the whole system.</li>
+  </ul>
+</div>
+</body>
+</html>

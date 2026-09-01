@@ -1,0 +1,127 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Footer — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --max:1600px; --pad-x:16px; --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 48px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+  .frame{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(70,84,170,.22),rgba(13,13,13,.8) 48%,rgba(8,8,12,1) 100%)}
+  .frame .vp{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-dim);padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(13,13,13,.6)}
+  .narrow{max-width:420px}
+
+  /* ── the pattern ───────────────────────────────────────────── */
+  footer.f{background:rgba(13,13,13,.7);padding:40px var(--pad-x) 32px;border-top:1px solid var(--line)}
+  footer.f .ftr-inner{max-width:var(--max);margin-inline:auto}
+  footer.f .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding-bottom:56px}
+  footer.f .col .h{color:var(--fg-dim);font-family:var(--mono);font-size:13px;margin-bottom:16px}
+  footer.f .col a{display:block;padding:4px 0;font-size:18px;font-weight:500;color:inherit;text-decoration:none;transition:opacity .25s var(--ease)}
+  footer.f .col a:hover{opacity:.7}
+  footer.f .col a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  footer.f .word{font-weight:700;line-height:.9;letter-spacing:-.05em;font-size:clamp(48px,10vw,120px)}
+  footer.f .word .reg{font-size:.45em;vertical-align:super}
+  footer.f .baseline{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;color:var(--fg-dim);font-size:13px}
+
+  .narrow footer.f .cols{grid-template-columns:1fr 1fr;gap:20px;padding-bottom:32px}
+  .narrow footer.f .word{font-size:40px}
+
+  table{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  td{padding:16px 16px 16px 0;border-bottom:1px solid var(--line);color:var(--fg-mute);line-height:1.45;vertical-align:top}
+  tr:first-child td{border-top:1px solid var(--line)}
+  td.tok{font-family:var(--mono);font-size:13px;color:var(--fg);white-space:nowrap;width:170px}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Patterns / Footer</p>
+  <h1 class="pt">Footer</h1>
+  <p class="lede">Three mono-headed link columns, then the wordmark at full width as the last piece of type on the page, then a hairline baseline. The darkest band in the system.</p>
+
+  <div class="frame">
+    <div class="vp">&ge; 810px</div>
+    <footer class="f">
+      <div class="ftr-inner">
+        <div class="cols">
+          <div class="col">
+            <div class="h">Sitemap</div>
+            <a href="#work">Work</a>
+          </div>
+          <div class="col">
+            <div class="h">Studio</div>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+          </div>
+          <div class="col">
+            <div class="h">Social</div>
+            <a href="#">X</a>
+            <a href="#">Instagram</a>
+            <a href="#">LinkedIn</a>
+          </div>
+        </div>
+        <div class="word">greenhueblues<span class="reg">®</span></div>
+        <div class="baseline">
+          <div></div>
+          <div>Copyright 2026. All rights reserved.</div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <h2>Narrow</h2>
+  <p class="note">2 columns at 810px, 1 column at 480px (gap 20px, padding-bottom 32px). The wordmark drops to <code>clamp(36px, 9vw, 64px)</code>, then 32px below 360px.</p>
+  <div class="frame narrow">
+    <div class="vp">810px</div>
+    <footer class="f">
+      <div class="ftr-inner">
+        <div class="cols">
+          <div class="col"><div class="h">Sitemap</div><a href="#work">Work</a></div>
+          <div class="col"><div class="h">Studio</div><a href="#about">About</a><a href="#contact">Contact</a></div>
+          <div class="col"><div class="h">Social</div><a href="#">X</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+        </div>
+        <div class="word">greenhueblues<span class="reg">®</span></div>
+        <div class="baseline"><div></div><div>Copyright 2026.</div></div>
+      </div>
+    </footer>
+  </div>
+
+  <h2>Spec</h2>
+  <table>
+    <tbody>
+      <tr><td class="tok">Band</td><td><code>rgba(13,13,13,.7)</code> with <code>border-top: 1px solid var(--line)</code>. Padding <code>40px var(--pad-x) 32px</code>.</td></tr>
+      <tr><td class="tok">Columns</td><td><code>repeat(3, 1fr)</code>, gap 32px, <code>padding-bottom: 56px</code>. Column heads are 13px mono in <code>--fg-dim</code> with 16px below; links are 18px weight 500 with 4px vertical padding.</td></tr>
+      <tr><td class="tok">Wordmark</td><td>Weight 700, <code>clamp(64px, 11.5vw, 176px)</code>, line-height .9, tracking -.05em. The <code>®</code> is <code>.45em</code> superscript. Enters from <code>y: 40</code> over 1s <code>power3.out</code>, delay .25s.</td></tr>
+      <tr><td class="tok">Baseline</td><td><code>display: flex; justify-content: space-between; align-items: flex-end</code>, 13px, <code>--fg-dim</code>, <code>margin-top: 8px</code>. Left cell is intentionally empty &mdash; keep it as the slot for future meta.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>The wordmark is the visual full stop of the page. Nothing goes below the baseline row.</li>
+    <li>Column heads stay mono and sentence-case (<b>Sitemap</b>, <b>Studio</b>, <b>Social</b>) &mdash; this is the one place the mono texture is not uppercased.</li>
+    <li>No newsletter form, no social icons, no back-to-top button. Text links only.</li>
+  </ul>
+</div>
+</body>
+</html>

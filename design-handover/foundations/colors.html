@@ -1,0 +1,106 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Color — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 56px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 20px;font-weight:500;font-size:24px;letter-spacing:-.02em}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
+  .sw{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .sw .chip{height:104px;border-bottom:1px solid var(--line)}
+  .sw .meta{padding:14px 16px 16px}
+  .sw .tok{font-family:var(--mono);font-size:13px;color:var(--fg)}
+  .sw .val{font-family:var(--mono);font-size:12px;color:var(--fg-dim);margin-top:4px}
+  .sw .use{font-size:14px;color:var(--fg-mute);line-height:1.45;margin-top:10px}
+  .checker{background-image:linear-gradient(45deg,#1a1a1a 25%,transparent 25%,transparent 75%,#1a1a1a 75%),linear-gradient(45deg,#1a1a1a 25%,transparent 25%,transparent 75%,#1a1a1a 75%);background-size:16px 16px;background-position:0 0,8px 8px;background-color:#000}
+  .ramp{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .ramp div{flex:1;height:72px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-family:var(--mono);font-size:11px;color:var(--fg-dim)}
+  .rules{margin:20px 0 0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.9em;color:var(--accent)}
+  .no{color:#ff9e9e}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Foundations / 01</p>
+  <h1>Color</h1>
+  <p class="lede">Dark-first, near-black ground, white text, one cool accent. Color is used sparingly and never as a coat of paint. Always reference the token, never the raw hex.</p>
+
+  <div class="swatches">
+    <div class="sw">
+      <div class="chip" style="background:#0d0d0d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)"></div>
+      <div class="meta"><div class="tok">--bg</div><div class="val">#0d0d0d</div><div class="use">Page background, solid card fills.</div></div>
+    </div>
+    <div class="sw">
+      <div class="chip" style="background:#ffffff"></div>
+      <div class="meta"><div class="tok">--fg</div><div class="val">#ffffff</div><div class="use">Primary text.</div></div>
+    </div>
+    <div class="sw">
+      <div class="chip checker" style="box-shadow:inset 0 0 0 200px rgba(255,255,255,.7)"></div>
+      <div class="meta"><div class="tok">--fg-mute</div><div class="val">rgba(255,255,255,.7)</div><div class="use">Secondary text, body copy inside sections.</div></div>
+    </div>
+    <div class="sw">
+      <div class="chip checker" style="box-shadow:inset 0 0 0 200px rgba(255,255,255,.5)"></div>
+      <div class="meta"><div class="tok">--fg-dim</div><div class="val">rgba(255,255,255,.5)</div><div class="use">Tertiary: captions, meta, categories. Never primary reading copy.</div></div>
+    </div>
+    <div class="sw">
+      <div class="chip checker" style="box-shadow:inset 0 0 0 200px rgba(255,255,255,.15)"></div>
+      <div class="meta"><div class="tok">--line</div><div class="val">rgba(255,255,255,.15)</div><div class="use">Hairline borders, dividers, table rules.</div></div>
+    </div>
+    <div class="sw">
+      <div class="chip" style="background:#a8c7ff"></div>
+      <div class="meta"><div class="tok">--accent</div><div class="val">#a8c7ff · periwinkle</div><div class="use">Hero headline, links on hover, active states, primary buttons.</div></div>
+    </div>
+  </div>
+
+  <h2>Accent tint ramp</h2>
+  <p class="lede" style="margin-bottom:20px">For hover fills and subtle panels, tint the accent — don't introduce a new hue. <code>rgba(168,199,255, α)</code></p>
+  <div class="ramp">
+    <div style="background:rgba(168,199,255,.03)">.03</div>
+    <div style="background:rgba(168,199,255,.05)">.05</div>
+    <div style="background:rgba(168,199,255,.08)">.08</div>
+    <div style="background:rgba(168,199,255,.12)">.12</div>
+    <div style="background:rgba(168,199,255,.5)">.50</div>
+  </div>
+  <ul class="rules">
+    <li><b>.03–.05</b> hover fills · <b>.08–.12</b> active / selected · <b>.50</b> input borders at rest</li>
+  </ul>
+
+  <h2>Section grounds</h2>
+  <p class="lede" style="margin-bottom:20px">Sections sit on the same near-black at varying alpha so the fixed Fibonacci background glows through.</p>
+  <div class="ramp">
+    <div style="background:rgba(13,13,13,.45)">.45 — cta</div>
+    <div style="background:rgba(13,13,13,.52)">.52 — about</div>
+    <div style="background:rgba(13,13,13,.70)">.70 — footer</div>
+    <div style="background:#0d0d0d">1.0 — solid</div>
+  </div>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>The accent is a <b>cool periwinkle</b>. Never swap it for a warm or brand-y color, and never add a second accent.</li>
+    <li>The green / blue / sunset gradient panels are <b>art, not UI tokens</b>. Don't reuse them for buttons, cards, or text.</li>
+    <li><span class="no">Don't</span> hardcode a color that already has a token.</li>
+    <li><span class="no">Don't</span> use <code>--fg-dim</code> for primary reading copy — contrast fails.</li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project Panels — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --script:"Caveat","Brush Script MT",cursive;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 48px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+
+  /* ── the pattern (scaled: live panels are height:100vh, sticky) ─ */
+  .panel{position:relative;height:300px;overflow:hidden;color:#fff;isolation:isolate;border:1px solid var(--line);border-radius:8px;margin-bottom:24px}
+  .panel .pbg{position:absolute;inset:0;z-index:0}
+  .panel .label{position:absolute;left:24px;top:50%;transform:translateY(-50%);font-weight:600;font-size:clamp(56px,9vw,120px);letter-spacing:-.05em;line-height:.85;z-index:2;text-shadow:0 2px 24px rgba(0,0,0,.55)}
+  .panel .name{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-weight:600;font-size:clamp(32px,5vw,72px);letter-spacing:-.04em;line-height:.95;z-index:2;text-align:right;text-shadow:0 2px 16px rgba(0,0,0,.55)}
+  .panel .ph-tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6);background:rgba(0,0,0,.45);padding:6px 12px;border:1px dashed rgba(255,255,255,.25);border-radius:6px;z-index:1}
+  .panel .script{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-3deg);font-family:var(--script);font-weight:700;font-size:clamp(64px,11vw,160px);line-height:.9;color:#0e3326;text-shadow:0 1px 0 rgba(255,255,255,.18);z-index:1}
+
+  .p1 .pbg{background:radial-gradient(120% 70% at 30% 30%,#6dd9a8 0%,#2c8b6a 35%,#14503b 70%,#0a2c22 100%),#12211c}
+  .p1 .pbg::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 70% 75%,rgba(255,255,255,.18),transparent 60%),radial-gradient(40% 30% at 20% 80%,rgba(0,0,0,.3),transparent 60%);mix-blend-mode:overlay}
+  .p2 .pbg{background:radial-gradient(80% 60% at 50% 50%,#1a2a52 0%,#0e173a 60%,#06092a 100%)}
+  .p2 .pbg .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1.5px);background-size:22px 22px;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,#000 40%,transparent 90%);mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,#000 40%,transparent 90%)}
+  .p2 .pbg svg{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);width:100%;height:50%}
+  .p3 .pbg{background:linear-gradient(180deg,#2a1430 0%,#6a2645 18%,#c45d3e 40%,#f0a04a 55%,#6a3526 75%,#20131a 100%)}
+  .p4 .pbg{background:radial-gradient(80% 60% at 30% 30%,#2a3aa8 0%,#131a5c 50%,#06082a 100%)}
+  .p5 .pbg{background:radial-gradient(80% 80% at 50% 80%,#4a1419 0%,#2a0c10 40%,#100406 100%),#0a0306}
+
+  .swatchrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-top:8px}
+  .swatchrow .s{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .swatchrow .s .c{height:64px}
+  .swatchrow .s .t{padding:10px 12px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim)}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Patterns / Work</p>
+  <h1 class="pt">Project panels</h1>
+  <p class="lede">The work section is a stack of sticky full-viewport panels that slide over one another as you scroll. Each one is a photograph under a flat black scrim, numbered left, named right. No thumbnails, no grid, no captions.</p>
+
+  <div class="panel p1">
+    <div class="pbg" style="background:linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,.38)),radial-gradient(120% 70% at 30% 30%,#6dd9a8 0%,#2c8b6a 35%,#14503b 70%,#0a2c22 100%)"></div>
+    <span class="label">1</span>
+    <span class="name">DNA</span>
+  </div>
+
+  <div class="panel p2">
+    <div class="pbg" style="background:linear-gradient(rgba(0,0,0,.42),rgba(0,0,0,.42)),radial-gradient(80% 60% at 50% 50%,#1a2a52 0%,#0e173a 60%,#06092a 100%)">
+      <div class="grid"></div>
+      <svg viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 100 C 80 20, 160 180, 240 100 S 400 20, 480 100 S 640 180, 720 100 S 880 20, 960 100 S 1120 180, 1200 100" fill="none" stroke="#F4D03F" stroke-width="3"/>
+        <path d="M0 100 C 80 50, 160 150, 240 100 S 400 50, 480 100 S 640 150, 720 100 S 880 50, 960 100 S 1120 150, 1200 100" fill="none" stroke="rgba(244,208,63,.35)" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <span class="label">2</span>
+    <span class="name">Vision</span>
+  </div>
+
+  <div class="panel p3">
+    <div class="pbg" style="background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),linear-gradient(180deg,#2a1430 0%,#6a2645 18%,#c45d3e 40%,#f0a04a 55%,#6a3526 75%,#20131a 100%)"></div>
+    <span class="label">3</span>
+    <span class="name">Logic</span>
+  </div>
+
+  <div class="panel p4">
+    <div class="pbg" style="background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),radial-gradient(80% 60% at 30% 30%,#2a3aa8 0%,#131a5c 50%,#06082a 100%)"></div>
+    <span class="label">4</span>
+    <span class="name">Limitless</span>
+  </div>
+
+  <p class="note">Shown at 300px tall. Live: <code>position: sticky; top: 0; height: 100vh; min-height: 640px; isolation: isolate</code>, background is <code>linear-gradient(rgba(0,0,0,.38&ndash;.42) &times;2), url(photo) center/cover no-repeat</code>. The gradients above stand in for the photographs (dna.png, vision.png, logic.JPG, limitless.JPG).</p>
+
+  <h2>Type &amp; placement</h2>
+  <ul class="rules">
+    <li><b>Number</b> &mdash; <code>left: 24px</code>, vertically centred, weight 600, <code>clamp(72px, 12vw, 200px)</code>, tracking -.05em, line-height .85, <code>text-shadow: 0 2px 24px rgba(0,0,0,.55)</code>.</li>
+    <li><b>Name</b> &mdash; <code>right: 24px</code>, vertically centred, right-aligned, weight 600, <code>clamp(40px, 6vw, 96px)</code>, tracking -.04em, line-height .95, <code>text-shadow: 0 2px 16px rgba(0,0,0,.55)</code>.</li>
+    <li><b>Reveal</b> &mdash; both animate once on scroll-in: number from <code>x: -40</code>, name from <code>x: +40</code> (delay .08s), .7s <code>[0.22,0.7,0.18,1]</code>, <code>viewport: {once:true, amount:.5}</code>. The animated element is an <b>inner span</b> so it never fights the parent&rsquo;s <code>translateY(-50%)</code> centring.</li>
+    <li><b>Placeholder tag</b> &mdash; while artwork is missing, centre a dashed mono chip: <code>rgba(0,0,0,.45)</code> fill, <code>1px dashed rgba(255,255,255,.25)</code>, radius 6px, 11px mono, tracking .16em, uppercase.</li>
+  </ul>
+
+  <h2>Panel grounds (art, not tokens)</h2>
+  <div class="swatchrow">
+    <div class="s"><div class="c" style="background:radial-gradient(120% 70% at 30% 30%,#6dd9a8,#2c8b6a 35%,#14503b 70%,#0a2c22)"></div><div class="t">p1 &middot; jade</div></div>
+    <div class="s"><div class="c" style="background:radial-gradient(80% 60% at 50% 50%,#1a2a52,#0e173a 60%,#06092a)"></div><div class="t">p2 &middot; midnight</div></div>
+    <div class="s"><div class="c" style="background:linear-gradient(180deg,#2a1430,#6a2645 18%,#c45d3e 40%,#f0a04a 55%,#6a3526 75%,#20131a)"></div><div class="t">p3 &middot; sunset</div></div>
+    <div class="s"><div class="c" style="background:radial-gradient(80% 60% at 30% 30%,#2a3aa8,#131a5c 50%,#06082a)"></div><div class="t">p4 &middot; ultramarine</div></div>
+    <div class="s"><div class="c" style="background:radial-gradient(80% 80% at 50% 80%,#4a1419,#2a0c10 40%,#100406)"></div><div class="t">p5 &middot; oxblood</div></div>
+  </div>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>These gradients are <b>art</b>. Never reuse them for buttons, cards, text or any UI surface &mdash; that is what <code>--accent</code> is for.</li>
+    <li>Photographs always sit under a flat black scrim at <b>.38&ndash;.42</b> so white 600-weight type stays legible without a box behind it.</li>
+    <li>Panels are unlinked in the current build. If they become links, the whole panel is the target &mdash; do not add a button.</li>
+    <li>Extra decoration (the p2 dot grid + gold wave, the p1 script word) is per-panel and optional. Keep at most one such device per panel.</li>
+  </ul>
+</div>
+</body>
+</html>

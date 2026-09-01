@@ -1,0 +1,131 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 56px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:64px 0 20px;font-weight:500;font-size:24px;letter-spacing:-.02em}
+  .ease{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:24px}
+  .ease svg{width:100%;height:auto;display:block}
+  .ease .txt{font-size:16px;color:var(--fg-mute);line-height:1.55}
+  .ease .txt code{display:block;font-family:var(--mono);font-size:14px;color:var(--accent);margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:16px}
+  th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);font-weight:400;padding:0 16px 14px 0;border-bottom:1px solid var(--line)}
+  td{padding:18px 16px 18px 0;border-bottom:1px solid var(--line);color:var(--fg-mute);line-height:1.45;vertical-align:top}
+  td.tok{font-family:var(--mono);font-size:13px;color:var(--fg);white-space:nowrap}
+  td.val{font-family:var(--mono);font-size:13px;color:var(--accent)}
+  .demos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-top:8px}
+  .demo{border:1px solid var(--line);border-radius:8px;padding:22px}
+  .demo .cap{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:16px}
+  .demo .hint{font-size:14px;color:var(--fg-dim);margin-top:14px;line-height:1.45}
+  .lnk{font-size:18px;font-weight:500;transition:opacity .25s var(--ease)}
+  .lnk:hover{opacity:.7}
+  .thumb{aspect-ratio:4/3;border:1px solid var(--line);background:#15171b;overflow:hidden;position:relative;display:grid;place-items:center}
+  .thumb .img{position:absolute;inset:0;background:radial-gradient(80% 60% at 30% 30%,#2a3aa8,#131a5c 55%,#06082a);transition:transform .35s var(--ease),filter .35s var(--ease)}
+  .thumb:hover .img{transform:scale(1.06);filter:brightness(.85)}
+  .thumb .pill{position:relative;z-index:1;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:#0d0d0d;padding:10px 20px;font-size:14px;font-weight:500;opacity:0;transform:translateY(6px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+  .thumb:hover .pill{opacity:1;transform:translateY(0)}
+  .rowdemo{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .rowdemo .r{display:grid;grid-template-columns:1fr auto;gap:16px;padding:22px 0;padding-left:0;transition:background .25s var(--ease),padding-left .25s var(--ease)}
+  .rowdemo .r+.r{border-top:1px solid var(--line)}
+  .rowdemo .r:hover{background:rgba(255,255,255,.04);padding-left:12px}
+  .rowdemo .yr{font-family:var(--mono);font-size:13px;color:var(--fg-dim)}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+  @media (prefers-reduced-motion: reduce){
+    .thumb .img,.thumb .pill,.rowdemo .r,.lnk{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Foundations / 04</p>
+  <h1>Motion</h1>
+  <p class="lede">Motion is a whisper. One easing curve, slow entrances, low-opacity hovers. Nothing bounces, nothing announces itself, and every decorative animation has a calm static fallback.</p>
+
+  <div class="ease">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <rect x="0" y="0" width="100" height="100" fill="none" stroke="rgba(255,255,255,.15)"/>
+      <path d="M0 100 C 20 30, 20 20, 100 0" fill="none" stroke="#a8c7ff" stroke-width="2"/>
+    </svg>
+    <div class="txt">
+      <code>--ease: cubic-bezier(.2, .7, .2, 1)</code>
+      Fast out of the gate, long settle. It is the only easing in the system for UI transitions. Script-driven entrances may use <code>power3.out</code> (GSAP) or <code>[0.22, 0.7, 0.18, 1]</code> (Framer Motion) &mdash; the same character.
+    </div>
+  </div>
+
+  <h2>Durations</h2>
+  <table>
+    <thead><tr><th>Use</th><th>Value</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="tok">Default transition</td><td class="val">.25s var(--ease)</td><td>Links, colors, opacity.</td></tr>
+      <tr><td class="tok">Hover feedback</td><td class="val">.2s&ndash;.35s</td><td>Images, pills, row tints.</td></tr>
+      <tr><td class="tok">Entrance</td><td class="val">.6s&ndash;1s</td><td>Nav .6s / delay .1s &middot; hero lines 1s, staggered .05/.20/.34s &middot; CTA .85s / delay .15s &middot; footer word 1s / delay .25s.</td></tr>
+      <tr><td class="tok">Panel reveal</td><td class="val">.7s, stagger .08s</td><td>Number in from x -40, name in from x +40, <code>once: true</code>, <code>amount: 0.5</code>.</td></tr>
+      <tr><td class="tok">Ambient loops</td><td class="val">13s / 18s / 22s / 26s</td><td>Hero flicker, iridescence B, flame rise, iridescence A. Deliberately desynced so nothing visibly resyncs.</td></tr>
+      <tr><td class="tok">Glare lean</td><td class="val">1.6s cubic-bezier(.22,.61,.36,1)</td><td>Cursor-follow bloom leans, never slides.</td></tr>
+      <tr><td class="tok">Smooth scroll</td><td class="val">Lenis 1.15s</td><td>wheelMultiplier .95, touchMultiplier 1.2.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Hover patterns</h2>
+  <div class="demos">
+    <div class="demo">
+      <div class="cap">Link</div>
+      <a href="#" class="lnk">More About Us &rarr;</a>
+      <div class="hint">opacity 1 &rarr; .7 over .25s. No underline, no color change.</div>
+    </div>
+    <div class="demo">
+      <div class="cap">Card / thumb</div>
+      <div class="thumb"><span class="img"></span><span class="pill">View project</span></div>
+      <div class="hint">Image scale(1.02&ndash;1.06) + brightness(.85); a centered pill fades in.</div>
+    </div>
+    <div class="demo">
+      <div class="cap">Row</div>
+      <div class="rowdemo">
+        <div class="r"><span>Sacred geometry study</span><span class="yr">2026</span></div>
+        <div class="r"><span>Kathmandu field notes</span><span class="yr">2025</span></div>
+      </div>
+      <div class="hint">Tint <code>rgba(255,255,255,.04)</code> + a 12px padding-left shift.</div>
+    </div>
+  </div>
+
+  <h2>Reduced motion</h2>
+  <table>
+    <tbody>
+      <tr><td class="tok">Hero line-art</td><td class="val">animation: none</td><td>The flame flicker and rise stop; the artwork stays fully visible.</td></tr>
+      <tr><td class="tok">Iridescence</td><td class="val">animation: none</td><td>Sheen layers hold their position &mdash; still painted, just still.</td></tr>
+      <tr><td class="tok">Hero glare</td><td class="val">static centred bloom</td><td>Replaced with a fixed 50%/42% glow at fixed alphas. Never hidden.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li><b>Always</b> guard decorative animation with <code>@media (prefers-reduced-motion: reduce)</code> &mdash; and give it a calm static fallback rather than hiding the element.</li>
+    <li>Ambient loops must be long (&ge;13s) and mutually desynced. Uneven keyframe stops are what make them read as alive rather than as a pulse.</li>
+    <li>Entrances run <b>once</b> on scroll-in. Nothing re-animates on the way back up.</li>
+    <li>No bounce, no overshoot, no spring. One curve.</li>
+  </ul>
+</div>
+</body>
+</html>

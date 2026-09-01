@@ -1,0 +1,133 @@
+<!-- @dsCard group="Patterns" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Navigation — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --max:1600px; --pad-x:16px; --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 48px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+  .frame{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(70,84,170,.22),rgba(13,13,13,.8) 48%,rgba(8,8,12,1) 100%)}
+  .frame .vp{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-dim);padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(13,13,13,.6)}
+  .stage{padding:0;min-height:180px;display:flex;align-items:flex-start}
+
+  /* ── the pattern ───────────────────────────────────────────── */
+  .top{width:100%;background:transparent;padding:22px var(--pad-x);color:#fff}
+  .top .inner{max-width:var(--max);margin-inline:auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+  .top .brand{font-weight:700;font-size:28px;letter-spacing:-.025em;line-height:1;text-decoration:none;color:inherit}
+  .top .brand .reg{font-size:.55em;vertical-align:super;opacity:.85}
+  .top ul{display:flex;justify-content:center;gap:34px;margin:0;padding:0;list-style:none;font-size:18px;font-weight:500}
+  .top .right{display:flex;justify-content:flex-end;align-items:center;gap:18px;font-weight:500;font-size:18px}
+  .top a{color:inherit;text-decoration:none;transition:opacity .25s var(--ease),color .25s var(--ease)}
+  .top a:hover{opacity:.7}
+  .top a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* narrow demos reproduce the real breakpoints inside a fixed-width stage */
+  .n810 .top ul{display:none}
+  .n810 .top .inner{grid-template-columns:1fr auto}
+  .n810 .top .brand{font-size:22px}
+  .n810 .top .right{gap:12px;font-size:15px}
+  .n480 .top{padding:14px var(--pad-x)}
+  .n480 .top ul{display:none}
+  .n480 .top .inner{grid-template-columns:1fr auto}
+  .n480 .top .brand{font-size:17px}
+  .n480 .top .right{font-size:13px;gap:10px}
+  .n480 .top .right a:not(:last-child){display:none}
+  .narrow{max-width:420px}
+
+  table{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);font-weight:400;padding:0 16px 14px 0;border-bottom:1px solid var(--line)}
+  td{padding:16px 16px 16px 0;border-bottom:1px solid var(--line);color:var(--fg-mute);line-height:1.45;vertical-align:top}
+  td.tok{font-family:var(--mono);font-size:13px;color:var(--fg);white-space:nowrap}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Patterns / Navigation</p>
+  <h1>Nav</h1>
+  <p class="lede">Fixed, transparent, three columns: brand &middot; center links &middot; right actions. It never gets a background fill or a border &mdash; it floats over the artwork.</p>
+
+  <h2>Desktop</h2>
+  <p class="note">position: fixed &middot; top 0 &middot; z-index 50 &middot; background transparent &middot; padding 22px var(--pad-x)</p>
+  <div class="frame">
+    <div class="vp">&ge; 810px</div>
+    <div class="stage">
+      <nav class="top">
+        <div class="inner">
+          <a href="#top" class="brand">greenhueblues<span class="reg">®</span></a>
+          <ul>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+          <div class="right">
+            <a href="#">X</a>
+            <a href="#">Instagram</a>
+            <a href="#">LinkedIn</a>
+            <a href="#contact">Contact</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <h2>&le; 810px &mdash; center links drop</h2>
+  <p class="note">The <code>ul</code> hides, the grid becomes <code>1fr auto</code>, brand 22px, right actions 15px / gap 12px. There is no hamburger &mdash; the page is a single scroll, so the anchors live in the footer.</p>
+  <div class="frame narrow n810">
+    <div class="vp">810px</div>
+    <div class="stage">
+      <nav class="top">
+        <div class="inner">
+          <a href="#top" class="brand">greenhueblues<span class="reg">®</span></a>
+          <ul><li><a href="#work">Work</a></li><li><a href="#about">About</a></li></ul>
+          <div class="right"><a href="#">X</a><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#contact">Contact</a></div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <h2>&le; 480px &mdash; Contact only</h2>
+  <p class="note">Padding 14px, brand 17px, and every right-hand link except the last one hides. Contact survives.</p>
+  <div class="frame narrow n480">
+    <div class="vp">480px</div>
+    <div class="stage">
+      <nav class="top">
+        <div class="inner">
+          <a href="#top" class="brand">greenhueblues<span class="reg">®</span></a>
+          <ul><li><a href="#work">Work</a></li><li><a href="#about">About</a></li></ul>
+          <div class="right"><a href="#">X</a><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#contact">Contact</a></div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <h2>Spec</h2>
+  <table>
+    <tbody>
+      <tr><td class="tok">Wordmark</td><td>Lowercase <b>greenhueblues</b>, weight 700, 28px, tracking -.025em, line-height 1. The <code>®</code> is <code>.55em</code>, <code>vertical-align: super</code>, opacity .85.</td></tr>
+      <tr><td class="tok">Links</td><td>18px, weight 500. Hover <code>opacity .7</code> over .25s. No underline, no accent color, no active-page treatment.</td></tr>
+      <tr><td class="tok">Entrance</td><td>Fades and drops in from <code>y: -16</code> over .6s <code>easeOut</code>, delay .1s. Once.</td></tr>
+      <tr><td class="tok">Focus</td><td><code>outline: 2px solid var(--accent); outline-offset: 2px</code> &mdash; never removed.</td></tr>
+      <tr><td class="tok">Alt background</td><td>If the nav must sit over light artwork, use <code>rgba(13,13,13,.3)</code>. Never a solid fill.</td></tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

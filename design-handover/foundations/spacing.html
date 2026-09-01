@@ -1,0 +1,137 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Space &amp; Layout — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --max:1600px; --pad-x:16px; --section-y:clamp(80px,10vw,160px);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 56px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:64px 0 20px;font-weight:500;font-size:24px;letter-spacing:-.02em}
+  table{width:100%;border-collapse:collapse;font-size:16px}
+  th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);font-weight:400;padding:0 16px 14px 0;border-bottom:1px solid var(--line)}
+  td{padding:18px 16px 18px 0;border-bottom:1px solid var(--line);color:var(--fg-mute);line-height:1.45;vertical-align:top}
+  td.tok{font-family:var(--mono);font-size:13px;color:var(--fg);white-space:nowrap}
+  td.val{font-family:var(--mono);font-size:13px;color:var(--accent);white-space:nowrap}
+  .scale{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .scale .s{text-align:center}
+  .scale .bar{background:rgba(168,199,255,.12);border:1px solid rgba(168,199,255,.5);border-radius:2px}
+  .scale .n{font-family:var(--mono);font-size:11px;color:var(--fg-dim);margin-top:8px}
+  .diagram{border:1px solid var(--line);border-radius:8px;padding:0;overflow:hidden;margin-top:8px}
+  .diagram .pad{background:repeating-linear-gradient(45deg,rgba(168,199,255,.10) 0 6px,transparent 6px 12px);width:var(--pad-x);flex:0 0 var(--pad-x)}
+  .diagram .strip{display:flex;align-items:stretch;min-height:132px}
+  .diagram .content{flex:1;border-inline:1px dashed rgba(168,199,255,.45);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--fg-dim);letter-spacing:.1em;text-align:center;padding:24px 12px;line-height:1.8}
+  .rhythm{margin-top:8px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .rhythm .band{padding-block:var(--section-y);text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-dim)}
+  .rhythm .band+.band{border-top:1px solid var(--line)}
+  .rhythm .b1{background:rgba(13,13,13,.45)}
+  .rhythm .b2{background:rgba(13,13,13,.52)}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+  .warn{border:1px solid rgba(168,199,255,.5);background:rgba(168,199,255,.06);border-radius:8px;padding:20px 22px;margin-top:24px;font-size:16px;color:var(--fg-mute);line-height:1.55}
+  .warn b{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Foundations / 03</p>
+  <h1>Space &amp; layout</h1>
+  <p class="lede">One container, one horizontal pad, one vertical rhythm token. Whitespace is the primary compositional device &mdash; if a section feels crowded, the fix is space, not smaller type.</p>
+
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="tok">--max</td><td class="val">1600px</td><td>Max content width. Every full-width section wraps its inner content in <code>.wrap</code>.</td></tr>
+      <tr><td class="tok">--pad-x</td><td class="val">16px</td><td>Horizontal page padding, inside and out. Nav, hero copy, sections and footer all share it.</td></tr>
+      <tr><td class="tok">--section-y</td><td class="val">clamp(80px, 10vw, 160px)</td><td>Vertical rhythm between sections. Rescaled by the density modifiers below.</td></tr>
+      <tr><td class="tok">[data-density="compact"]</td><td class="val">clamp(56px, 7vw, 110px)</td><td>Honor it if present on an ancestor.</td></tr>
+      <tr><td class="tok">[data-density="airy"]</td><td class="val">clamp(120px, 14vw, 220px)</td><td>Honor it if present on an ancestor.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Container</h2>
+  <div class="diagram">
+    <div class="strip">
+      <div class="pad"></div>
+      <div class="content">.wrap<br>max-width: var(--max) &nbsp;&middot;&nbsp; margin-inline: auto &nbsp;&middot;&nbsp; padding-inline: var(--pad-x)</div>
+      <div class="pad"></div>
+    </div>
+  </div>
+
+  <h2>Spacing scale</h2>
+  <p class="lede" style="margin-bottom:20px">Values in use cluster on a loose scale. Prefer these; do not invent a 13px or 27px gap.</p>
+  <div class="scale">
+    <div class="s"><div class="bar" style="width:28px;height:4px"></div><div class="n">4</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:6px"></div><div class="n">6</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:8px"></div><div class="n">8</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:10px"></div><div class="n">10</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:14px"></div><div class="n">14</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:16px"></div><div class="n">16</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:18px"></div><div class="n">18</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:22px"></div><div class="n">22</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:24px"></div><div class="n">24</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:32px"></div><div class="n">32</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:48px"></div><div class="n">48</div></div>
+    <div class="s"><div class="bar" style="width:28px;height:56px"></div><div class="n">56</div></div>
+  </div>
+
+  <h2>Known anchors in the live page</h2>
+  <table>
+    <tbody>
+      <tr><td class="tok">Nav padding</td><td class="val">22px var(--pad-x)</td><td>Collapses to 14px below 480px.</td></tr>
+      <tr><td class="tok">Nav column gap</td><td class="val">24px</td><td>3-col grid: brand &middot; center links &middot; right action. Center links gap 34px.</td></tr>
+      <tr><td class="tok">Hero copy inset</td><td class="val">bottom 36px</td><td>Headline sits at the bottom-left of a full-viewport hero.</td></tr>
+      <tr><td class="tok">Panel label inset</td><td class="val">24px</td><td>Number left, name right, both vertically centered.</td></tr>
+      <tr><td class="tok">About padding-block</td><td class="val">clamp(140px, 20vw, 260px)</td><td>The statement section breathes more than a normal section.</td></tr>
+      <tr><td class="tok">CTA padding</td><td class="val">clamp(120px,18vw,240px) 0 clamp(40px,6vw,80px)</td><td>Heavy top, light bottom &mdash; it leads into the footer.</td></tr>
+      <tr><td class="tok">Footer</td><td class="val">40px var(--pad-x) 32px</td><td>Column grid gap 32px, padding-bottom 56px above the wordmark.</td></tr>
+      <tr><td class="tok">Grid / card gaps</td><td class="val">24px&ndash;32px</td><td>Standard content gap 24px; card grids 32px.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Vertical rhythm</h2>
+  <div class="rhythm">
+    <div class="band b1">padding-block: var(--section-y)</div>
+    <div class="band b2">padding-block: var(--section-y)</div>
+  </div>
+
+  <h2>Breakpoints</h2>
+  <table>
+    <tbody>
+      <tr><td class="tok">810px</td><td class="val">primary</td><td>Nav center links hide, nav goes 2-col, hero copy stacks, footer goes 2-col.</td></tr>
+      <tr><td class="tok">600px</td><td class="val">rows</td><td>Row layouts collapse to a single column.</td></tr>
+      <tr><td class="tok">480px</td><td class="val">mobile</td><td>--section-y shrinks, nav padding 14px, footer 1-col, CTA drops to clamp(32px,9vw,48px).</td></tr>
+      <tr><td class="tok">360px</td><td class="val">floor</td><td>Brand 15px, footer word 32px. Test here.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <b>Resolved inconsistency.</b> Earlier docs noted a clash between Tailwind&rsquo;s <code>max-w-7xl</code> (1280px) and <code>--max: 1600px</code>. Tailwind is no longer in the build &mdash; <code>postcss.config.js</code> carries autoprefixer only. <b>Use <code>--max</code> / <code>.wrap</code> everywhere.</b> Do not reintroduce utility-class widths.
+  </div>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>Every full-width section gets a <code>.wrap</code> (or an exact replica) for its inner content.</li>
+    <li>Vertical space between sections comes from <code>--section-y</code>, not ad-hoc margins on headings.</li>
+    <li>Interactive targets stay <b>&ge; ~40px</b> on touch.</li>
+  </ul>
+</div>
+</body>
+</html>

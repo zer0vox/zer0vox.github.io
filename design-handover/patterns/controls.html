@@ -1,0 +1,172 @@
+<!-- @dsCard group="Extended" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controls &amp; Rows — greenhueblues®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d; --fg:#fff; --fg-mute:rgba(255,255,255,.7); --fg-dim:rgba(255,255,255,.5);
+    --line:rgba(255,255,255,.15); --accent:#a8c7ff;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:18px;line-height:1.2;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1100px;margin-inline:auto;padding:64px 32px 96px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin:0 0 14px}
+  h1.pt{margin:0 0 8px;font-weight:500;font-size:clamp(32px,4vw,54px);letter-spacing:-.035em;line-height:1}
+  .lede{margin:0 0 32px;color:var(--fg-mute);font-size:18px;line-height:1.5;max-width:52ch}
+  h2{margin:56px 0 8px;font-weight:500;font-size:20px;letter-spacing:-.02em}
+  .note{margin:0 0 18px;font-size:15px;color:var(--fg-dim);line-height:1.5}
+  .banner{border:1px solid rgba(168,199,255,.5);background:rgba(168,199,255,.06);border-radius:8px;padding:20px 22px;margin-bottom:48px;font-size:16px;color:var(--fg-mute);line-height:1.55}
+  .banner b{color:var(--fg)}
+  .banner .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .stage{border:1px solid var(--line);border-radius:8px;padding:32px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;background:rgba(255,255,255,.02)}
+  .stage.block{display:block}
+
+  /* ── buttons ─────────────────────────────────────────────── */
+  .btn{background:var(--accent);color:#0d0d0d;border:none;padding:11px 28px;border-radius:4px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+  .btn:hover{opacity:.85;transform:scale(1.04)}
+  .btn:active{transform:scale(.97)}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn--ghost{background:transparent;color:var(--accent);border:1px solid var(--accent);transition:background .2s var(--ease)}
+  .btn--ghost:hover{background:rgba(168,199,255,.1);opacity:1;transform:none}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;transform:none}
+
+  /* ── input ───────────────────────────────────────────────── */
+  .input{padding:10px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(168,199,255,.5);border-radius:4px;color:var(--fg);font-family:inherit;font-size:15px;min-width:240px;transition:border-color .2s var(--ease),background .2s var(--ease)}
+  .input::placeholder{color:var(--fg-dim)}
+  .input:focus{outline:none;border-color:var(--accent);background:rgba(168,199,255,.12)}
+  .field{display:block}
+  .field .lbl{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:10px}
+
+  /* ── card ────────────────────────────────────────────────── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:32px}
+  .card .thumb{aspect-ratio:4/3;border:1px solid var(--line);background:#15171b;overflow:hidden;position:relative;display:grid;place-items:center}
+  .card .thumb .img{position:absolute;inset:0;background:radial-gradient(80% 60% at 30% 30%,#2a3aa8,#131a5c 55%,#06082a);transition:transform .35s var(--ease),filter .35s var(--ease)}
+  .card:hover .thumb .img{transform:scale(1.06);filter:brightness(.85)}
+  .card .thumb .pill{position:relative;z-index:1;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:#0d0d0d;padding:10px 20px;font-size:14px;font-weight:500;opacity:0;transform:translateY(6px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+  .card:hover .thumb .pill{opacity:1;transform:translateY(0)}
+  .card .m{margin-top:16px}
+  .card .t{font-size:clamp(20px,1.7vw,26px);font-weight:500;letter-spacing:-.02em}
+  .card .s{margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim)}
+
+  /* ── index row ───────────────────────────────────────────── */
+  .rows{border-top:1px solid var(--line)}
+  .rows .head,.rows .row{display:grid;grid-template-columns:2fr 1.2fr 1fr auto;gap:24px;align-items:baseline}
+  .rows .head{padding:14px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim)}
+  .rows .row{padding:22px 0;border-bottom:1px solid var(--line);transition:background .25s var(--ease),padding-left .25s var(--ease)}
+  .rows .row:hover{background:rgba(255,255,255,.04);padding-left:12px}
+  .rows .row .t{font-size:18px;font-weight:500}
+  .rows .row .c,.rows .row .y{font-family:var(--mono);font-size:13px;color:var(--fg-dim)}
+  @media (max-width:600px){
+    .rows .head{display:none}
+    .rows .row{grid-template-columns:1fr;gap:6px}
+  }
+
+  table{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  td{padding:16px 16px 16px 0;border-bottom:1px solid var(--line);color:var(--fg-mute);line-height:1.45;vertical-align:top}
+  tr:first-child td{border-top:1px solid var(--line)}
+  td.tok{font-family:var(--mono);font-size:13px;color:var(--fg);white-space:nowrap;width:150px}
+  .rules{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .rules li{padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--fg-mute);line-height:1.5}
+  .rules li b{color:var(--fg);font-weight:500}
+  code{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+  pre{margin:8px 0 0;padding:20px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03);overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--fg-mute)}
+  pre b{color:var(--accent);font-weight:400}
+  @media (prefers-reduced-motion: reduce){
+    .btn,.card .thumb .img,.card .thumb .pill,.rows .row,.input{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="eyebrow">Extended / Controls</p>
+  <h1 class="pt">Controls &amp; rows</h1>
+  <p class="lede">Buttons, inputs, cards and index rows, drawn to the system so new surfaces have somewhere to start.</p>
+
+  <div class="banner">
+    <span class="tag">Status &mdash; spec, not shipped</span><br>
+    <b>None of these components exist in the current codebase.</b> The live page (nav, hero, four project panels, statement, CTA, footer) contains no buttons, inputs, cards or tables at all. These specs are carried forward from an earlier build of the site &mdash; treat them as the <b>agreed direction</b> for when such a component is needed, and re-verify against <code>src/index.css</code> once one actually ships.
+  </div>
+
+  <h2>Button &mdash; primary</h2>
+  <div class="stage">
+    <button class="btn">Play</button>
+    <button class="btn">Get in touch</button>
+    <button class="btn" disabled>Disabled</button>
+  </div>
+  <pre>background: <b>var(--accent)</b>; color: <b>#0d0d0d</b>; border: none;
+padding: <b>11px 28px</b>; border-radius: <b>4px</b>; font-weight: 600; font-size: 15px;
+transition: opacity .2s var(--ease), transform .2s var(--ease);
+:hover  { opacity: .85; transform: scale(1.04); }
+:active { transform: scale(.97); }</pre>
+
+  <h2>Button &mdash; ghost</h2>
+  <div class="stage">
+    <button class="btn btn--ghost">Secondary</button>
+    <button class="btn btn--ghost">View all work</button>
+  </div>
+  <pre>background: transparent; color: <b>var(--accent)</b>; border: <b>1px solid var(--accent)</b>;
+:hover { background: <b>rgba(168,199,255,.1)</b>; }</pre>
+
+  <h2>Input</h2>
+  <div class="stage">
+    <label class="field">
+      <span class="lbl">Email</span>
+      <input class="input" type="email" placeholder="you@studio.com">
+    </label>
+    <label class="field">
+      <span class="lbl">Project</span>
+      <input class="input" type="text" placeholder="Tell us briefly">
+    </label>
+  </div>
+  <pre>padding: <b>10px 12px</b>; background: <b>rgba(255,255,255,.08)</b>;
+border: <b>1px solid rgba(168,199,255,.5)</b>; border-radius: <b>4px</b>; color: var(--fg);
+:focus { outline: none; border-color: <b>var(--accent)</b>; background: <b>rgba(168,199,255,.12)</b>; }
+::placeholder { color: var(--fg-dim); }</pre>
+  <p class="note">Labels use the 11px mono meta treatment, 10px above the field. Errors: keep the copy in <code>--fg-mute</code> and mark the field with the accent &mdash; there is no red in this palette, so an error state must be introduced deliberately if one is ever needed.</p>
+
+  <h2>Card &mdash; work grid</h2>
+  <div class="grid">
+    <a class="card" href="#" style="color:inherit;text-decoration:none">
+      <div class="thumb"><span class="img"></span><span class="pill">View project</span></div>
+      <div class="m"><div class="t">Vision</div><div class="s">Identity &middot; 2026</div></div>
+    </a>
+    <a class="card" href="#" style="color:inherit;text-decoration:none">
+      <div class="thumb"><span class="img" style="background:radial-gradient(120% 70% at 30% 30%,#6dd9a8,#2c8b6a 35%,#14503b 70%,#0a2c22)"></span><span class="pill">View project</span></div>
+      <div class="m"><div class="t">DNA</div><div class="s">Web &middot; 2026</div></div>
+    </a>
+    <a class="card" href="#" style="color:inherit;text-decoration:none">
+      <div class="thumb"><span class="img" style="background:linear-gradient(180deg,#2a1430,#6a2645 18%,#c45d3e 40%,#f0a04a 55%,#6a3526 75%,#20131a)"></span><span class="pill">View project</span></div>
+      <div class="m"><div class="t">Logic</div><div class="s">Art direction &middot; 2025</div></div>
+    </a>
+  </div>
+  <p class="note" style="margin-top:18px">Thumb <code>aspect-ratio: 4/3</code>, <b>square corners</b>, <code>1px solid var(--line)</code>, <code>background: #15171b</code>. Grid gap 32px. Hover scales the image and reveals a centred pill. Title <code>clamp(20px,1.7vw,26px)</code> weight 500; client / category / year in mono <code>--fg-dim</code>.</p>
+
+  <h2>Index row</h2>
+  <div class="rows">
+    <div class="head"><span>Project</span><span>Client</span><span>Category</span><span>Year</span></div>
+    <div class="row"><span class="t">Sacred geometry study</span><span class="c">Internal</span><span class="c">Research</span><span class="y">2026</span></div>
+    <div class="row"><span class="t">Kathmandu field notes</span><span class="c">Himal Trust</span><span class="c">Editorial</span><span class="y">2025</span></div>
+    <div class="row"><span class="t">Prayer wheel</span><span class="c">Studio</span><span class="c">Interaction</span><span class="y">2025</span></div>
+  </div>
+  <p class="note" style="margin-top:18px">Hairline rules top and bottom, 22px vertical padding, mono uppercase header row, hover tint <code>rgba(255,255,255,.04)</code> plus a 12px <code>padding-left</code> shift. Collapses to one column at 600px with the header hidden.</p>
+
+  <h2>Rules</h2>
+  <ul class="rules">
+    <li>Primary buttons are the <b>only</b> place a solid accent fill appears. One per view.</li>
+    <li>Radii: <code>4px</code> controls, <code>6px</code> chips, <code>8px</code> cards and tables, <code>999px</code> pills. Media thumbs stay square.</li>
+    <li>Every interactive element keeps a visible <code>--accent</code> focus outline and a tap target of at least ~40px.</li>
+    <li>Dynamic updates (filtering a grid, a form result) need a visually-hidden live region announcing the change.</li>
+    <li>No red, green or amber status colors exist. If a semantic state is genuinely required, propose it before shipping it.</li>
+  </ul>
+</div>
+</body>
+</html>

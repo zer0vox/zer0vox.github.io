@@ -1,0 +1,37 @@
+/* greenhueblues® — canonical design tokens.
+   Mirror of the :root block in src/index.css. If the two disagree, index.css wins. */
+:root {
+  /* Color */
+  --bg: #0d0d0d;
+  --fg: #ffffff;
+  --fg-mute: rgba(255, 255, 255, 0.7);
+  --fg-dim: rgba(255, 255, 255, 0.5);
+  --line: rgba(255, 255, 255, 0.15);
+  --accent: #a8c7ff;
+
+  /* Type families */
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --script: "Caveat", "Brush Script MT", cursive;
+
+  /* Type scale (fluid) */
+  --hero-size: clamp(22px, 2.8vw, 40px);
+  --display: clamp(40px, 5vw, 70px);
+  --huge: clamp(44px, 7.2vw, 112px);
+  --body: 18px;
+
+  /* Layout */
+  --max: 1600px;
+  --pad-x: 16px;
+  --section-y: clamp(80px, 10vw, 160px);
+
+  /* Motion */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* Density modifiers — honor these if present on an ancestor. */
+[data-density="compact"] { --section-y: clamp(56px, 7vw, 110px); }
+[data-density="airy"]    { --section-y: clamp(120px, 14vw, 220px); }
+
+/* Container */
+.wrap { max-width: var(--max); margin-inline: auto; padding-inline: var(--pad-x); }
