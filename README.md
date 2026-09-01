@@ -1,16 +1,45 @@
-# React + Vite
+# greenhueblues
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Portfolio site for greenhueblues — an independent design studio in Kathmandu.
+React + Vite, deployed to GitHub Pages at **[greenhueblues.me](https://greenhueblues.me)**.
 
-Currently, two official plugins are available:
+## Running it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev      # vite dev server
+npm run build    # production build into dist/
+npm run preview  # serve the built output
+npm run lint     # eslint
+```
 
-## React Compiler
+## Layout
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+A single page. There is no router — every hash (`#work`, `#about`, `#contact`) is an
+in-page anchor, scrolled by Lenis.
 
-## Expanding the ESLint configuration
+```
+src/
+  main.jsx                       entry
+  App.jsx                        Lenis smooth scroll, renders Home
+  index.css                      design tokens and all page styling
+  pages/Home.jsx                 hero, panels, about, contact, footer
+  components/
+    FibonacciPsyBackground.jsx   OGL/GSAP animated background
+    useHeroGlare.js              pointer-tracked hero glare
+  assets/                        panel imagery
+public/
+  CNAME                          custom domain for GitHub Pages
+  favicon.svg, greenhueblues.png favicon and social share image
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Design tokens (colour, type, spacing, easing) live in `:root` at the top of
+[`src/index.css`](src/index.css). `--sans` is Inter, `--mono` is Fragment Mono,
+`--script` is Caveat, all loaded from Google Fonts.
+
+## Deploying
+
+Push to `master`. [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+builds the site and publishes `dist/` to GitHub Pages; the custom domain comes from
+`public/CNAME`. Nothing else is needed — the repo is a user site served at the domain
+root, so Vite's default `base: '/'` is correct.

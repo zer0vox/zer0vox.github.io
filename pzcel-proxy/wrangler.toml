@@ -1,7 +1,0 @@
-name = "pzcel-proxy"
-main = "src/index.js"
-compatibility_date = "2024-11-01"
-
-# Cloudflare Workers AI — runs the model inside the Worker. Free tier, no key.
-[ai]
-binding = "AI"

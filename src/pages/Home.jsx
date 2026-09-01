@@ -32,11 +32,11 @@ export default function Home() {
   const heroRef = useRef(null)
   useHeroGlare(heroRef)
 
-  // When arriving from another route (e.g. the PZCEL page) with a section
-  // hash in the URL, scroll to that section once Home has mounted.
+  // Landing on a deep link like /#about should jump to that section once the
+  // page has mounted.
   useEffect(() => {
     const id = window.location.hash.slice(1)
-    if (id && id !== 'top' && id !== 'pzcel') {
+    if (id && id !== 'top') {
       requestAnimationFrame(() => {
         document.getElementById(id)?.scrollIntoView()
       })
@@ -107,8 +107,6 @@ export default function Home() {
           <ul>
             <li><a href="#work">Work</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#pzcel">PZCEL</a></li>
-            <li><a href="#mx">MX</a></li>
           </ul>
           <div className="right">
             <a href="#">X</a>
@@ -192,8 +190,6 @@ export default function Home() {
             <div className="col">
               <div className="h">Sitemap</div>
               <a href="#work">Work</a>
-              <a href="#pzcel">PZCEL</a>
-              <a href="#mx">MX</a>
             </div>
             <div className="col">
               <div className="h">Studio</div>
