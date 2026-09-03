@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import FibonacciPsyBackground from '../components/FibonacciPsyBackground'
 import { useHeroGlare } from '../components/useHeroGlare'
+import { SiteNav, SiteFooter } from '../components/SiteChrome'
 import dnaImg from '../assets/dna.png'
 import visionImg from '../assets/vision.png'
 import logicImg from '../assets/logic.JPG'
@@ -28,20 +29,8 @@ function PanelReveal({ children, delay = 0, from = 'left' }) {
 
 export default function Home() {
   const ctaHeadingRef = useRef(null)
-  const footerWordRef = useRef(null)
   const heroRef = useRef(null)
   useHeroGlare(heroRef)
-
-  // Landing on a deep link like /#about should jump to that section once the
-  // page has mounted.
-  useEffect(() => {
-    const id = window.location.hash.slice(1)
-    if (id && id !== 'top') {
-      requestAnimationFrame(() => {
-        document.getElementById(id)?.scrollIntoView()
-      })
-    }
-  }, [])
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -76,18 +65,12 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (!ctaHeadingRef.current || !footerWordRef.current) return
+    if (!ctaHeadingRef.current) return
 
     gsap.fromTo(
       ctaHeadingRef.current,
       { y: 28, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', delay: 0.15 }
-    )
-
-    gsap.fromTo(
-      footerWordRef.current,
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, ease: 'power3.out', delay: 0.25 }
     )
   }, [])
 
@@ -95,27 +78,7 @@ export default function Home() {
   return (
     <>
       <FibonacciPsyBackground />
-      <motion.nav
-        className="top"
-        id="nav"
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-      >
-        <div className="inner">
-          <a href="#top" className="brand">greenhueblues<span className="reg">®</span></a>
-          <ul>
-            <li><a href="#work">Work</a></li>
-            <li><a href="#about">About</a></li>
-          </ul>
-          <div className="right">
-            <a href="#">X</a>
-            <a href="#">Instagram</a>
-            <a href="#">LinkedIn</a>
-            <a href="#contact">Contact</a>
-          </div>
-        </div>
-      </motion.nav>
+      <SiteNav />
 
       <header className="hero" id="top" ref={heroRef}>
         <div className="bg" />
@@ -184,32 +147,7 @@ export default function Home() {
         </motion.h2>
       </section>
 
-      <footer>
-        <div className="ftr-inner">
-          <div className="cols">
-            <div className="col">
-              <div className="h">Sitemap</div>
-              <a href="#work">Work</a>
-            </div>
-            <div className="col">
-              <div className="h">Studio</div>
-              <a href="#about">About</a>
-              <a href="#contact">Contact</a>
-            </div>
-            <div className="col">
-              <div className="h">Social</div>
-              <a href="#">X</a>
-              <a href="#">Instagram</a>
-              <a href="#">LinkedIn</a>
-            </div>
-          </div>
-          <div className="word" ref={footerWordRef}>greenhueblues<span className="reg">®</span></div>
-          <div className="baseline">
-            <div />
-            <div>Copyright 2026. All rights reserved.</div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   )
 }

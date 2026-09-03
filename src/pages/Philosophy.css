@@ -1,0 +1,793 @@
+/* Philosophy page. The design was drawn on the same tokens as the rest of the
+   site (--bg, --accent, --max, --section-y ...), so everything here reuses them;
+   only the values this page invents on its own are literals. */
+
+.ph {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.ph a {
+  color: var(--fg);
+  text-decoration: none;
+  transition: opacity .25s var(--ease);
+}
+
+.ph a:hover {
+  opacity: .7;
+}
+
+/* Ambient ------------------------------------------------------------------ */
+
+.ph-ambient,
+.ph-ambient-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* The ridgeline is meant to be felt rather than looked at, but it was being
+   crushed twice over — a .16 opacity under a near-solid vignette. Opened up to
+   where the peaks and the flag actually read, with the veil still closing to
+   solid at the edges so every section keeps a dark ground under its type. */
+.ph-ambient {
+  background-size: cover;
+  background-position: center;
+  opacity: .34;
+  filter: saturate(.8) contrast(1.02) brightness(1.12);
+  animation: ph-drift 26s var(--ease) infinite;
+}
+
+.ph-ambient-veil {
+  background: radial-gradient(120% 90% at 50% 40%, rgba(13, 13, 13, .08) 0%, rgba(13, 13, 13, .68) 62%, var(--bg) 100%);
+}
+
+@keyframes ph-drift {
+  0% { transform: scale(1.06) translate3d(0, 0, 0); }
+  50% { transform: scale(1.12) translate3d(-1.6%, -1.2%, 0); }
+  100% { transform: scale(1.06) translate3d(0, 0, 0); }
+}
+
+@keyframes ph-flow {
+  to { stroke-dashoffset: -240; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph [data-ambient] {
+    animation: none !important;
+  }
+}
+
+/* Header and footer come from SiteChrome and are styled by index.css, so this
+   file covers only the page body between them. */
+
+/* Hero --------------------------------------------------------------------- */
+
+.ph-hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  background: #000;
+  overflow: hidden;
+}
+
+.ph-hero-photo,
+.ph-hero-bloom {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 66%;
+}
+
+.ph-hero-photo {
+  opacity: .8;
+  filter: brightness(1.5) contrast(1.1) saturate(1.14);
+}
+
+.ph-hero-bloom {
+  mix-blend-mode: screen;
+  opacity: .45;
+  filter: brightness(1.6) contrast(1.5) saturate(1.3) blur(7px);
+}
+
+.ph-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, .1) 38%, rgba(0, 0, 0, .92) 100%);
+}
+
+.ph-hero-copy {
+  position: relative;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--pad-x);
+  padding-bottom: var(--section-y);
+  width: 100%;
+}
+
+.ph-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .55);
+  margin-bottom: 24px;
+}
+
+.ph-hero-title {
+  margin: 0;
+  max-width: 22ch;
+  font-size: var(--hero-size);
+  font-weight: 400;
+  letter-spacing: -.04em;
+  line-height: 1.05;
+  color: var(--accent);
+  text-wrap: balance;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, .55);
+}
+
+/* Blueprint torch ---------------------------------------------------------- */
+
+/* Revealed only under the cursor: paintTorch() drives the mask and opacity. */
+.ph-blueprint {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  will-change: opacity, mask-image;
+  transition: opacity .6s var(--ease);
+}
+
+.ph-bp-grid {
+  position: absolute;
+  inset: 0;
+  background-color: #060a14;
+  background-image:
+    linear-gradient(rgba(168, 199, 255, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 199, 255, .07) 1px, transparent 1px),
+    linear-gradient(rgba(168, 199, 255, .16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 199, 255, .16) 1px, transparent 1px);
+  background-size: 16px 16px, 16px 16px, 96px 96px, 96px 96px;
+}
+
+.ph-bp-edges {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 66%;
+  filter: url(#phBpEdges);
+  opacity: .95;
+}
+
+.ph-bp-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ph-bp-lines .flow-a { animation: ph-flow 9s linear infinite; }
+.ph-bp-lines .flow-b { animation: ph-flow 15s linear infinite; }
+.ph-bp-lines .flow-c { animation: ph-flow 22s linear infinite; }
+
+/* The golden section drawn over the photograph: the page's whole argument. */
+.ph-bp-v {
+  position: absolute;
+  left: 61.8%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(168, 199, 255, .55);
+}
+
+.ph-bp-h {
+  position: absolute;
+  top: 61.8%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(168, 199, 255, .55);
+}
+
+.ph-bp-box,
+.ph-bp-box-inner {
+  position: absolute;
+  left: 61.8%;
+  top: 61.8%;
+  height: 38.2%;
+}
+
+.ph-bp-box {
+  width: 38.2%;
+  border: 1px solid rgba(168, 199, 255, .45);
+}
+
+.ph-bp-box-inner {
+  width: 23.6%;
+  border-right: 1px solid rgba(168, 199, 255, .35);
+}
+
+.ph-bp-phi,
+.ph-bp-div {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.ph-bp-phi {
+  left: 61.8%;
+  top: 61.8%;
+  transform: translate(12px, 12px);
+  color: rgba(168, 199, 255, .75);
+}
+
+.ph-bp-div {
+  left: 24px;
+  top: 61.8%;
+  transform: translateY(-16px);
+  color: rgba(168, 199, 255, .55);
+}
+
+.ph-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
+  border-radius: 999px;
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity .6s var(--ease);
+  background: radial-gradient(circle, rgba(168, 199, 255, .10) 0%, rgba(168, 199, 255, 0) 62%);
+  box-shadow: inset 0 0 0 1px rgba(168, 199, 255, .14);
+}
+
+/* Statement ---------------------------------------------------------------- */
+
+.ph-statement {
+  position: relative;
+  z-index: 1;
+  background: rgba(13, 13, 13, .52);
+  padding-block: var(--section-y);
+}
+
+.ph-statement .inner,
+.ph-contact .inner {
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--pad-x);
+}
+
+.ph-statement-lead {
+  margin: 0;
+  max-width: 18ch;
+  font-size: clamp(36px, 6vw, 88px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.ph-statement-body {
+  margin: 48px 0 0;
+  max-width: 52ch;
+  font-size: var(--body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--fg-mute);
+}
+
+/* Dial --------------------------------------------------------------------- */
+
+/* 320vh of track is what the six stages are spread across; the stage inside is
+   sticky, so scrolling turns the drum rather than moving the page past it. */
+.ph-dial-track {
+  position: relative;
+  z-index: 1;
+  height: 320vh;
+  background: linear-gradient(180deg, rgba(26, 26, 26, .72) 0%, rgba(33, 33, 33, .78) 50%, rgba(26, 26, 26, .72) 100%);
+}
+
+.ph-dial-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.ph-dial-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 60% at 50% 50%, rgba(255, 255, 255, .05) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.ph-glyph {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ph-guide-l,
+.ph-guide-r {
+  position: absolute;
+  top: 50%;
+  width: 4%;
+  height: 1px;
+}
+
+.ph-guide-l {
+  left: 0;
+  background: linear-gradient(90deg, rgba(168, 199, 255, 0), rgba(168, 199, 255, .55));
+}
+
+.ph-guide-r {
+  right: 0;
+  background: linear-gradient(90deg, rgba(168, 199, 255, .55), rgba(168, 199, 255, 0));
+}
+
+/* Focal scale. The lens here is a drafting instrument, not an object: the same
+   hairlines, mono numerals and red the rest of the page is drawn with, travelling
+   with the scroll. Minor ticks measure, red stops mark where to stop, and the
+   accent caret is the fixed index they are read against. */
+.ph-lens {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 54px;
+  height: 100%;
+  border-left: 1px solid var(--line);
+}
+
+/* Minor ticks: a 9px rule, an eighth of a stage, drawn short from the edge. */
+.ph-lens-ticks {
+  position: absolute;
+  right: 0;
+  width: 9px;
+  top: -20px;
+  bottom: -20px;
+  background-image: repeating-linear-gradient(180deg,
+    rgba(255, 255, 255, .22) 0px, rgba(255, 255, 255, .22) 1px,
+    rgba(255, 255, 255, 0) 1px, rgba(255, 255, 255, 0) 9px);
+  will-change: transform;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 16%, #000 84%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 16%, #000 84%, rgba(0, 0, 0, 0) 100%);
+}
+
+.ph-lens-scale {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 13%, #000 87%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 13%, #000 87%, rgba(0, 0, 0, 0) 100%);
+}
+
+.ph-lens-mark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 6px);
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 8px;
+  will-change: transform;
+}
+
+.ph-lens-num {
+  font-family: var(--devanagari);
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(255, 255, 255, .42);
+  transition: color .25s var(--ease);
+}
+
+.ph-lens-tick {
+  width: 22px;
+  height: 1px;
+  background: #d8483c;
+  transition: width .25s var(--ease);
+}
+
+.ph-lens-mark.is-on .ph-lens-tick {
+  width: 30px;
+}
+
+.ph-lens-mark.is-on .ph-lens-num {
+  color: var(--fg);
+}
+
+/* The fixed index the scale is read against. */
+.ph-lens-index {
+  position: absolute;
+  top: calc(50% - 1px);
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  opacity: .85;
+}
+
+.ph-lens-index::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -3.5px;
+  border-left: 5px solid var(--accent);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.ph-dial {
+  position: absolute;
+  inset: 0;
+}
+
+.ph-dial-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 50%;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+}
+
+.ph-dial-num {
+  font-family: var(--devanagari);
+  font-size: 15px;
+  letter-spacing: .1em;
+}
+
+.ph-num-dim { color: rgba(255, 255, 255, .42); }
+.ph-num-hot { color: #d8483c; }
+
+.ph-dial-label {
+  font-size: clamp(30px, 5.2vw, 72px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: 1;
+}
+
+.ph-dial-ui {
+  position: absolute;
+  inset: 0;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--pad-x);
+  pointer-events: none;
+}
+
+.ph-readout {
+  position: absolute;
+  top: clamp(96px, 13vh, 150px);
+  left: var(--pad-x);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.ph-readout .dev {
+  font-family: var(--devanagari);
+}
+
+.ph-readout .now {
+  color: var(--accent);
+}
+
+.ph-copy {
+  position: absolute;
+  right: 78px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(46ch, 40vw);
+  display: grid;
+}
+
+.ph-copy-item {
+  grid-area: 1 / 1;
+  align-self: center;
+  opacity: 0;
+}
+
+.ph-copy-cue {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: 14px;
+}
+
+.ph-copy-body {
+  margin: 0;
+  font-size: var(--body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--fg-mute);
+  text-wrap: pretty;
+}
+
+.ph-turn {
+  position: absolute;
+  right: 78px;
+  bottom: clamp(48px, 7vw, 96px);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  text-align: right;
+}
+
+.ph-turn .deg {
+  color: rgba(168, 199, 255, .75);
+  margin-top: 6px;
+}
+
+/* Mark band ---------------------------------------------------------------- */
+
+.ph-mark {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 1868 / 836;
+  overflow: hidden;
+  background: #e9e9e9;
+}
+
+/* The design asks for `auto 160%`, but the photograph is 4:3 against a 1868:836
+   band, so that scale lands 4.5% short of the width at every viewport and lets
+   the backing colour show down both edges. `cover` is the nearest fill — 167.5%
+   here — and keeps the 68%/72% framing. */
+.ph-mark-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: 68% 72%;
+  filter: grayscale(1) contrast(1.12) brightness(1.06);
+}
+
+.ph-mark-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .3) 24%, rgba(255, 255, 255, 0) 44%, rgba(0, 0, 0, .16) 100%);
+}
+
+.ph-mark-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, .94);
+  border-top: 1px solid rgba(0, 0, 0, .07);
+  border-bottom: 1px solid rgba(0, 0, 0, .07);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .1);
+  padding-block: clamp(14px, 1.8vw, 30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.2vw, 22px);
+  white-space: nowrap;
+}
+
+.ph-mark-text {
+  font-family: var(--mono);
+  font-size: clamp(15px, 1.8vw, 32px);
+  letter-spacing: .04em;
+  color: #2e2e2e;
+}
+
+.ph-mark-logo {
+  position: relative;
+  height: clamp(30px, 3.6vw, 64px);
+  aspect-ratio: 307 / 89;
+  transform: translateY(.1em);
+}
+
+.ph-mark-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+/* In practice -------------------------------------------------------------- */
+
+.ph-practice {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+  padding-block: clamp(72px, 8vw, 120px);
+  overflow: hidden;
+}
+
+.ph-practice-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 45%;
+}
+
+.ph-practice-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(13, 13, 13, .82) 0%, rgba(13, 13, 13, .5) 42%, rgba(13, 13, 13, .74) 100%);
+}
+
+.ph-practice-blur {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(1.5px);
+  background: radial-gradient(120% 90% at 30% 45%, rgba(13, 13, 13, .42) 0%, rgba(13, 13, 13, .1) 60%, rgba(13, 13, 13, .4) 100%);
+}
+
+.ph-practice .inner {
+  position: relative;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--pad-x);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 3.5vw, 48px);
+}
+
+.ph-rule-row {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.ph-rule-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(168, 199, 255, .75);
+  white-space: nowrap;
+}
+
+.ph-rule-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, .14);
+}
+
+.ph-rule-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .18em;
+  color: rgba(255, 255, 255, .32);
+}
+
+.ph-practice-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: clamp(28px, 4vw, 72px);
+  align-items: start;
+}
+
+.ph-practice-head {
+  margin: 0;
+  max-width: 22ch;
+  font-size: clamp(28px, 3.2vw, 52px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  line-height: 1.08;
+  color: var(--fg);
+  text-wrap: balance;
+}
+
+.ph-practice-body {
+  display: grid;
+  gap: 22px;
+  max-width: 46ch;
+}
+
+.ph-practice-body p {
+  margin: 0;
+  font-size: clamp(17px, 1.25vw, 21px);
+  line-height: 1.62;
+  color: rgba(255, 255, 255, .78);
+  text-wrap: pretty;
+}
+
+.ph-practice-body .ph-practice-pull {
+  padding-left: 20px;
+  border-left: 1px solid rgba(168, 199, 255, .45);
+  color: var(--fg);
+}
+
+/* Contact ------------------------------------------------------------------ */
+
+.ph-contact {
+  position: relative;
+  z-index: 1;
+  background: rgba(13, 13, 13, .45);
+  padding-block: var(--section-y);
+}
+
+.ph-contact h2 {
+  margin: 0;
+  font-size: var(--huge);
+  font-weight: 500;
+  letter-spacing: -.045em;
+  line-height: .94;
+  text-wrap: balance;
+}
+
+.ph-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 48px;
+  padding: 14px 24px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background .25s var(--ease), border-color .25s var(--ease);
+}
+
+.ph a.ph-contact-link:hover {
+  background: rgba(168, 199, 255, .05);
+  border-color: rgba(168, 199, 255, .5);
+  opacity: 1;
+}
+
+/* Narrow ------------------------------------------------------------------- */
+
+/* The dial's copy column sits beside the drum on a wide screen; below that it
+   has nowhere to go, so it drops under the type and the lens is dropped. */
+@media (max-width: 900px) {
+  /* The drum is raised to 36% (see paint() in Philosophy.jsx), so the guides
+     that mark the active row move with it. */
+  .ph-guide-l,
+  .ph-guide-r {
+    top: 36%;
+  }
+
+  /* Nothing is above the drum to hold the stage count any more, so it pairs
+     with the turn indicator along the bottom instead. */
+  .ph-readout {
+    top: auto;
+    bottom: 24px;
+  }
+
+  /* Faint stage names still pass behind this band as the drum turns, so the
+     copy carries its own ground rather than sitting straight on them. */
+  .ph-copy {
+    right: 0;
+    left: 0;
+    top: auto;
+    bottom: 88px;
+    transform: none;
+    width: auto;
+    padding: 28px var(--pad-x) 0;
+    background: linear-gradient(180deg, rgba(26, 26, 26, 0) 0%, rgba(26, 26, 26, .88) 22%, rgba(26, 26, 26, .95) 100%);
+  }
+
+  .ph-turn {
+    right: var(--pad-x);
+    bottom: 24px;
+  }
+
+  .ph-lens {
+    display: none;
+  }
+}
