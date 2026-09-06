@@ -1,0 +1,143 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Chapters"
+    },
+    {
+      "id": "page-2",
+      "name": "Specs & responsive"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "1 \u00b7 NEC",
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 900,
+      "page": "page-1"
+    },
+    {
+      "file": "ChapterCNAD.dc.html",
+      "title": "2 \u00b7 CNAD",
+      "x": 1720,
+      "y": 0,
+      "w": 1600,
+      "h": 900,
+      "page": "page-1"
+    },
+    {
+      "file": "ChapterDAAI.dc.html",
+      "title": "3 \u00b7 DAAI",
+      "x": 3440,
+      "y": 0,
+      "w": 1600,
+      "h": 900,
+      "page": "page-1"
+    },
+    {
+      "file": "ChapterMandaapX.dc.html",
+      "title": "4 \u00b7 MandaapX",
+      "x": 0,
+      "y": 1120,
+      "w": 1600,
+      "h": 900,
+      "page": "page-1"
+    },
+    {
+      "file": "Transition.dc.html",
+      "title": "1 \u2192 2, mid-transition",
+      "x": 1720,
+      "y": 1120,
+      "w": 1600,
+      "h": 900,
+      "page": "page-1"
+    },
+    {
+      "file": "Narrow.dc.html",
+      "title": "Narrow desktop 1100",
+      "x": 0,
+      "y": 0,
+      "w": 1100,
+      "h": 800,
+      "page": "page-2"
+    },
+    {
+      "file": "Mobile.dc.html",
+      "title": "Mobile 390",
+      "x": 1220,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "page-2"
+    },
+    {
+      "file": "RailStates.dc.html",
+      "title": "Year rail",
+      "x": 0,
+      "y": 1064,
+      "w": 1600,
+      "h": 900,
+      "page": "page-2"
+    },
+    {
+      "file": "TypeScale.dc.html",
+      "title": "Type & rhythm",
+      "x": 1720,
+      "y": 1064,
+      "w": 1600,
+      "h": 900,
+      "page": "page-2"
+    },
+    {
+      "file": "CreditSpec.dc.html",
+      "title": "Licence credit",
+      "x": 0,
+      "y": 2184,
+      "w": 1600,
+      "h": 900,
+      "page": "page-2"
+    },
+    {
+      "file": "Fallback.dc.html",
+      "title": "No WebGL / reduced motion",
+      "x": 1720,
+      "y": 2184,
+      "w": 1600,
+      "h": 1400,
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-frame",
+      "x": 0,
+      "y": -150,
+      "w": 700,
+      "page": "page-1",
+      "text": "The left column is a live WebGL canvas \u2014 536 \u00d7 620 at x 164. The grey shapes inside it are footprint stand-ins, not a proposal for the models. Only the frame, its size and its position are designed here."
+    },
+    {
+      "id": "note-daai",
+      "x": 3440,
+      "y": -150,
+      "w": 700,
+      "page": "page-1",
+      "text": "The DAAI chapter's object is the fellowship's own award. It is the one model that is not a GLB \u2014 the trophy is generated procedurally from curves at runtime, so it costs no download. Every chapter has an object; the frame never sits empty and the layout never shifts."
+    },
+    {
+      "id": "note-specs",
+      "x": 0,
+      "y": -150,
+      "w": 760,
+      "page": "page-2",
+      "text": "Everything on this page is measured, not described. Values are lifted from src/index.css and src/pages/About.css as they stand \u2014 where a number differs from what is built, the artboard says so at the bottom."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

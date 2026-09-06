@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@700;800&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff; font-family: Geist, sans-serif; }
+    a { color: rgba(255,255,255,.58); } a:hover { color: #fff; }
+    .h { font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .cap { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .06em; color: rgba(255,255,255,.42); }
+    .val { font-family: "Fragment Mono", monospace; font-size: 12px; line-height: 1.75; color: rgba(255,255,255,.72); }
+    .gap { font-family: "Fragment Mono", monospace; font-size: 11px; color: #a8c7ff; }
+    .period { font-family: "Fragment Mono", monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #a8c7ff; }
+    .role { margin: 0; font-family: "Schibsted Grotesk", Geist, sans-serif; font-weight: 800;
+            letter-spacing: -.028em; font-size: 46px; line-height: 1.02; }
+    .org { display: flex; align-items: center; gap: 8px; font-size: 15px; color: rgba(255,255,255,.7); }
+    .sep { color: rgba(255,255,255,.5); }
+    .lead { margin: 0; font-size: 19px; line-height: 1.45; color: #fff; max-width: 46ch; }
+    .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-width: 46ch; }
+    .notes li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.7); }
+    .notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 1px; background: rgba(255,255,255,.15); }
+    .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips li { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .04em;
+                padding: 4px 9px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.5); }
+    .rule { height: 1px; background: rgba(255,255,255,.15); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 900px; background: #0d0d0d; padding: 56px 64px; box-sizing: border-box;">
+
+  <div class="h" style="margin-bottom: 8px;">Type scale and vertical rhythm</div>
+  <div class="cap" style="margin-bottom: 40px;">
+    THE COPY COLUMN, AT 1600 WIDE &middot; ALL CLAMPS SHOWN AT THEIR 1600px VALUE &middot; COLUMN WIDTH 620px, COPY MEASURE 46ch
+  </div>
+
+  <div style="display: flex; gap: 90px;">
+
+    <!-- The stack, with the gaps called out between each element -->
+    <div style="width: 640px;">
+      <div class="period">2026 — PRESENT</div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 12px;"><div class="rule" style="width: 40px;"></div><span class="gap">12</span></div>
+      <h2 class="role">Software Engineer</h2>
+      <div style="display: flex; align-items: center; gap: 10px; height: 12px;"><div class="rule" style="width: 40px;"></div><span class="gap">12</span></div>
+      <div class="org"><span>MandaapX</span><span class="sep">/</span><span>Currently brewing</span></div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 16px;"><div class="rule" style="width: 40px;"></div><span class="gap">12 + 4 margin = 16</span></div>
+      <p class="lead">Building full-stack products on the FARM stack — FastAPI, React and MongoDB — and shipping them to real infrastructure.</p>
+      <div style="display: flex; align-items: center; gap: 10px; height: 12px;"><div class="rule" style="width: 40px;"></div><span class="gap">12</span></div>
+      <ul class="notes">
+        <li>REST APIs, frontend interfaces, backend services and the integrations between them.</li>
+        <li>Docker, AWS and cloud deployments.</li>
+      </ul>
+      <div style="display: flex; align-items: center; gap: 10px; height: 18px;"><div class="rule" style="width: 40px;"></div><span class="gap">12 + 6 margin = 18</span></div>
+      <ul class="chips">
+        <li>FastAPI</li><li>React</li><li>MongoDB</li><li>Python</li><li>TypeScript</li><li>Docker</li><li>AWS</li>
+      </ul>
+    </div>
+
+    <!-- The numbers -->
+    <div class="val" style="max-width: 640px;">
+      <span style="color:rgba(255,255,255,.45)">PERIOD</span><br>
+      Fragment Mono 12px / .08em / uppercase<br>
+      colour = this chapter's rail accent<br><br>
+
+      <span style="color:rgba(255,255,255,.45)">ROLE</span><br>
+      Schibsted Grotesk 800<br>
+      clamp(28px, 3.1vw, 46px) &rarr; 46px here, 34px at 1100, 28px at 390<br>
+      tracking &minus;.028em &middot; line-height 1.02 &middot; #fff<br><br>
+
+      <span style="color:rgba(255,255,255,.45)">ORG / PLACE</span><br>
+      Geist 15px &middot; rgba(255,255,255,.7)<br>
+      row gap 8px &middot; separator &ldquo;/&rdquo; at rgba(255,255,255,.5)<br><br>
+
+      <span style="color:rgba(255,255,255,.45)">LEAD</span><br>
+      Geist clamp(16px, 1.2vw, 19px) &rarr; 19px here<br>
+      line-height 1.45 &middot; #fff &middot; max-width 46ch<br><br>
+
+      <span style="color:rgba(255,255,255,.45)">BULLETS</span><br>
+      Geist 15px / 1.45 &middot; rgba(255,255,255,.7)<br>
+      padding-left 18px, 8&times;1px hairline at top .62em<br>
+      list gap 8px &middot; max-width 46ch<br><br>
+
+      <span style="color:rgba(255,255,255,.45)">CHIPS</span><br>
+      Fragment Mono 11px / .04em &middot; rgba(255,255,255,.5)<br>
+      padding 4px 9px &middot; radius 999px<br>
+      1px border rgba(255,255,255,.15) &middot; gap 6px<br><br>
+
+      <span style="color:rgba(255,255,255,.45)">STACK</span><br>
+      flex column, gap 12px<br>
+      lead margin-top 4px &middot; chips margin-top 6px<br>
+      column is centred on the canvas frame, not top-aligned
+    </div>
+  </div>
+
+  <div class="cap" style="position: absolute; left: 64px; bottom: 44px; color: rgba(255,255,255,.34); line-height: 1.7;">
+    UNCHANGED FROM WHAT IS BUILT. THE SCALE WAS ALREADY RIGHT &mdash; ONLY THE PERIOD COLOUR MOVES, FROM A FIXED #a8c7ff TO THE PER-CHAPTER RAMP.
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Design handover bundle → Claude Design
 
-Everything Claude Design needs to design on-brand for greenhueblues®, as
+Everything Claude Design needs to design on-brand for greenhueblues, as
 self-contained preview pages plus one written spec.
 
 ```

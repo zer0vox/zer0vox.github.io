@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@700;800&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff;
+           font-family: Geist, -apple-system, "Segoe UI", sans-serif; }
+    a { color: rgba(255,255,255,.58); } a:hover { color: #fff; }
+    .mono { font-family: "Fragment Mono", ui-monospace, Menlo, monospace; }
+    .label { font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .kicker { margin: 0; font-size: 12px; letter-spacing: .04em; color: rgba(255,255,255,.5); }
+    .period { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .role { margin: 0; font-family: "Schibsted Grotesk", Geist, sans-serif; font-weight: 800;
+            letter-spacing: -.028em; font-size: 46px; line-height: 1.02; }
+    .org { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; color: rgba(255,255,255,.7); }
+    .sep { color: rgba(255,255,255,.5); }
+    .lead { margin: 4px 0 0; font-size: 19px; line-height: 1.45; color: #fff; max-width: 46ch; }
+    .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-width: 46ch; }
+    .notes li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.7); }
+    .notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 1px; background: rgba(255,255,255,.15); }
+    .chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips li { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .04em;
+                padding: 4px 9px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.5); }
+    .rail { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+    .rail li { display: flex; align-items: center; gap: 12px; padding: 7px 10px 7px 0;
+               font-family: "Fragment Mono", monospace; font-size: 13px; letter-spacing: .02em; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: rgba(255,255,255,.22); }
+    .off { color: rgba(255,255,255,.5); }
+    .off span:last-child { opacity: .75; transform: translateX(-4px); display: inline-block; }
+    .on { color: #fff; }
+    .tick { position: absolute; font-family: "Fragment Mono", monospace; font-size: 10px;
+            letter-spacing: .06em; color: rgba(168,199,255,.65); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 900px; background: #0d0d0d; overflow: hidden;">
+
+  <!-- Header: 48px from the top, aligned to the rail column -->
+  <div style="position: absolute; left: 40px; top: 48px; display: flex; align-items: baseline; gap: 24px;">
+    <div class="label">Experience</div>
+    <p class="kicker mono">Oldest first. Scroll to walk it, or jump by year.</p>
+  </div>
+
+  <!-- Year rail: x 40, vertically centred on the body row -->
+  <ol class="rail" style="position: absolute; left: 40px; top: 380px;">
+    <li class="on"><span class="dot" style="background: #a8ffc7; width: 8px; height: 8px;"></span><span>2021</span></li>
+    <li class="off"><span class="dot"></span><span>2025</span></li>
+    <li class="off"><span class="dot"></span><span>2025</span></li>
+    <li class="off"><span class="dot"></span><span>Now</span></li>
+  </ol>
+
+  <!-- Live WebGL canvas: x 164, y 140, 536 x 620. Nothing is designed inside it. -->
+  <div style="position: absolute; left: 164px; top: 140px; width: 536px; height: 620px;">
+    <svg width="536" height="620" viewBox="0 0 536 620" fill="none" aria-hidden="true">
+      <g transform="translate(268 310)">
+        <rect x="-150" y="-215" width="300" height="430" rx="4" fill="#2b2b2b"/>
+        <rect x="-132" y="-196" width="120" height="150" rx="3" fill="#343434"/>
+        <rect x="8" y="-196" width="124" height="52" rx="3" fill="#343434"/>
+        <rect x="8" y="-128" width="124" height="52" rx="3" fill="#343434"/>
+        <rect x="-132" y="-24" width="264" height="18" rx="2" fill="#383838"/>
+        <rect x="-132" y="10" width="264" height="18" rx="2" fill="#383838"/>
+        <rect x="-132" y="44" width="264" height="18" rx="2" fill="#383838"/>
+        <circle cx="-86" cy="140" r="34" fill="#343434"/>
+        <rect x="-20" y="106" width="152" height="68" rx="3" fill="#303030"/>
+      </g>
+    </svg>
+    <sc-if value="{{guides}}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="position: absolute; inset: 0; border: 1px solid rgba(168,255,199,.18);"></div>
+        <div class="tick" style="left: 0; top: -22px; color: rgba(168,255,199,.65);">CANVAS 536 &times; 620 &middot; electronics.glb</div>
+        <div class="tick" style="left: -124px; top: -22px; color: rgba(255,255,255,.35);">x 164</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- Copy column: x 800, 620 wide, optically centred against the canvas -->
+  <div style="position: absolute; left: 800px; top: 140px; width: 620px; height: 620px;
+              display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+    <div class="period mono" style="color: #a8ffc7;">2021 — 2025</div>
+    <h1 class="role">BE, Electronics and Communication Engineering</h1>
+    <div class="org">
+      <span>Certified NEC Engineer, 2025</span>
+      <span class="sep">/</span>
+      <span>Nepal</span>
+    </div>
+    <p class="lead">Four years spent learning how signal becomes system — from the physics of a circuit up to the software riding on top of it.</p>
+    <ul class="notes">
+      <li>Registered with the Nepal Engineering Council as a certified engineer in 2025.</li>
+      <li>Built the electronics and communication grounding that the rest of this timeline runs on.</li>
+    </ul>
+    <ul class="chips">
+      <li>C</li><li>C++</li><li>MATLAB</li><li>Proteus</li>
+    </ul>
+  </div>
+
+  <!-- Credit row: reserved on every chapter so nothing shifts when it fills. -->
+  <div style="position: absolute; left: 164px; top: 800px; width: 536px; height: 40px;"></div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"guides":{"editor":"boolean","default":true,"section":"Annotation"},"$preview":{"width":1600,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { guides: this.props.guides ?? true };
+  }
+}
+</script>
+</body>
+</html>

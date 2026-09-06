@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@700;800&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff; font-family: Geist, sans-serif; }
+    a { color: rgba(255,255,255,.62); text-decoration: underline; text-underline-offset: 2px;
+        text-decoration-color: rgba(255,255,255,.28); }
+    a:hover { color: #fff; }
+    /* Computed at 390px: label -> 14px, role -> 28px (clamp floor), lead -> 16px. */
+    .label { font-size: 14px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .period { font-family: "Fragment Mono", monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .role { margin: 0; font-family: "Schibsted Grotesk", Geist, sans-serif; font-weight: 800;
+            letter-spacing: -.028em; font-size: 28px; line-height: 1.06; }
+    .org { font-size: 14px; line-height: 1.4; color: rgba(255,255,255,.7); }
+    .sep { color: rgba(255,255,255,.5); }
+    .lead { margin: 0; font-size: 16px; line-height: 1.45; color: #fff; }
+    .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .notes li { position: relative; padding-left: 16px; font-size: 14px; line-height: 1.45; color: rgba(255,255,255,.7); }
+    .notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 1px; background: rgba(255,255,255,.15); }
+    .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips li { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .04em;
+                padding: 5px 10px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.5); }
+    /* The rail turns horizontal. Each year keeps a 44px hit target. */
+    .hrail { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
+    .hrail li { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 0;
+                font-family: "Fragment Mono", monospace; font-size: 12px; letter-spacing: .02em;
+                color: rgba(255,255,255,.5); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: rgba(255,255,255,.22); }
+    .cap { font-family: "Fragment Mono", monospace; font-size: 10px; letter-spacing: .06em; color: rgba(255,255,255,.38); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 390px; height: 844px; background: #0d0d0d; overflow: hidden;
+            display: flex; flex-direction: column; padding: 28px 20px 24px; box-sizing: border-box; gap: 14px;">
+
+  <div class="label">Experience</div>
+
+  <ol class="hrail">
+    <li><span class="dot"></span><span>2021</span></li>
+    <li style="color:#fff;"><span class="dot" style="background:#a8ecda; width:8px; height:8px;"></span><span>2025</span></li>
+    <li><span class="dot"></span><span>2025</span></li>
+    <li><span class="dot"></span><span>Now</span></li>
+  </ol>
+
+  <!-- Object above the copy, full column width, 350 x 272. -->
+  <div style="position: relative; width: 350px; height: 272px; flex: none;">
+    <svg width="350" height="272" viewBox="0 0 350 272" fill="none" aria-hidden="true">
+      <g transform="translate(175 148)">
+        <rect x="-134" y="-56" width="268" height="120" rx="6" fill="#2b2b2b"/>
+        <rect x="-134" y="-74" width="268" height="20" rx="5" fill="#252525"/>
+        <rect x="-112" y="-44" width="94" height="72" rx="4" fill="#343434"/>
+        <rect x="-102" y="-34" width="74" height="52" rx="2" fill="#2a2a2a"/>
+        <circle cx="30" cy="-14" r="19" fill="#383838"/>
+        <circle cx="82" cy="-14" r="19" fill="#383838"/>
+        <rect x="6" y="16" width="98" height="9" rx="3" fill="#343434"/>
+        <rect x="6" y="32" width="98" height="9" rx="3" fill="#343434"/>
+        <rect x="94" y="-120" width="9" height="66" rx="4" fill="#303030"/>
+      </g>
+    </svg>
+    <div style="position: absolute; inset: 0; border: 1px solid rgba(168,236,218,.18);"></div>
+  </div>
+
+  <!-- Credit stays directly under the object it credits, at 12px. -->
+  <p style="margin: 0; font-family: 'Fragment Mono', monospace; font-size: 12px; line-height: 1.5;
+            letter-spacing: .02em; color: rgba(255,255,255,.4);">
+    <a href="https://sketchfab.com/3d-models/military-radio-099f56505d30414e970d79e4872a752d">&ldquo;Military Radio&rdquo;</a>
+    by <a href="https://sketchfab.com/ForaMon">ForaMon</a>,
+    licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+  </p>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 2px;">
+    <div class="period" style="color: #a8ecda;">2025</div>
+    <h1 class="role">Engineering Intern</h1>
+    <div class="org">CNAD — Civil Aviation Authority of Nepal <span class="sep">/</span> Communication &amp; Navigation Aid Department</div>
+    <p class="lead">Aviation is the one place where a dropped signal is not an inconvenience, and that is where I learned what reliable actually costs.</p>
+    <ul class="notes">
+      <li>Hands-on with VHF, aviation communication and navigation systems.</li>
+      <li>Assisted with maintenance, troubleshooting and day-to-day technical operations.</li>
+    </ul>
+    <ul class="chips">
+      <li>VHF</li><li>RF Communication</li><li>CNS</li><li>Navigation Systems</li><li>Troubleshooting</li>
+    </ul>
+  </div>
+
+  <div class="cap" style="margin-top: auto;">390 &times; 844 &middot; GUTTER 20 &middot; OBJECT 350 &times; 272</div>
+
+</div>
+</x-dc>
+</body>
+</html>

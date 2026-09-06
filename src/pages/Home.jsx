@@ -1,34 +1,44 @@
-import { useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
-import gsap from 'gsap'
-import FibonacciPsyBackground from '../components/FibonacciPsyBackground'
+import { Suspense, lazy, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { useRevealInView, EASE_PANEL } from '../components/reveal.js'
+// The animated backdrop is decorative and aria-hidden, and it drags in ogl and
+// GSAP's ScrollTrigger — ~30 kB gzip that first paint does not need. Split off
+// so the hero text renders first and the canvas fades in behind it, which is
+// the order it already appears in anyway thanks to its 0.9s fade.
+const FibonacciPsyBackground = lazy(() => import('../components/FibonacciPsyBackground'))
 import { useHeroGlare } from '../components/useHeroGlare'
 import { SiteNav, SiteFooter } from '../components/SiteChrome'
-import dnaImg from '../assets/dna.png'
-import visionImg from '../assets/vision.png'
-import logicImg from '../assets/logic.JPG'
-import limitlessImg from '../assets/limitless.JPG'
+import ContactCta from '../components/ContactCta.jsx'
+import dnaImg from '../assets/dna.webp'
+import visionImg from '../assets/vision.webp'
+// Panel 3 is the one photograph here that did not come off Sumip's camera:
+// "bottom view of concrete spiral stair" by Len Cruz (unsplash.com/@lendcruz,
+// unsplash.com/photos/ScEKf8u7y-c), Unsplash License — free to use, including
+// commercially, with no attribution required. Credited anyway.
+import logicImg from '../assets/logic-spiral.webp'
+import limitlessImg from '../assets/limitless.webp'
 
 // Reveals a panel's number/name as it scrolls into view. The parent span keeps
 // its translateY(-50%) centering; this inner span animates on its own axis, so
 // the two transforms never conflict.
 function PanelReveal({ children, delay = 0, from = 'left' }) {
-  const offset = from === 'right' ? 40 : -40
+  const ref = useRef(null)
+  useRevealInView(ref, {
+    x: from === 'right' ? 40 : -40,
+    duration: 0.7,
+    delay,
+    ease: EASE_PANEL,
+    amount: 0.5,
+  })
+
   return (
-    <motion.span
-      style={{ display: 'inline-block' }}
-      initial={{ opacity: 0, x: offset }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.7, ease: [0.22, 0.7, 0.18, 1], delay }}
-    >
+    <span ref={ref} style={{ display: 'inline-block' }}>
       {children}
-    </motion.span>
+    </span>
   )
 }
 
 export default function Home() {
-  const ctaHeadingRef = useRef(null)
   const heroRef = useRef(null)
   useHeroGlare(heroRef)
 
@@ -38,9 +48,37 @@ export default function Home() {
     })
 
     const about = document.getElementById('aboutCopy')
-    if (about) {
-      const words = Array.from(about.querySelectorAll('.w'))
-      const update = () => {
+    if (!about) return undefined
+
+    let cancelled = false
+    let teardown = null
+
+    // split-type is needed for exactly one paragraph, below the fold, so it is
+    // fetched after first paint rather than riding in the main chunk.
+    import('split-type').then(({ default: SplitType }) => {
+      // The route can unmount before this resolves.
+      if (cancelled) return
+
+      // split-type does the word splitting now, so the copy stays plain prose
+      // in the markup instead of being hand-wrapped in <span class="w"> per
+      // word (which meant re-splitting by hand on every copy edit, and left
+      // the sentence unreadable to anything parsing the DOM).
+      const split = new SplitType(about, {
+        types: 'words',
+        wordClass: 'w',
+        tagName: 'span',
+      })
+      const words = split.words ?? []
+
+      // How many words are lit right now. Tracked so a scroll frame only
+      // touches the words whose state actually changed: the cutoff moves by a
+      // word or two per frame, but this used to call classList.toggle on every
+      // word in the paragraph on every single scroll event.
+      let lit = 0
+      let frame = 0
+
+      const apply = () => {
+        frame = 0
         const rect = about.getBoundingClientRect()
         const vh = window.innerHeight
         const startY = vh * 0.75
@@ -49,36 +87,48 @@ export default function Home() {
         const traveled = Math.max(0, startY - rect.top)
         const progress = Math.max(0, Math.min(1, traveled / total))
         const cutoff = Math.floor(progress * words.length)
-        words.forEach((word, idx) => word.classList.toggle('lit', idx < cutoff))
+        if (cutoff === lit) return
+
+        // Walk only the span between the old and new cutoff, in whichever
+        // direction the reader moved.
+        if (cutoff > lit) for (let i = lit; i < cutoff; i++) words[i]?.classList.add('lit')
+        else for (let i = lit - 1; i >= cutoff; i--) words[i]?.classList.remove('lit')
+        lit = cutoff
       }
 
-      update()
+      // Coalesce to one measurement per frame: the listener fires far more
+      // often than the screen refreshes, and each call forces a layout.
+      const update = () => {
+        if (!frame) frame = requestAnimationFrame(apply)
+      }
+
+      apply()
       window.addEventListener('scroll', update, { passive: true })
       window.addEventListener('resize', update)
 
-      return () => {
+      teardown = () => {
+        if (frame) cancelAnimationFrame(frame)
         window.removeEventListener('scroll', update)
         window.removeEventListener('resize', update)
+        split.revert()
       }
+    })
+
+    return () => {
+      cancelled = true
+      teardown?.()
     }
-    return undefined
-  }, [])
-
-  useEffect(() => {
-    if (!ctaHeadingRef.current) return
-
-    gsap.fromTo(
-      ctaHeadingRef.current,
-      { y: 28, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', delay: 0.15 }
-    )
   }, [])
 
 
   return (
     <>
-      <FibonacciPsyBackground />
+      <Suspense fallback={null}>
+        <FibonacciPsyBackground />
+      </Suspense>
       <SiteNav />
+
+      <main id="main">
 
       <header className="hero" id="top" ref={heroRef}>
         <div className="bg" />
@@ -116,7 +166,7 @@ export default function Home() {
           <span className="name"><PanelReveal delay={0.08} from="right">Vision</PanelReveal></span>
         </article>
         <article className="panel p3">
-          <div className="pbg" style={{ background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${logicImg}) center/cover no-repeat` }} />
+          <div className="pbg" style={{ background: `linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url(${logicImg}) center/cover no-repeat` }} />
           <span className="label"><PanelReveal>3</PanelReveal></span>
           <span className="name"><PanelReveal delay={0.08} from="right">Logic</PanelReveal></span>
         </article>
@@ -129,24 +179,15 @@ export default function Home() {
 
       <section className="about wrap" id="about">
         <p id="aboutCopy">
-          <span className="w">greenhueblues</span> <span className="w">is</span> <span className="w">an</span> <span className="w">independent</span> <span className="w">design</span> <span className="w">studio</span> <span className="w">based</span> <span className="w">in</span> <span className="w">Kathmandu,</span> <span className="w">working</span> <span className="w">globally</span> <span className="w">with</span> <span className="w">brands</span> <span className="w">and</span> <span className="w">cultural</span> <span className="w">institutions.</span>
+          greenhueblues is the personal creative practice of Sumip Chaudhary,
+          based in Kathmandu and working globally.
         </p>
-        <a href="#about" className="about-more">More About Us →</a>
+        <Link to="/about" className="about-more">More About →</Link>
       </section>
 
+      <ContactCta />
 
-      <section className="cta wrap" id="contact">
-        <motion.h2
-          ref={ctaHeadingRef}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.55 }}
-          transition={{ duration: 0.65, ease: 'easeOut' }}
-        >
-          Let&apos;s work together.
-        </motion.h2>
-      </section>
-
+      </main>
       <SiteFooter />
     </>
   )

@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@700;800&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff; font-family: Geist, sans-serif; }
+    a { color: rgba(255,255,255,.58); text-decoration: underline; text-underline-offset: 2px;
+        text-decoration-color: rgba(255,255,255,.22); }
+    a:hover { color: #fff; }
+    .label { font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .cap { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .06em; color: rgba(255,255,255,.42); }
+    .year { font-family: "Fragment Mono", monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .role { margin: 0; font-family: "Schibsted Grotesk", Geist, sans-serif; font-weight: 800;
+            letter-spacing: -.028em; font-size: 40px; line-height: 1.02; }
+    .org { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; color: rgba(255,255,255,.7); }
+    .sep { color: rgba(255,255,255,.5); }
+    .lead { margin: 0; font-size: 19px; line-height: 1.45; color: #fff; max-width: 60ch; }
+    .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-width: 60ch; }
+    .notes li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.7); }
+    .notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 1px; background: rgba(255,255,255,.15); }
+    .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips li { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .04em;
+                padding: 4px 9px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.5); }
+    .row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 48px;
+           padding-block: 44px; border-top: 1px solid rgba(255,255,255,.15); }
+    .body { display: flex; flex-direction: column; gap: 12px; }
+    .credit { margin: 4px 0 0; font-family: "Fragment Mono", monospace; font-size: 12px;
+              line-height: 1.5; letter-spacing: .02em; color: rgba(255,255,255,.4); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 1400px; background: #0d0d0d; padding: 56px 64px 64px; box-sizing: border-box;">
+
+  <div class="label" style="margin-bottom: 8px;">Experience</div>
+  <div class="cap" style="margin-bottom: 40px;">
+    NO WEBGL, OR prefers-reduced-motion: reduce &middot; NO STAGE, NO STICKY TRACK, NO 3D &mdash; THE SAME FOUR CHAPTERS AS A PLAIN LIST
+  </div>
+
+  <div class="row">
+    <div class="year" style="color: #a8ffc7;">2021 — 2025</div>
+    <div class="body">
+      <h2 class="role">BE, Electronics and Communication Engineering</h2>
+      <div class="org"><span>Certified NEC Engineer, 2025</span><span class="sep">/</span><span>Nepal</span></div>
+      <p class="lead">Four years spent learning how signal becomes system — from the physics of a circuit up to the software riding on top of it.</p>
+      <ul class="notes">
+        <li>Registered with the Nepal Engineering Council as a certified engineer in 2025.</li>
+        <li>Built the electronics and communication grounding that the rest of this timeline runs on.</li>
+      </ul>
+      <ul class="chips"><li>C</li><li>C++</li><li>MATLAB</li><li>Proteus</li></ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="year" style="color: #a8ecda;">2025</div>
+    <div class="body">
+      <h2 class="role">Engineering Intern</h2>
+      <div class="org"><span>CNAD — Civil Aviation Authority of Nepal</span><span class="sep">/</span><span>Communication &amp; Navigation Aid Department</span></div>
+      <p class="lead">Aviation is the one place where a dropped signal is not an inconvenience, and that is where I learned what reliable actually costs.</p>
+      <ul class="notes">
+        <li>Hands-on with VHF, aviation communication and navigation systems.</li>
+        <li>Assisted with maintenance, troubleshooting and day-to-day technical operations.</li>
+      </ul>
+      <ul class="chips"><li>VHF</li><li>RF Communication</li><li>CNS</li><li>Navigation Systems</li><li>Troubleshooting</li></ul>
+      <!-- The model is not rendered here, so strictly the licence does not bite.
+           It stays anyway: the same data drives both views, and dropping it is
+           one refactor away from dropping it where it does bite. -->
+      <p class="credit">
+        <a href="https://sketchfab.com/3d-models/military-radio-099f56505d30414e970d79e4872a752d">&ldquo;Military Radio&rdquo;</a>
+        by <a href="https://sketchfab.com/ForaMon">ForaMon</a>,
+        licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="year" style="color: #a8daec;">2025 — 2026</div>
+    <div class="body">
+      <h2 class="role">DAAI Fellow</h2>
+      <div class="org"><span>Data, Automation &amp; AI Fellowship</span><span class="sep">/</span><span>Top Performer</span></div>
+      <p class="lead">The turn from hardware to data — a fellowship spent automating the things I had been doing by hand.</p>
+      <ul class="notes">
+        <li>Hands-on work across data, automation and AI.</li>
+        <li>Recognised as a Top Performer of the cohort.</li>
+      </ul>
+      <ul class="chips"><li>Python</li><li>AI/ML</li><li>Data Analysis</li><li>Automation</li><li>Git</li></ul>
+    </div>
+  </div>
+
+  <div class="row" style="border-bottom: 1px solid rgba(255,255,255,.15);">
+    <div class="year" style="color: #a8c7ff;">2026 — present</div>
+    <div class="body">
+      <h2 class="role">Software Engineer</h2>
+      <div class="org"><span>MandaapX</span><span class="sep">/</span><span>Currently brewing</span></div>
+      <p class="lead">Building full-stack products on the FARM stack — FastAPI, React and MongoDB — and shipping them to real infrastructure.</p>
+      <ul class="notes">
+        <li>REST APIs, frontend interfaces, backend services and the integrations between them.</li>
+        <li>Docker, AWS and cloud deployments.</li>
+      </ul>
+      <ul class="chips"><li>FastAPI</li><li>React</li><li>MongoDB</li><li>Python</li><li>TypeScript</li><li>Docker</li><li>AWS</li></ul>
+    </div>
+  </div>
+
+  <div class="cap" style="margin-top: 40px; line-height: 1.8; color: rgba(255,255,255,.38); max-width: 90ch;">
+    THE HIERARCHY SURVIVES THE FALLBACK: PERIOD FIRST, THEN ROLE, ORG, LEAD, BULLETS, CHIPS &mdash; SAME ORDER, SAME SCALE, SAME ACCENT RAMP<br>
+    RUNNING TOP TO BOTTOM. THE STAGE ONLY EVER SHOWED ONE OF THESE AT A TIME; THIS SHOWS ALL FOUR. NOTHING IS LOST BUT THE OBJECTS.
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

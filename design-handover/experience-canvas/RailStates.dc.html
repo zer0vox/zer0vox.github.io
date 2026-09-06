@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff; font-family: Geist, sans-serif; }
+    a { color: rgba(255,255,255,.58); } a:hover { color: #fff; }
+    .mono { font-family: "Fragment Mono", ui-monospace, Menlo, monospace; }
+    .h { font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .cap { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .06em; color: rgba(255,255,255,.42); }
+    .val { font-family: "Fragment Mono", monospace; font-size: 12px; line-height: 1.7; color: rgba(255,255,255,.72); }
+    .row { display: flex; align-items: center; gap: 12px; padding: 7px 10px 7px 0;
+           font-family: "Fragment Mono", monospace; font-size: 13px; letter-spacing: .02em; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+    .swatch { display: flex; align-items: center; gap: 10px; font-family: "Fragment Mono", monospace; font-size: 12px; color: rgba(255,255,255,.72); }
+    .chip { width: 26px; height: 26px; border-radius: 4px; flex: none; }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 900px; background: #0d0d0d; padding: 56px 64px; box-sizing: border-box;">
+
+  <div class="h" style="margin-bottom: 8px;">Year rail</div>
+  <div class="cap" style="margin-bottom: 44px;">
+    COLUMN 1 OF THE BODY GRID &middot; x 40 AT 1600 &middot; x 24 AT 1100 &middot; VERTICALLY CENTRED ON THE BODY ROW, NOT THE STAGE
+  </div>
+
+  <div style="display: flex; gap: 100px;">
+
+    <!-- States -->
+    <div style="display: flex; flex-direction: column; gap: 34px;">
+      <div>
+        <div class="cap" style="margin-bottom: 10px;">INACTIVE</div>
+        <div class="row" style="color: rgba(255,255,255,.5);">
+          <span class="dot" style="background: rgba(255,255,255,.22);"></span>
+          <span style="opacity: .75; transform: translateX(-4px); display: inline-block;">2025</span>
+        </div>
+        <div class="val">dot rgba(255,255,255,.22) &middot; 7px<br>label rgba(255,255,255,.5) at .75 opacity<br>label translateX(&minus;4px)</div>
+      </div>
+
+      <div>
+        <div class="cap" style="margin-bottom: 10px;">HOVER / FOCUS-VISIBLE</div>
+        <div class="row" style="color: #fff;">
+          <span class="dot" style="background: rgba(255,255,255,.55);"></span>
+          <span>2025</span>
+        </div>
+        <div class="val">dot rgba(255,255,255,.55)<br>label #fff at 1 opacity<br>label translateX(0) &middot; 450ms</div>
+      </div>
+
+      <div>
+        <div class="cap" style="margin-bottom: 10px;">CURRENT</div>
+        <div class="row" style="color: #fff;">
+          <span class="dot" style="background: #a8daec; width: 8px; height: 8px;"></span>
+          <span>2025</span>
+        </div>
+        <div class="val">dot 8px, filled with this chapter's accent<br>label #fff at 1 opacity, translateX(0)<br><span style="color:#a8daec;">no glow, no ring, no box-shadow</span></div>
+      </div>
+    </div>
+
+    <!-- Geometry -->
+    <div>
+      <div class="cap" style="margin-bottom: 18px;">GEOMETRY</div>
+      <div class="val">
+        row padding&nbsp;&nbsp;&nbsp;7px 10px 7px 0<br>
+        row gap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2px<br>
+        dot &rarr; label&nbsp;&nbsp;&nbsp;&nbsp;12px<br>
+        type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fragment Mono 13px / .02em<br>
+        hit target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;44px min &mdash; pad the button,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do not grow the type<br><br>
+        transition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color 350ms,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform 450ms<br>
+        easing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cubic-bezier(.2,.7,.2,1)
+      </div>
+    </div>
+
+    <!-- Accent ramp -->
+    <div>
+      <div class="cap" style="margin-bottom: 18px;">THE ACCENT RAMP</div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="swatch"><span class="chip" style="background:#a8ffc7;"></span>#a8ffc7 &nbsp; ch 1 &mdash; 2021 &nbsp; <span style="color:rgba(255,255,255,.45)">the beginning</span></div>
+        <div class="swatch"><span class="chip" style="background:#a8ecda;"></span>#a8ecda &nbsp; ch 2 &mdash; 2025</div>
+        <div class="swatch"><span class="chip" style="background:#a8daec;"></span>#a8daec &nbsp; ch 3 &mdash; 2025</div>
+        <div class="swatch"><span class="chip" style="background:#a8c7ff;"></span>#a8c7ff &nbsp; ch 4 &mdash; Now &nbsp; <span style="color:rgba(255,255,255,.45)">now</span></div>
+      </div>
+      <div class="val" style="margin-top: 22px; max-width: 42ch; line-height: 1.65;">
+        The two house accents already mean beginning and now, so the rail walks
+        between them rather than picking one. Steps are a straight RGB lerp
+        from #a8ffc7 to #a8c7ff, and mid-transition the dot holds the real
+        in-between value.<br><br>
+        The same colour drives that chapter's period line above the role. It is
+        the only place either accent appears on the stage.
+      </div>
+    </div>
+  </div>
+
+  <div class="cap" style="position: absolute; left: 64px; bottom: 48px; line-height: 1.7; color: rgba(255,255,255,.34);">
+    CHANGED FROM WHAT IS BUILT: THE CURRENT DOT'S box-shadow GLOW IS REMOVED &mdash; IT WAS THE ONLY AURA LEFT ON THE STAGE.<br>
+    THE ACTIVE DOT NOW READS BY FILL AND SIZE ALONE.
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -2,13 +2,15 @@ import { useEffect, useRef } from 'react'
 import { Camera, Geometry, Mesh, Program, Renderer, Transform } from 'ogl'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { motion } from 'framer-motion'
+import { useRevealOnMount } from './reveal.js'
 
 const TAU = Math.PI * 2
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
 
 export default function FibonacciPsyBackground() {
   const oglMountRef = useRef(null)
+  // Fade-only: no x/y, so the layer keeps its untransformed containing block.
+  useRevealOnMount(oglMountRef, { duration: 0.9 })
   const psyCanvasRef = useRef(null)
 
   useEffect(() => {
@@ -191,13 +193,7 @@ export default function FibonacciPsyBackground() {
 
   return (
     <div className="fx-bg" aria-hidden="true">
-      <motion.div
-        className="fx-bg-ogl"
-        ref={oglMountRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.9, ease: 'easeOut' }}
-      />
+      <div className="fx-bg-ogl" ref={oglMountRef} />
       <canvas ref={psyCanvasRef} className="fx-bg-psy" />
     </div>
   )

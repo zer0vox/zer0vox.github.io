@@ -1,4 +1,4 @@
-# greenhueblues® — design spec
+# greenhueblues — design spec
 
 Handover spec for Claude Design. Authoritative source: [`src/index.css`](../src/index.css)
 `:root` block. If this document and `index.css` disagree, **`index.css` wins** — update

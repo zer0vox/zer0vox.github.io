@@ -1,4 +1,4 @@
-# Design System — greenhueblues®
+# Design System — greenhueblues
 
 > Hand this file to Claude Code. It is the single source of truth for the site's
 > visual language. When building or editing UI, match these tokens and patterns

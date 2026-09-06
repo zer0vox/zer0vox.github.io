@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@700;800&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff;
+           font-family: Geist, -apple-system, "Segoe UI", sans-serif; }
+    a { color: rgba(255,255,255,.58); } a:hover { color: #fff; }
+    .mono { font-family: "Fragment Mono", ui-monospace, Menlo, monospace; }
+    .label { font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .kicker { margin: 0; font-size: 12px; letter-spacing: .04em; color: rgba(255,255,255,.5); }
+    .period { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .role { margin: 0; font-family: "Schibsted Grotesk", Geist, sans-serif; font-weight: 800;
+            letter-spacing: -.028em; font-size: 46px; line-height: 1.02; }
+    .org { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; color: rgba(255,255,255,.7); }
+    .sep { color: rgba(255,255,255,.5); }
+    .lead { margin: 4px 0 0; font-size: 19px; line-height: 1.45; color: #fff; max-width: 46ch; }
+    .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-width: 46ch; }
+    .notes li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.7); }
+    .notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 1px; background: rgba(255,255,255,.15); }
+    .chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips li { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .04em;
+                padding: 4px 9px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.5); }
+    .rail { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+    .rail li { display: flex; align-items: center; gap: 12px; padding: 7px 10px 7px 0;
+               font-family: "Fragment Mono", monospace; font-size: 13px; letter-spacing: .02em; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: rgba(255,255,255,.22); }
+    .off { color: rgba(255,255,255,.5); }
+    .off span:last-child { opacity: .75; transform: translateX(-4px); display: inline-block; }
+    .on { color: #fff; }
+    .tick { position: absolute; font-family: "Fragment Mono", monospace; font-size: 10px; letter-spacing: .06em; }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 900px; background: #0d0d0d; overflow: hidden;">
+
+  <div style="position: absolute; left: 40px; top: 48px; display: flex; align-items: baseline; gap: 24px;">
+    <div class="label">Experience</div>
+    <p class="kicker mono">Oldest first. Scroll to walk it, or jump by year.</p>
+  </div>
+
+  <ol class="rail" style="position: absolute; left: 40px; top: 380px;">
+    <li class="off"><span class="dot"></span><span>2021</span></li>
+    <li class="off"><span class="dot"></span><span>2025</span></li>
+    <li class="on"><span class="dot" style="background: #a8daec; width: 8px; height: 8px;"></span><span>2025</span></li>
+    <li class="off"><span class="dot"></span><span>Now</span></li>
+  </ol>
+
+  <!-- This chapter's object is the fellowship's own award. It is the one model
+       that is not a GLB: the trophy is generated procedurally at runtime from
+       curves, so it costs no download and stays sharp at any zoom. It is a tall,
+       narrow subject in a frame sized for wide ones, so it sits centred with
+       air either side rather than being scaled up to fill. -->
+  <div style="position: absolute; left: 164px; top: 140px; width: 536px; height: 620px;">
+    <svg width="536" height="620" viewBox="0 0 536 620" fill="none" aria-hidden="true">
+      <!-- gold sculpture -->
+      <path d="M209 302 C255 255 330 175 368 96 C345 190 255 290 209 302 Z" fill="#3f382a"/>
+      <path d="M250 372 C252 300 250 240 247 176 L269 176 C272 240 272 300 286 372 Z" fill="#4a4231"/>
+      <path d="M278 356 C244 328 216 282 222 206 C250 260 268 314 278 356 Z" fill="#372f24"/>
+      <ellipse cx="268" cy="365" rx="35" ry="22" fill="#4a4231"/>
+      <rect x="241" y="148" width="35" height="28" rx="3" fill="#4a4231"/>
+      <circle cx="256" cy="103" r="63" fill="#463e2e"/>
+      <circle cx="256" cy="103" r="63" stroke="#5a5039" stroke-width="17" fill="none"/>
+      <circle cx="256" cy="103" r="55" fill="#524731"/>
+      <!-- black pedestal -->
+      <rect x="165" y="372" width="206" height="9" rx="2" fill="#242424"/>
+      <rect x="169" y="380" width="198" height="170" rx="3" fill="#1e1e1e"/>
+      <rect x="195" y="390" width="147" height="156" rx="2" fill="#4a4231"/>
+      <rect x="203" y="398" width="131" height="140" rx="1" fill="#3c3527"/>
+      <rect x="159" y="550" width="218" height="12" rx="2" fill="#242424"/>
+      <rect x="149" y="562" width="238" height="28" rx="3" fill="#1e1e1e"/>
+    </svg>
+    <sc-if value="{{guides}}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="position: absolute; inset: 0; border: 1px solid rgba(168,217,236,.18);"></div>
+        <div class="tick" style="left: 0; top: -22px; color: rgba(168,217,236,.65);">CANVAS 536 &times; 620 &middot; trophy &mdash; procedural, no GLB</div>
+        <div class="tick" style="left: 396px; top: 598px; color: rgba(255,255,255,.35);">SUBJECT 238 &times; 559 &middot; 1 : 2.35</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="position: absolute; left: 800px; top: 140px; width: 620px; height: 620px;
+              display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+    <div class="period mono" style="color: #a8daec;">2025 — 2026</div>
+    <h1 class="role">DAAI Fellow</h1>
+    <div class="org">
+      <span>Data, Automation &amp; AI Fellowship</span>
+      <span class="sep">/</span>
+      <span>Top Performer</span>
+    </div>
+    <p class="lead">The turn from hardware to data — a fellowship spent automating the things I had been doing by hand.</p>
+    <ul class="notes">
+      <li>Hands-on work across data, automation and AI.</li>
+      <li>Recognised as a Top Performer of the cohort.</li>
+    </ul>
+    <ul class="chips">
+      <li>Python</li><li>AI/ML</li><li>Data Analysis</li><li>Automation</li><li>Git</li>
+    </ul>
+  </div>
+
+  <div style="position: absolute; left: 164px; top: 800px; width: 536px; height: 40px;"></div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"guides":{"editor":"boolean","default":true,"section":"Annotation"},"$preview":{"width":1600,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { guides: this.props.guides ?? true };
+  }
+}
+</script>
+</body>
+</html>

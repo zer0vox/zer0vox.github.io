@@ -2,39 +2,80 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Tells the browser the page is dark before a single byte of CSS has
+         parsed, which removes the white flash on a cold load, and makes form
+         controls and scrollbars render dark to match. -->
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0d0d0d" />
+
     <!-- Favicon: crisp scalable SVG mark first (modern browsers), PNG fallback
-         for older ones, SVG reused as the apple-touch (home-screen) icon. -->
+         for older ones. apple-touch-icon must be a PNG — iOS has never
+         supported SVG for the home-screen icon and silently falls back to a
+         screenshot of the page when handed one. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/greenhueblues.png" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="/greenhueblues.png" />
+
+    <!-- Fonts. These two hints open the TLS connections while the HTML is still
+         being read, so the font CSS is not paying for a cold handshake. The
+         second one needs `crossorigin` because font files are always fetched in
+         CORS mode — without it the browser opens a second, unrelated
+         connection and the hint is wasted.
+
+         The request is deliberately narrow: Geist ships 400/500/700 (the site
+         never sets 800 on it), Schibsted Grotesk ships only 800, which is the
+         single weight --display-weight resolves to, and Noto Sans Devanagari is
+         subset with `text=` to the ten Devanagari digits, the only glyphs of it
+         the site ever renders. It is a separate <link> because `text=` applies
+         to a whole request, not to one family within it. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@800&family=Fragment+Mono:ital@0;1&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500&text=%E0%A5%A6%E0%A5%A7%E0%A5%A8%E0%A5%A9%E0%A5%AA%E0%A5%AB%E0%A5%AC%E0%A5%AD%E0%A5%AE%E0%A5%AF&display=swap"
+    />
+
     <title>greenhueblues — mindful systems for a conscious world</title>
     <meta
       name="description"
-      content="greenhueblues — building mindful systems for a conscious world. An independent design studio in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
+      content="greenhueblues — building mindful systems for a conscious world. The personal creative practice of Sumip Chaudhary, based in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
     />
+    <link rel="canonical" href="https://greenhueblues.me/" />
 
     <!-- Open Graph / social share.
-         NOTE: og:url and og:image must be ABSOLUTE URLs. Replace
-         https://greenhueblues.com with your real deployed origin once live. -->
+         og:url and og:image must be ABSOLUTE, and must point at the host this
+         site is actually deployed to — public/CNAME says greenhueblues.me. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="greenhueblues" />
     <meta property="og:title" content="greenhueblues — mindful systems for a conscious world" />
     <meta
       property="og:description"
-      content="Independent design studio in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
+      content="A personal creative practice based in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
     />
-    <meta property="og:url" content="https://greenhueblues.com/" />
-    <meta property="og:image" content="https://greenhueblues.com/greenhueblues.png" />
+    <meta property="og:url" content="https://greenhueblues.me/" />
+    <meta property="og:image" content="https://greenhueblues.me/greenhueblues.png" />
+    <!-- Stated up front so a scraper can lay the card out without fetching the
+         image first. These are greenhueblues.png's real dimensions. -->
+    <meta property="og:image:width" content="1080" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content="The greenhueblues mark" />
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Twitter. `summary`, not `summary_large_image`: the card image is the
+         square 1080x1080 mark, and the large-image card crops to 1.91:1, which
+         would slice the top and bottom off it. -->
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="greenhueblues — mindful systems for a conscious world" />
     <meta
       name="twitter:description"
-      content="Independent design studio in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
+      content="A personal creative practice based in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
     />
-    <meta name="twitter:image" content="https://greenhueblues.com/greenhueblues.png" />
+    <meta name="twitter:image" content="https://greenhueblues.me/greenhueblues.png" />
   </head>
   <body>
     <div id="root"></div>

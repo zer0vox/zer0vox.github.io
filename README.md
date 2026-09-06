@@ -1,6 +1,6 @@
 # greenhueblues
 
-Portfolio site for greenhueblues — an independent design studio in Kathmandu.
+Portfolio site for greenhueblues — a personal creative practice based in Kathmandu.
 React + Vite, deployed to GitHub Pages at **[greenhueblues.me](https://greenhueblues.me)**.
 
 ## Running it

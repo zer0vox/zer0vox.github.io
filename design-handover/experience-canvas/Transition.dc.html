@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Schibsted+Grotesk:wght@700;800&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff; font-family: Geist, sans-serif; }
+    a { color: rgba(255,255,255,.58); } a:hover { color: #fff; }
+    .mono { font-family: "Fragment Mono", ui-monospace, Menlo, monospace; }
+    .period { font-family: "Fragment Mono", monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .role { margin: 0; font-family: "Schibsted Grotesk", Geist, sans-serif; font-weight: 800;
+            letter-spacing: -.028em; font-size: 46px; line-height: 1.02; }
+    .org { font-size: 15px; color: rgba(255,255,255,.7); }
+    .lead { margin: 4px 0 0; font-size: 19px; line-height: 1.45; color: #fff; max-width: 46ch; }
+    .rail { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+    .rail li { display: flex; align-items: center; gap: 12px; padding: 7px 10px 7px 0;
+               font-family: "Fragment Mono", monospace; font-size: 13px; letter-spacing: .02em; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: rgba(255,255,255,.22); }
+    .off { color: rgba(255,255,255,.5); }
+    .cap { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .06em;
+           color: rgba(255,255,255,.45); }
+    .num { font-family: "Fragment Mono", monospace; font-size: 12px; color: #fff; }
+    .bar { height: 10px; border-radius: 5px; }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 900px; background: #0d0d0d; overflow: hidden;">
+
+  <div style="position: absolute; left: 40px; top: 40px;" class="cap">
+    CHAPTER 1 &rarr; CHAPTER 2 &nbsp;&middot;&nbsp; FRAME AT f = 0.35
+  </div>
+
+  <!-- Rail: the dot colour lerps continuously, so mid-transition it is a real
+       in-between value, not either endpoint. -->
+  <ol class="rail" style="position: absolute; left: 40px; top: 250px;">
+    <li style="color: rgba(255,255,255,.72);"><span class="dot" style="background: #a8f5cf; width: 7.4px; height: 7.4px;"></span><span>2021</span></li>
+    <li style="color: rgba(255,255,255,.62);"><span class="dot" style="background: rgba(255,255,255,.34);"></span><span>2025</span></li>
+    <li class="off"><span class="dot"></span><span>2025</span></li>
+    <li class="off"><span class="dot"></span><span>Now</span></li>
+  </ol>
+
+  <!-- Canvas column: both objects present, opacity-crossfaded by the scene. -->
+  <div style="position: absolute; left: 164px; top: 110px; width: 536px; height: 480px;">
+    <div style="position: absolute; inset: 0; opacity: .18;">
+      <svg width="536" height="480" viewBox="0 0 536 480" fill="none" aria-hidden="true">
+        <g transform="translate(268 240)">
+          <rect x="-116" y="-166" width="232" height="332" rx="4" fill="#2b2b2b"/>
+          <rect x="-102" y="-152" width="92" height="116" rx="3" fill="#343434"/>
+          <rect x="6" y="-152" width="96" height="40" rx="3" fill="#343434"/>
+          <rect x="-102" y="-18" width="204" height="14" rx="2" fill="#383838"/>
+          <rect x="-102" y="8" width="204" height="14" rx="2" fill="#383838"/>
+        </g>
+      </svg>
+    </div>
+    <div style="position: absolute; inset: 0; opacity: .34;">
+      <svg width="536" height="480" viewBox="0 0 536 480" fill="none" aria-hidden="true">
+        <g transform="translate(268 268)">
+          <rect x="-162" y="-70" width="324" height="146" rx="7" fill="#2b2b2b"/>
+          <rect x="-162" y="-92" width="324" height="24" rx="5" fill="#252525"/>
+          <rect x="-136" y="-54" width="116" height="86" rx="4" fill="#343434"/>
+          <circle cx="36" cy="-18" r="23" fill="#383838"/>
+          <circle cx="100" cy="-18" r="23" fill="#383838"/>
+        </g>
+      </svg>
+    </div>
+    <div class="cap" style="position: absolute; left: 0; top: -26px;">MODEL CROSSFADE &middot; OPACITY ONLY</div>
+  </div>
+
+  <!-- Copy column: outgoing lifting out, incoming rising in, both on screen. -->
+  <div style="position: absolute; left: 800px; top: 110px; width: 620px; height: 480px;">
+    <div style="position: absolute; left: 0; top: 90px; width: 620px; opacity: .13; transform: translateY(-15px);">
+      <div class="period" style="color: #a8ffc7;">2021 — 2025</div>
+      <h2 class="role" style="margin-top: 12px;">BE, Electronics and Communication Engineering</h2>
+      <p class="lead">Four years spent learning how signal becomes system.</p>
+    </div>
+    <div style="position: absolute; left: 0; top: 150px; width: 620px; opacity: .1; transform: translateY(22px);">
+      <div class="period" style="color: #a8ecda;">2025</div>
+      <h2 class="role" style="margin-top: 12px;">Engineering Intern</h2>
+      <p class="lead">Aviation is the one place where a dropped signal is not an inconvenience.</p>
+    </div>
+    <div class="cap" style="position: absolute; left: 0; top: -26px;">COPY: OUT 13% &middot; IN 10%</div>
+  </div>
+
+  <!-- The numbers, because this has to be built. -->
+  <div style="position: absolute; left: 164px; top: 640px; width: 1256px;
+              border-top: 1px solid rgba(255,255,255,.15); padding-top: 28px;">
+    <div class="cap" style="margin-bottom: 20px;">
+      f = PROGRESS BETWEEN TWO CHAPTERS, 0 &rarr; 1 &nbsp;&middot;&nbsp; ONE VIEWPORT OF SCROLL &nbsp;&middot;&nbsp; EASING cubic-bezier(.2,.7,.2,1)
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="num" style="width: 210px; color: rgba(255,255,255,.7);">Outgoing copy</div>
+        <div style="position: relative; width: 640px; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px;">
+          <div class="bar" style="position: absolute; left: 0; width: 256px; background: rgba(168,255,199,.55);"></div>
+        </div>
+        <div class="num">f 0 &rarr; 0.40 &nbsp; opacity 1 &rarr; 0 &nbsp; y 0 &rarr; &minus;24px</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="num" style="width: 210px; color: rgba(255,255,255,.7);">Incoming copy</div>
+        <div style="position: relative; width: 640px; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px;">
+          <div class="bar" style="position: absolute; left: 192px; width: 320px; background: rgba(168,236,218,.55);"></div>
+        </div>
+        <div class="num">f 0.30 &rarr; 0.80 &nbsp; opacity 0 &rarr; 1 &nbsp; y +24px &rarr; 0</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="num" style="width: 210px; color: rgba(255,255,255,.7);">Model crossfade</div>
+        <div style="position: relative; width: 640px; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px;">
+          <div class="bar" style="position: absolute; left: 192px; width: 256px; background: rgba(255,255,255,.3);"></div>
+        </div>
+        <div class="num">f 0.30 &rarr; 0.70 &nbsp; opacity only &mdash; no added spin</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="num" style="width: 210px; color: rgba(255,255,255,.7);">Object, within a chapter</div>
+        <div style="position: relative; width: 640px; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px;">
+          <div class="bar" style="position: absolute; left: 0; width: 640px; background: rgba(255,255,255,.18);"></div>
+        </div>
+        <div class="num">rotateY &minus;10&deg; &rarr; +10&deg; &nbsp; y +18px &rarr; &minus;18px</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="num" style="width: 210px; color: rgba(255,255,255,.7);">Rail dot colour</div>
+        <div style="position: relative; width: 640px; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px;">
+          <div class="bar" style="position: absolute; left: 0; width: 640px;
+                      background: linear-gradient(90deg, #a8ffc7, #a8ecda);"></div>
+        </div>
+        <div class="num">f 0 &rarr; 1 &nbsp; continuous lerp, never snaps</div>
+      </div>
+    </div>
+
+    <div class="cap" style="margin-top: 22px; line-height: 1.6; color: rgba(255,255,255,.38);">
+      NOTHING ELSE MOVES. THE CANVAS FRAME, THE RAIL POSITION, THE HEADER AND THE CREDIT ROW ARE FIXED FOR THE WHOLE SECTION.<br>
+      THE OBJECT'S TURN IS DRIVEN STRICTLY BY SCROLL POSITION &mdash; STOP SCROLLING AND IT STOPS DEAD. THERE IS NO CLOCK ANYWHERE IN THIS SECTION.
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

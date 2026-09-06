@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fragment+Mono&family=Caveat:wght@500;700&family=Noto+Sans+Devanagari:wght@400;500&display=swap');
+/* Type — one workhorse, one display voice, one mono.
+
+   WORKHOSE (--sans): Geist. Same lineage as Inter — a neutral, high-x-height
+   grotesk built for screens — so it does Inter's job without being the
+   typeface every other site is set in. Falls back to the platform face
+   (SF Pro on Apple, Segoe on Windows) if it fails to load.
+
+   DISPLAY (--display-font): Schibsted Grotesk at 800. An editorial grotesk —
+   narrower and more spirited than the workhorse, so it holds a long line at
+   112px and carries weight without going blobby. Chosen over Geist 800,
+   Archivo 800 and Bricolage 800 after comparing all four on the real page.
+
+   MONO (--mono): Fragment Mono, kept — it was already the best-chosen face
+   on the site and it carries the small label voice. */
+/* The font request itself now lives in index.html as a <link>, alongside a
+   preconnect to both Google Fonts origins. A remote @import here is the worst
+   place for it: Vite leaves it verbatim at the top of the built CSS, so the
+   browser cannot even discover the font URL until it has downloaded and parsed
+   the whole app stylesheet, and only then opens two cold connections. As a
+   <link> in the document head the preload scanner sees it immediately and the
+   two stylesheets download in parallel. */
 
 :root {
   --bg: #0d0d0d;
@@ -7,10 +27,18 @@
   --fg-dim: rgba(255, 255, 255, 0.5);
   --line: rgba(255, 255, 255, 0.15);
   --accent: #a8c7ff;
-  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --accent-green: #a8ffc7;
+  --sans: "Geist", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --script: "Caveat", "Brush Script MT", cursive;
   --devanagari: "Noto Sans Devanagari", "Fragment Mono", ui-monospace, monospace;
+  /* Display voice. The tracking matters as much as the family: a grotesk this
+     heavy at 112px closes up its counters unless it's pulled well negative.
+     --display-tracking is for the big moments (hero, statement, CTA);
+     --display-tracking-sm for mid-size display (bio lead, marquee). */
+  --display-font: "Schibsted Grotesk", var(--sans);
+  --display-weight: 800;
+  --display-tracking: -0.042em;
+  --display-tracking-sm: -0.028em;
   --max: 1600px;
   --pad-x: 16px;
   --section-y: clamp(80px, 10vw, 160px);
@@ -110,6 +138,46 @@ a:hover {
   opacity: 1;
 }
 
+/* Off-screen until focused, then it lands over the nav as a normal-looking
+   control. Positioned fixed so it is not affected by whatever the current
+   route's hero is doing, and given a z-index above the nav's own stacking
+   context so it cannot appear behind the glass bar. `main:focus` is silenced
+   because the skip target is focused programmatically, and a focus ring around
+   the entire page is noise rather than information. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 200;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #fff;
+  color: #0d0d0d;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  /* Kept in the layout (not display:none) so assistive tech still reaches it,
+     but pulled out of sight until it is focused. */
+  transform: translateY(-150%);
+  transition: transform .18s var(--ease, ease);
+}
+
+.skip-link:focus-visible,
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #0d0d0d;
+  outline-offset: 2px;
+}
+
+main:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link { transition: none; }
+}
+
 nav.top,
 .hero,
 .panels,
@@ -133,7 +201,64 @@ nav.top {
   padding: 22px var(--pad-x);
 }
 
+/* Liquid glass. The material is a pseudo-element rather than the bar's own
+   background so it can be a floating capsule inset from the fixed full-bleed
+   nav, and so it can fade in without touching the bar's box (see
+   useScrolledPastHero — a nav that resized would chase its own threshold).
+   The look is three layers: a backdrop blur that also lifts saturation so the
+   page reads as refracted rather than greyed, a top-lit gradient, and inset
+   hairlines that give the capsule a lit upper rim and a hint of bounce along
+   the bottom. */
+nav.top::before {
+  content: "";
+  position: absolute;
+  inset: 8px var(--pad-x);
+  max-width: calc(var(--max) + 32px);
+  margin-inline: auto;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.05) 46%,
+    rgba(255, 255, 255, 0.02)
+  );
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 14px 38px rgba(0, 0, 0, 0.34);
+  opacity: 0;
+  transform: translateY(-8px) scale(0.985);
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.5s var(--ease);
+  pointer-events: none;
+}
+
+nav.top.is-glass::before {
+  opacity: 1;
+  transform: none;
+}
+
+/* No backdrop-filter (older Firefox): carry the same shape on a tinted panel
+   so the bar still separates from the content sliding under it. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  nav.top::before {
+    background: rgba(22, 22, 22, 0.86);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  nav.top::before {
+    transform: none;
+    transition: opacity 0.2s linear;
+  }
+}
+
 nav.top .inner {
+  position: relative;
   max-width: var(--max);
   margin-inline: auto;
   display: grid;
@@ -148,12 +273,6 @@ nav.top .brand {
   font-size: 28px;
   letter-spacing: -0.025em;
   line-height: 1;
-}
-
-nav.top .brand .reg {
-  font-size: .55em;
-  vertical-align: super;
-  opacity: .85;
 }
 
 nav.top ul {
@@ -525,7 +644,9 @@ nav.top .right {
 
 .hero h1 {
   margin: 0;
-  font-weight: 400;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-weight: var(--display-weight);
   font-size: var(--hero-size);
   letter-spacing: -0.04em;
   line-height: 1.05;
@@ -586,7 +707,7 @@ nav.top .right {
   left: 24px;
   top: 50%;
   transform: translateY(-50%);
-  font-weight: 600;
+  font-weight: 700;
   font-size: clamp(72px, 12vw, 200px);
   letter-spacing: -0.05em;
   line-height: .85;
@@ -599,7 +720,7 @@ nav.top .right {
   right: 24px;
   top: 50%;
   transform: translateY(-50%);
-  font-weight: 600;
+  font-weight: 700;
   font-size: clamp(40px, 6vw, 96px);
   letter-spacing: -0.04em;
   line-height: .95;
@@ -637,20 +758,6 @@ nav.top .right {
     radial-gradient(60% 40% at 70% 75%, rgba(255, 255, 255, .18), transparent 60%),
     radial-gradient(40% 30% at 20% 80%, rgba(0, 0, 0, .30), transparent 60%);
   mix-blend-mode: overlay;
-}
-
-.panel.p1 .script {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(-3deg);
-  font-family: var(--script);
-  font-weight: 700;
-  font-size: clamp(80px, 13vw, 220px);
-  line-height: .9;
-  color: #0e3326;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, .18);
-  z-index: 1;
 }
 
 .panel.p2 .pbg {
@@ -697,10 +804,12 @@ nav.top .right {
 
 .about p {
   margin: 0;
-  font-weight: 500;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-weight: var(--display-weight);
   font-size: clamp(36px, 6vw, 88px);
-  letter-spacing: -0.03em;
-  line-height: 1.02;
+  letter-spacing: var(--display-tracking);
+  line-height: 1.05;
   text-wrap: balance;
 }
 
@@ -719,18 +828,317 @@ nav.top .right {
   color: var(--fg-dim);
 }
 
+/* Contact ------------------------------------------------------------------
+   The closing section, and the only place on the site asking for something
+   back, so it is the one moment that gets a material of its own: chrome.
+
+   Built from the same parts as the hero's iridescence — oversized, heavily
+   blurred colour layers under `mix-blend-mode: screen` — but with the ramp
+   pushed to metal. The brand's two accents sit inside that ramp as its warm
+   and cool glints, so the chrome is tinted the green hue and the blues rather
+   than being neutral silver dropped on top of the palette.
+
+   Everything here animates only transform, opacity and background-position,
+   and the whole section is paused unless [data-live] is present — the section
+   component sets that from an IntersectionObserver, so a reader who has
+   scrolled past is not paying for metal they cannot see. */
+
 .cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: rgba(13, 13, 13, 0.45);
-  padding: clamp(120px, 18vw, 240px) 0 clamp(40px, 6vw, 80px);
+  /* The inline value is spelled out rather than left at 0: this shorthand sits
+     after .wrap in the cascade, so a 0 here silently cancels .wrap's
+     padding-inline and pins the copy to the very edge of the viewport, out of
+     line with the hero above and the footer below. */
+  padding: clamp(120px, 18vw, 240px) var(--pad-x) clamp(40px, 6vw, 80px);
 }
 
-.cta h2 {
+.cta-inner {
+  position: relative;
+  z-index: 2;
+}
+
+/* Liquid chrome ------------------------------------------------------------ */
+
+.cta-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Pool the metal toward the lower left, behind and under the headline, and
+     let it fall away before it reaches the footer seam. */
+  -webkit-mask-image: radial-gradient(120% 100% at 22% 62%, #000 0%, rgba(0, 0, 0, .6) 42%, transparent 78%);
+          mask-image: radial-gradient(120% 100% at 22% 62%, #000 0%, rgba(0, 0, 0, .6) 42%, transparent 78%);
+}
+
+.cta-chrome-flow,
+.cta-chrome-sheen {
+  position: absolute;
+  /* Oversized so the drift never exposes an edge. */
+  inset: -45%;
+  display: block;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+/* The body of the metal: broad conic bands whose overlaps read as the rolling
+   highlights on a poured, moving surface. */
+.cta-chrome-flow {
+  opacity: .3;
+  filter: blur(46px) saturate(135%) contrast(115%);
+  background:
+    conic-gradient(from 165deg at 38% 58%,
+      rgba(168, 199, 255, 0) 0deg,
+      rgba(168, 199, 255, .55) 58deg,
+      rgba(255, 255, 255, .75) 104deg,
+      rgba(168, 255, 199, .5) 158deg,
+      rgba(120, 136, 158, .2) 212deg,
+      rgba(255, 255, 255, .62) 268deg,
+      rgba(168, 199, 255, .42) 316deg,
+      rgba(168, 199, 255, 0) 360deg);
+}
+
+/* A narrower, brighter pass at a different rate. Two speeds are what stop it
+   reading as one rotating gradient. */
+.cta-chrome-sheen {
+  opacity: .22;
+  filter: blur(30px) saturate(120%);
+  background:
+    conic-gradient(from 20deg at 64% 40%,
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, .7) 42deg,
+      rgba(168, 255, 199, .35) 88deg,
+      rgba(255, 255, 255, 0) 150deg,
+      rgba(168, 199, 255, .45) 232deg,
+      rgba(255, 255, 255, 0) 300deg,
+      rgba(255, 255, 255, 0) 360deg);
+}
+
+.cta[data-live] .cta-chrome-flow { animation: cta-flow 22s linear infinite; }
+.cta[data-live] .cta-chrome-sheen { animation: cta-sheen 15s linear infinite reverse; }
+
+@keyframes cta-flow {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes cta-sheen {
+  to { transform: rotate(1turn) scale(1.08); }
+}
+
+/* Scintillations ----------------------------------------------------------- */
+
+.cta-scint {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Each spark is one element painting a soft dot, scaled and faded on a loop.
+   box-shadow supplies the bloom, so there is no second element and no blur
+   filter per spark — twenty blurred layers would cost far more than twenty
+   composited transforms. */
+.cta-spark {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 4px 1px rgba(255, 255, 255, .7),
+    0 0 10px 2px rgba(168, 199, 255, .45);
+  opacity: 0;
+  transform: scale(.4);
+  will-change: transform, opacity;
+}
+
+/* Every third spark takes the green accent, so the field reads as the same
+   two-tone as the chrome rather than plain white. */
+.cta-spark:nth-child(3n) {
+  box-shadow:
+    0 0 4px 1px rgba(255, 255, 255, .7),
+    0 0 10px 2px rgba(168, 255, 199, .45);
+}
+
+.cta[data-live] .cta-spark {
+  animation: cta-twinkle var(--dur) var(--ease) var(--d) infinite;
+}
+
+@keyframes cta-twinkle {
+  0%, 100% { opacity: 0; transform: scale(.4); }
+  45% { opacity: .9; transform: scale(1); }
+  70% { opacity: .25; transform: scale(.8); }
+}
+
+/* Copy --------------------------------------------------------------------- */
+
+.cta-eyebrow {
+  margin: 0 0 clamp(16px, 2vw, 26px);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.cta-title {
   margin: 0;
-  font-weight: 500;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-weight: var(--display-weight);
   font-size: var(--huge);
-  letter-spacing: -0.045em;
+  letter-spacing: var(--display-tracking);
   line-height: .94;
   max-width: 14ch;
+
+  /* The headline is the chrome. A wide ramp is clipped to the glyphs and slid
+     across them, so the highlight travels through the letterforms instead of
+     the text simply being a silver colour. background-position is the only
+     animated property, which keeps this to a repaint of the text box. */
+  background-image: linear-gradient(100deg,
+    #6d788a 0%,
+    #dbe4ef 9%,
+    #ffffff 16%,
+    #aab8ca 25%,
+    #6b7889 34%,
+    #a8c7ff 44%,
+    #eaf1fb 53%,
+    #ffffff 59%,
+    #a8ffc7 69%,
+    #8f9dae 79%,
+    #dfe7f1 89%,
+    #75818f 100%);
+  background-size: 300% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  /* Safari needs this as well as the transparent colour or the fill wins. */
+  -webkit-text-fill-color: transparent;
+}
+
+.cta[data-live] .cta-title {
+  animation: cta-metal 9s linear infinite;
+}
+
+@keyframes cta-metal {
+  to { background-position: 300% 50%; }
+}
+
+.cta-lede {
+  margin: clamp(20px, 2.4vw, 30px) 0 0;
+  max-width: 42ch;
+  font-size: var(--body);
+  line-height: 1.5;
+  color: var(--fg-mute);
+}
+
+/* The address -------------------------------------------------------------- */
+
+.cta-mail {
+  display: inline-block;
+  margin-top: clamp(30px, 4vw, 48px);
+  border-radius: 999px;
+  text-decoration: none;
+  /* The rim is a gradient, so it is drawn as a padded background pair: this
+     outer layer is the lit edge, the face below is the dark capsule. */
+  padding: 1px;
+  background:
+    linear-gradient(140deg,
+      rgba(255, 255, 255, .8) 0%,
+      rgba(168, 199, 255, .45) 28%,
+      rgba(255, 255, 255, .12) 50%,
+      rgba(168, 255, 199, .4) 76%,
+      rgba(255, 255, 255, .7) 100%);
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+}
+
+.cta-mail-face {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px clamp(22px, 2.4vw, 32px);
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(160deg, #17181c 0%, #0f1013 55%, #141519 100%);
+  font-family: var(--mono);
+  font-size: clamp(14px, 1.35vw, 17px);
+  letter-spacing: -.01em;
+  color: var(--fg);
+}
+
+/* The sweep. Parked off the left edge and sent across on hover or focus — the
+   same gesture as light moving over a curved metal surface. */
+.cta-mail-face::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(105deg,
+    transparent 0%,
+    rgba(255, 255, 255, .06) 36%,
+    rgba(255, 255, 255, .3) 50%,
+    rgba(255, 255, 255, .06) 64%,
+    transparent 100%);
+}
+
+.cta-mail-text,
+.cta-mail-arrow {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-mail-arrow {
+  color: var(--accent);
+  transition: transform .4s var(--ease);
+}
+
+.cta-mail:hover,
+.cta-mail:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, .5),
+    0 0 22px rgba(168, 199, 255, .22);
+}
+
+.cta-mail:hover .cta-mail-face::before,
+.cta-mail:focus-visible .cta-mail-face::before {
+  transform: translateX(120%);
+  transition: transform .9s var(--ease);
+}
+
+.cta-mail:hover .cta-mail-arrow,
+.cta-mail:focus-visible .cta-mail-arrow {
+  transform: translateX(4px);
+}
+
+.cta-mail:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* A reader who has asked for less movement gets the material, not the motion:
+   the chrome still tints the headline and the capsule still lights up, but
+   nothing loops. The sparks are removed outright rather than frozen, because a
+   field of dots stopped mid-twinkle at assorted opacities looks like damage. */
+@media (prefers-reduced-motion: reduce) {
+  .cta-scint { display: none; }
+
+  .cta-chrome-flow,
+  .cta-chrome-sheen,
+  .cta-title {
+    animation: none !important;
+  }
+
+  .cta-mail,
+  .cta-mail-arrow,
+  .cta-mail-face::before {
+    transition: none;
+  }
 }
 
 footer {
@@ -772,11 +1180,6 @@ footer .word {
   font-size: clamp(64px, 11.5vw, 176px);
 }
 
-footer .word .reg {
-  font-size: .45em;
-  vertical-align: super;
-}
-
 footer .baseline {
   display: flex;
   justify-content: space-between;
@@ -793,6 +1196,13 @@ footer .baseline {
   font-weight: 500;
   border-bottom: 1px solid #fff;
   padding-bottom: 4px;
+}
+
+.about-story {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  padding-block: clamp(72px, 8vw, 120px);
 }
 
 .leader-row .name {
@@ -826,6 +1236,11 @@ footer .baseline {
 
   nav.top {
     padding: 14px var(--pad-x);
+  }
+
+  nav.top::before {
+    inset: 5px var(--pad-x);
+    border-radius: 22px;
   }
 
   nav.top .brand {

@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Fragment+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #0d0d0d; color: #fff; font-family: Geist, sans-serif; }
+    .credit { margin: 0; font-family: "Fragment Mono", monospace; font-size: 12px; line-height: 1.5;
+              letter-spacing: .02em; color: rgba(255,255,255,.4); }
+    .credit a { color: rgba(255,255,255,.58); text-decoration: underline; text-underline-offset: 2px;
+                text-decoration-color: rgba(255,255,255,.22); }
+    .credit a:hover, .credit a:focus-visible { color: #fff; text-decoration-color: currentColor; }
+    a { color: rgba(255,255,255,.58); } a:hover { color: #fff; }
+    .h { font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.5); }
+    .cap { font-family: "Fragment Mono", monospace; font-size: 11px; letter-spacing: .06em; color: rgba(255,255,255,.42); }
+    .val { font-family: "Fragment Mono", monospace; font-size: 12px; line-height: 1.75; color: rgba(255,255,255,.72); }
+    .demo { font-family: "Fragment Mono", monospace; font-size: 12px; line-height: 1.5; letter-spacing: .02em; color: rgba(255,255,255,.4); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 1600px; height: 900px; background: #0d0d0d; padding: 56px 64px; box-sizing: border-box;">
+
+  <div class="h" style="margin-bottom: 8px;">Licence credit</div>
+  <div class="cap" style="margin-bottom: 40px;">
+    CC BY 4.0 OBLIGES US TO NAME THE WORK, THE AUTHOR AND THE LICENCE, EACH LINKED &middot; THIS IS A CONDITION OF USE, NOT A CAPTION
+  </div>
+
+  <!-- Placement -->
+  <div style="display: flex; gap: 80px;">
+    <div>
+      <div class="cap" style="margin-bottom: 16px;">PLACEMENT</div>
+      <div style="position: relative; width: 560px; height: 340px; border: 1px solid rgba(255,255,255,.15);">
+        <div style="position: absolute; left: 14px; top: 14px; width: 40px; height: 210px;
+                    border: 1px dashed rgba(255,255,255,.18);"></div>
+        <div class="cap" style="position: absolute; left: 14px; top: 232px; font-size: 9px;">RAIL</div>
+
+        <div style="position: absolute; left: 74px; top: 14px; width: 186px; height: 210px;
+                    border: 1px solid rgba(168,236,218,.3); background: rgba(168,236,218,.03);"></div>
+        <div class="cap" style="position: absolute; left: 74px; top: 232px; font-size: 9px; color: rgba(168,236,218,.6);">CANVAS</div>
+
+        <div style="position: absolute; left: 74px; top: 258px; width: 300px; height: 32px;
+                    border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.05);"></div>
+        <div class="cap" style="position: absolute; left: 384px; top: 266px; font-size: 9px; color: #fff;">&larr; CREDIT</div>
+
+        <div style="position: absolute; left: 296px; top: 14px; width: 250px; height: 210px;
+                    border: 1px dashed rgba(255,255,255,.18);"></div>
+        <div class="cap" style="position: absolute; left: 296px; top: 232px; font-size: 9px;">COPY</div>
+      </div>
+      <div class="val" style="margin-top: 22px; max-width: 52ch;">
+        Its own row in the stage grid, below the canvas column and sharing that
+        column's left edge &mdash; directly under the object it credits.<br><br>
+        The row is <span style="color:#fff">reserved on every chapter</span>, filled
+        or not, so nothing above it shifts when the reader moves between a
+        chapter that needs a credit and one that does not.
+      </div>
+    </div>
+
+    <!-- Specimen and states -->
+    <div>
+      <div class="cap" style="margin-bottom: 16px;">AT SIZE</div>
+      <div style="border: 1px solid rgba(255,255,255,.15); padding: 22px 26px; max-width: 620px;">
+        <p class="credit">
+          <a href="https://sketchfab.com/3d-models/military-radio-099f56505d30414e970d79e4872a752d">&ldquo;Military Radio&rdquo;</a>
+          by <a href="https://sketchfab.com/ForaMon">ForaMon</a>,
+          licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+        </p>
+      </div>
+
+      <div class="cap" style="margin: 34px 0 16px;">LINK STATES</div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: baseline; gap: 20px;">
+          <span class="demo" style="width: 90px; color: rgba(255,255,255,.42);">rest</span>
+          <span class="demo"><span style="color: rgba(255,255,255,.58); text-decoration: underline;
+                text-underline-offset: 2px; text-decoration-color: rgba(255,255,255,.22);">ForaMon</span></span>
+          <span class="val">.58 text &middot; .22 underline</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 20px;">
+          <span class="demo" style="width: 90px; color: rgba(255,255,255,.42);">hover / focus</span>
+          <span class="demo"><span style="color: #fff; text-decoration: underline;
+                text-underline-offset: 2px; text-decoration-color: currentColor;">ForaMon</span></span>
+          <span class="val">#fff text &middot; underline matches</span>
+        </div>
+      </div>
+
+      <div class="val" style="margin-top: 34px; max-width: 52ch;">
+        Fragment Mono 12px &middot; line-height 1.5 &middot; .02em<br>
+        body rgba(255,255,255,.4) &middot; max-width 52ch<br>
+        underline-offset 2px<br><br>
+        <span style="color:rgba(255,255,255,.45)">12px, not 11px.</span> The built
+        version sets this at 11px; a licence condition should sit at the same
+        size as the rest of the small type, not below it.<br><br>
+        <span style="color:rgba(255,255,255,.45)">Pointer events.</span> The stage
+        sets pointer-events: none so the canvas stays inert &mdash; the credit
+        links must set it back to auto, or they cannot be clicked at all.
+      </div>
+    </div>
+  </div>
+
+  <div class="cap" style="position: absolute; left: 64px; bottom: 44px; color: rgba(255,255,255,.34); line-height: 1.7;">
+    ONLY THE CNAD CHAPTER CARRIES A CREDIT TODAY. THE ROW IS PART OF THE GRID, NOT PART OF THAT CHAPTER &mdash; ANY FUTURE LICENSED MODEL DROPS INTO IT UNCHANGED.
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

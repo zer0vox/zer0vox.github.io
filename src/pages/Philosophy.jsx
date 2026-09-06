@@ -2,11 +2,12 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SiteNav, SiteFooter } from '../components/SiteChrome'
-import ambientImg from '../assets/philosophy/ambient-grain.png'
-import heroImg from '../assets/philosophy/hero-ridgeline.jpg'
-import markBandImg from '../assets/philosophy/mark-band.jpg'
-import practiceImg from '../assets/philosophy/practice.jpg'
-import markLogo from '../assets/philosophy/greenhueblues-mark.png'
+import ambientImg from '../assets/philosophy/ambient-grain.webp'
+import heroImg from '../assets/philosophy/hero-ridgeline.webp'
+import markBandImg from '../assets/philosophy/mark-band.webp'
+import practiceImg from '../assets/philosophy/practice.webp'
+import markLogo from '../assets/philosophy/greenhueblues-mark.webp'
+import { CONTACT_EMAIL, CONTACT_MAILTO } from '../lib/contact.js'
 import './Philosophy.css'
 
 // The six stages the dial turns through. Devanagari numerals are the design's,
@@ -62,7 +63,7 @@ export default function Philosophy() {
 
   useEffect(() => {
     const previous = document.title
-    document.title = 'Philosophy — greenhueblues®'
+    document.title = 'Philosophy — greenhueblues'
     return () => {
       document.title = previous
     }
@@ -455,6 +456,8 @@ export default function Philosophy() {
 
       <SiteNav />
 
+      <main id="main">
+
       <section className="ph-hero" id="top" ref={heroRef}>
         <div className="ph-hero-photo" aria-hidden="true" style={{ backgroundImage: `url(${heroImg})` }} />
         <div className="ph-hero-bloom" aria-hidden="true" style={{ backgroundImage: `url(${heroImg})` }} />
@@ -619,10 +622,11 @@ export default function Philosophy() {
       <section className="ph-contact" id="contact">
         <div className="inner">
           <h2>Have something that needs noticing?</h2>
-          <a className="ph-contact-link" href="mailto:hello@greenhueblues.com">hello@greenhueblues.com</a>
+          <a className="ph-contact-link" href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a>
         </div>
       </section>
 
+      </main>
       <SiteFooter />
     </div>
   )
