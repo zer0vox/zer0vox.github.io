@@ -41,6 +41,16 @@
   --display-tracking-sm: -0.028em;
   --max: 1600px;
   --pad-x: 16px;
+  /* The nav capsule's interior padding. 28px is not arbitrary: the capsule is
+     the bar's height less its 8px inset top and bottom, about 56px, and a
+     border-radius of 999px on that clamps to a 28px corner. Anything smaller
+     and the last label ends where the corner is already curving away from it.
+
+     Applied as real padding on .inner rather than left to the difference
+     between two max-widths. That difference is zero on every viewport narrower
+     than the caps themselves — which is most of them, laptops included — and
+     the labels then sit flat on the rim. */
+  --nav-inset: 28px;
   --section-y: clamp(80px, 10vw, 160px);
   --hero-size: clamp(22px, 2.8vw, 40px);
   --display: clamp(40px, 5vw, 70px);
@@ -238,7 +248,7 @@ nav.top::before {
   content: "";
   position: absolute;
   inset: 8px var(--pad-x);
-  max-width: calc(var(--max) + 32px);
+  max-width: calc(var(--max) + var(--nav-inset) * 2);
   margin-inline: auto;
   border-radius: 999px;
   background: linear-gradient(
@@ -289,7 +299,11 @@ nav.top.is-glass::before {
 nav.top .inner {
   position: relative;
   z-index: 1;
-  max-width: var(--max);
+  /* Same outer box as the capsule below, with the clearance taken out of the
+     inside. --max stays the width the LABELS are laid out in, which is what
+     keeps the bar on the same grid as the page under it. */
+  max-width: calc(var(--max) + var(--nav-inset) * 2);
+  padding-inline: var(--nav-inset);
   margin-inline: auto;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1574,6 +1588,13 @@ footer .baseline {
   }}
 
 @media (max-width: 810px) {
+  /* The bar is a wordmark and a round 44px button at this width, and the
+     capsule is shorter because the wordmark is — so there is less corner to
+     clear, and 28px a side is width the wordmark needs more than the rim does. */
+  :root {
+    --nav-inset: 18px;
+  }
+
   /* Three links do not fit beside the wordmark once the bar is this narrow, so
      they move into a sheet under it. The sheet is the SAME markup as the
      desktop row -- .nav-sheet stops being `display: contents` and becomes a
