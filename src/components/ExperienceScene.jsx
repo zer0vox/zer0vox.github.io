@@ -152,7 +152,7 @@ function StageEnvironment() {
 // half doing the animating holds no state: a loaded model is a live Three.js
 // subtree whose materials are written every frame, which is not something a
 // state value may be.
-function ChapterModel({ entry, index, easedRef }) {
+function ChapterModel({ entry, index, easedRef, onSettled }) {
   const [model, setModel] = useState(null)
 
   const spec = entry.model
@@ -163,12 +163,18 @@ function ChapterModel({ entry, index, easedRef }) {
     // same prepared shape, so nothing below this line cares which it was.
     const arriving = spec.src ? loadModel(spec.src) : buildModel(spec.builder)
     arriving.then((loaded) => {
-      if (alive && loaded) setModel(loaded)
+      if (!alive) return
+      if (loaded) setModel(loaded)
+      // Reported whether or not it arrived. A chapter whose model failed is
+      // never going to produce one, and a spinner left up forever over a
+      // chapter that has already fallen back to its abstract node is worse
+      // than no spinner at all.
+      onSettled?.(index)
     })
     return () => {
       alive = false
     }
-  }, [spec.src, spec.builder])
+  }, [spec.src, spec.builder, index, onSettled])
 
   // A model that has not arrived yet — or failed to — simply is not there.
   if (!model) return null
@@ -248,7 +254,7 @@ function StagedModel({ model, index, easedRef, rotation, scale }) {
   )
 }
 
-function Scene({ entries, easedRef }) {
+function Scene({ entries, easedRef, onModelSettled }) {
   const groupRef = useRef(null)
 
   // Every chapter now carries an object, so this is on for the whole section —
@@ -303,7 +309,13 @@ function Scene({ entries, easedRef }) {
       <group ref={groupRef}>
         {entries.map((entry, i) =>
           entry.model?.src || entry.model?.builder ? (
-            <ChapterModel key={entry.id} entry={entry} index={i} easedRef={easedRef} />
+            <ChapterModel
+              key={entry.id}
+              entry={entry}
+              index={i}
+              easedRef={easedRef}
+              onSettled={onModelSettled}
+            />
           ) : null
         )}
       </group>
@@ -311,7 +323,7 @@ function Scene({ entries, easedRef }) {
   )
 }
 
-export default function ExperienceScene({ entries, easedRef, live }) {
+export default function ExperienceScene({ entries, easedRef, live, onModelSettled }) {
   return (
     <Canvas
       className="xp-gl"
@@ -322,7 +334,7 @@ export default function ExperienceScene({ entries, easedRef, live }) {
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       camera={{ fov: 40, position: [0, 0.25, 5.4], near: 0.1, far: 90 }}
     >
-      <Scene entries={entries} easedRef={easedRef} />
+      <Scene entries={entries} easedRef={easedRef} onModelSettled={onModelSettled} />
     </Canvas>
   )
 }

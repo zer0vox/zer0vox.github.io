@@ -1910,6 +1910,37 @@ footer .baseline {
   pointer-events: none;
 }
 
+/* Waiting on one part of a page rather than on the page. Same material and the
+   same fade, contained by its positioned parent instead of the viewport.
+
+   No opaque ground: the section around it is already drawn and worth looking
+   at, so this reports that something is still coming rather than hiding the
+   page until it does. And pointer-events stay off in both states — the
+   full-screen loader takes the pointer while it is up because there is nothing
+   behind it worth reaching, which is the opposite of true here: the year rail
+   and the copy are live underneath and must not be blocked by a spinner. */
+.ghb-loader--inline {
+  position: absolute;
+  /* Above the canvas (0) and its veil (1), below nothing — .xp-ui carries the
+     same 2 and comes later in the DOM, so the copy stays over the top. */
+  z-index: 2;
+  background: none;
+}
+
+.ghb-loader--inline,
+.ghb-loader--inline[data-shown] {
+  pointer-events: none;
+}
+
+/* Smaller than the boot screen's, which is sized against a whole viewport. */
+.ghb-loader--inline .ghb-blob {
+  width: clamp(64px, 5.5vw, 92px);
+}
+
+.ghb-loader--inline .ghb-loader-caption {
+  margin-top: 18px;
+}
+
 /* The bloom the metal sits in. The one place the site's accent appears in the
    loader — the blob's own colours are the chrome palette, and a periwinkle halo
    is what ties it back to the rest of the page. */

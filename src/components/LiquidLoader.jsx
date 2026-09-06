@@ -20,8 +20,15 @@ const EXIT_MS = 560
  * @param {string}  label  what is being waited on. Shown under the wordmark and
  *                         announced — a loading screen that does not say what it
  *                         is loading is just a shape.
+ * @param {boolean} inline waiting on one part of a page rather than the whole
+ *                         of it: contained by its positioned parent instead of
+ *                         covering the viewport, no opaque ground, and never
+ *                         catching the pointer. The wordmark is dropped too —
+ *                         it belongs to a boot screen, and repeating it inside
+ *                         a section would put a second one on a page that
+ *                         already has it in the nav.
  */
-export default function LiquidLoader({ show = true, label = 'Loading' }) {
+export default function LiquidLoader({ show = true, label = 'Loading', inline = false }) {
   const [mounted, setMounted] = useState(show)
   // Kept separate from `mounted` so the element is inserted at opacity 0 and
   // only then flipped — an element that mounts already in its final state has
@@ -57,7 +64,12 @@ export default function LiquidLoader({ show = true, label = 'Loading' }) {
   // "not entered yet" and "leaving", which are the same state — invisible, no
   // enter delay, transparent to the pointer.
   return (
-    <div className="ghb-loader" role="status" aria-live="polite" data-shown={shown ? '' : undefined}>
+    <div
+      className={inline ? 'ghb-loader ghb-loader--inline' : 'ghb-loader'}
+      role="status"
+      aria-live="polite"
+      data-shown={shown ? '' : undefined}
+    >
       <span className="ghb-blob-holder" aria-hidden="true">
         <span className="ghb-blob">
           {/* The filtered surface is its own box, fully opaque, so the grade
@@ -74,7 +86,9 @@ export default function LiquidLoader({ show = true, label = 'Loading' }) {
       {/* aria-hidden: the wordmark is the same one in the nav and in the page
           title, and a screen reader has already been told where it is. The
           caption below is the part that carries information. */}
-      <span className="ghb-loader-mark" aria-hidden="true">greenhueblues</span>
+      {inline ? null : (
+        <span className="ghb-loader-mark" aria-hidden="true">greenhueblues</span>
+      )}
       <span className="ghb-loader-caption">{label}</span>
     </div>
   )

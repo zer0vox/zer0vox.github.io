@@ -1,4 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import LiquidLoader from './LiquidLoader.jsx'
 import { scrollToOffset } from '../lib/lenis.js'
 import { EXPERIENCE } from '../data/experience.js'
 
@@ -57,6 +58,17 @@ function ExperienceStory({ entries }) {
   const [active, setActive] = useState(0)
   const [live, setLive] = useState(false)
   const [armed, setArmed] = useState(false)
+
+  // Which chapters' objects have finished arriving. A Set rather than a count
+  // because the four load in whatever order the network returns them, and what
+  // the stage needs to know is whether THIS chapter is ready, not how many are.
+  const [settled, setSettled] = useState(() => new Set())
+
+  // Stable, so threading it down to each ChapterModel does not re-run the
+  // effect that does the loading.
+  const noteModelSettled = useCallback((index) => {
+    setSettled((prev) => (prev.has(index) ? prev : new Set(prev).add(index)))
+  }, [])
 
   // Only render while the section is anywhere near the viewport; the scene
   // parks its render loop on the same flag.
@@ -138,6 +150,18 @@ function ExperienceStory({ entries }) {
   // moment it is actually the credit for something on screen.
   const credit = entries[active]?.model?.credit ?? null
 
+  // The stage is waiting if the chapter on it expects an object and that object
+  // has not reported in. One condition covers both halves of the wait, which is
+  // why the Suspense fallback below can stay null: before the scene's chunk has
+  // even downloaded nothing has reported, so this is already true, and it stays
+  // true until the active chapter's model is on the stage. Gated on `armed`
+  // because until the section has been near the viewport, nothing is loading
+  // and there is nothing to wait for.
+  const stageWaiting =
+    armed &&
+    Boolean(entries[active]?.model?.src || entries[active]?.model?.builder) &&
+    !settled.has(active)
+
   return (
     <section className="xp" id="experience">
       {/* One viewport of run-up per chapter, plus one to land on the last. */}
@@ -146,11 +170,21 @@ function ExperienceStory({ entries }) {
           <div className="xp-gl-wrap" aria-hidden="true">
             {armed && (
               <Suspense fallback={null}>
-                <ExperienceScene entries={entries} easedRef={easedRef} live={live} />
+                <ExperienceScene
+                  entries={entries}
+                  easedRef={easedRef}
+                  live={live}
+                  onModelSettled={noteModelSettled}
+                />
               </Suspense>
             )}
           </div>
           <div className="xp-veil" aria-hidden="true" />
+
+          {/* Outside .xp-gl-wrap on purpose: that wrapper is aria-hidden, being
+              pure decoration, and a status message inside it would never be
+              announced. Before .xp-ui in the DOM so the copy paints over it. */}
+          <LiquidLoader inline show={stageWaiting} label="Loading model" />
 
           {/* Not aria-hidden: the year rail is a real control. The crossfading
               cards below are the part that duplicates the outline, so only they
