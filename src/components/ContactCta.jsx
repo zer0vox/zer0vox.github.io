@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRevealInView } from './reveal.js'
 import { CONTACT_EMAIL, CONTACT_MAILTO } from '../lib/contact.js'
+import { SocialIconLinks } from './social.jsx'
 
 // The chrome is a set of continuous animations, so it is switched off whenever
 // the banner is not on screen. Without this the home page never has an idle
@@ -68,12 +69,20 @@ export default function ContactCta() {
           </p>
         </div>
 
-        <a className="cta-mail" href={CONTACT_MAILTO}>
-          <span className="cta-mail-face">
-            <span className="cta-mail-text">{CONTACT_EMAIL}</span>
-            <span className="cta-mail-arrow" aria-hidden="true">→</span>
-          </span>
-        </a>
+        <div className="cta-reach">
+          <a className="cta-mail" href={CONTACT_MAILTO}>
+            <span className="cta-mail-face">
+              <span className="cta-mail-text">{CONTACT_EMAIL}</span>
+              <span className="cta-mail-arrow" aria-hidden="true">→</span>
+            </span>
+          </a>
+
+          {/* The profiles used to sit in the nav, where three of them competed
+              with three routes in a bar that has to survive a 360px screen.
+              They belong with the address: this is the block that answers "how
+              do I reach you". */}
+          <SocialIconLinks />
+        </div>
       </div>
     </section>
   )

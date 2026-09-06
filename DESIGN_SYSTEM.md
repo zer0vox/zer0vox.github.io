@@ -202,6 +202,25 @@ text-transform: uppercase; color: var(--fg-dim);
 - 3-col grid: brand · center links · right action. Links hover to `opacity .7`.
 - Collapses below `810px` (hides center `ul`).
 
+### Loader (liquid chrome blob)
+`<LiquidLoader show label />` — the one loading state on the site. Full-bleed
+`--bg` cover at `z-index: 300`, holding a morphing chrome blob over the nav
+wordmark and a mono caption naming what is being waited on.
+
+- **Material:** the same one as the contact band — near-black body, three
+  screen-blended specular layers, `contrast(132%) saturate(118%)`. Do not give
+  it a palette of its own; retune it with `.cta-chrome` or not at all.
+- **Timing:** loop lengths are φ multiples (`3.82s / 6.18s / 10s / 16.18s`) so
+  the layers never resynchronise. Keep new ones on that series.
+- **Entry:** an interruptible `opacity` **transition** with a `.14s` delay, never
+  a keyframed fade — a wait that resolves inside the delay must not paint, and
+  one that resolves mid-fade has to reverse from where it got to.
+- Used at three points: the pre-React boot (a standalone copy of the CSS lives
+  inline in `index.html`, since it paints before any stylesheet), the lazy-route
+  `Suspense` fallback in `App.jsx`, and the About hero's four photographic
+  layers in `AboutHero.jsx`. Anything else that makes a visitor wait should use
+  it too rather than growing a second loading idiom.
+
 ### Section shell
 ```html
 <section class="my-section">

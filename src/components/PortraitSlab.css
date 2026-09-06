@@ -1,0 +1,490 @@
+/* Portrait easter egg — a graded 1/1 slab. ----------------------------------
+
+   Nine clicks on the About portrait and it comes back encased, labelled and
+   graded. The visual language is the generic one every grading house shares —
+   an acrylic case, a light label across the top, a holo card in the window, a
+   population of one — with this site's own marks on it. Nothing here borrows a
+   trademark, which is the only way a joke like this can sit on a public page.
+
+   The frame itself lives in About.css with the rest of the `meet` layout; only
+   the nudge and the slab are here, because only they belong to the egg. */
+
+/* The nudge ---------------------------------------------------------------- */
+
+/* The frame answers back from the third click of a run. Nothing says "keep
+   going" in words — it should read as the photograph catching the light, and
+   only in hindsight as a hint. --nudge ramps 0-1 across the second half of the
+   run so one set of rules can scale all of it. */
+.meet-portrait {
+  transition: transform .32s var(--ease), box-shadow .32s var(--ease);
+}
+
+.meet-portrait[data-run='3'] { --nudge: .18; }
+.meet-portrait[data-run='4'] { --nudge: .34; }
+.meet-portrait[data-run='5'] { --nudge: .5; }
+.meet-portrait[data-run='6'] { --nudge: .66; }
+.meet-portrait[data-run='7'] { --nudge: .82; }
+.meet-portrait[data-run='8'] { --nudge: 1; }
+
+.meet-portrait[data-run] {
+  transform:
+    rotate(calc(var(--nudge) * -.7deg))
+    scale(calc(1 + var(--nudge) * .015));
+  /* Both accents, so the tell is the brand's own two-tone rather than a
+     generic glow. */
+  box-shadow:
+    0 0 calc(var(--nudge) * 26px) rgba(168, 199, 255, calc(var(--nudge) * .3)),
+    0 0 calc(var(--nudge) * 64px) rgba(168, 255, 199, calc(var(--nudge) * .16));
+}
+
+/* The case ----------------------------------------------------------------- */
+
+.slab-veil {
+  position: fixed;
+  inset: 0;
+  /* Over nav.top, which sits at 50. */
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 40px);
+  /* Safety valve: if a very short window still cannot fit the slab, it
+     scrolls rather than clipping the grade off the top. */
+  overflow: auto;
+  background: rgba(4, 5, 10, .84);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  animation: slab-veil-in .4s var(--ease) both;
+}
+
+.slab {
+  /* Everything inside is sized in em from here, so the slab scales as one
+     object instead of every part carrying its own clamp. The vh term is what
+     keeps it inside a short window; the vw term handles a narrow one. */
+  font-size: clamp(8px, min(2.5vw, 1.5vh), 16px);
+  position: relative;
+  width: 25em;
+  display: grid;
+  gap: .9em;
+  padding: 1.1em;
+  border-radius: 1.1em;
+  /* The acrylic: a gradient rim rather than a border, because the highlight
+     has to carry round the corner, over an interior dark enough that the card
+     is the only lit thing in the case. */
+  background:
+    linear-gradient(150deg,
+      rgba(255, 255, 255, .14) 0%,
+      rgba(255, 255, 255, .02) 34%,
+      rgba(255, 255, 255, 0) 62%),
+    #0b0d13;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .22),
+    0 2em 6em rgba(0, 0, 0, .72);
+  /* Transform belongs to the pointer tilt alone. The entrance animates the
+     card inside instead, so the two never fight over this property — an
+     entrance with fill-mode: both would freeze the tilt at its end frame. */
+  transform: perspective(1400px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform .16s ease-out;
+  animation: slab-in .45s var(--ease) both;
+}
+
+/* The specular on the plastic, tracking the pointer. */
+.slab-case {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(58% 58% at calc(var(--px, .5) * 100%) calc(var(--py, .5) * 100%),
+    rgba(255, 255, 255, .13) 0%,
+    rgba(255, 255, 255, 0) 70%);
+}
+
+/* The label ---------------------------------------------------------------- */
+
+/* The one light thing on the object, and most of what makes it read as a slab
+   rather than a card in a picture frame. */
+.slab-label {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'house grade'
+    'id    grade';
+  align-items: center;
+  gap: .4em .9em;
+  padding: .85em 1em;
+  border-radius: .45em;
+  background: linear-gradient(180deg, #f7f6f2 0%, #e7e6e0 100%);
+  color: #14151a;
+}
+
+.slab-label-house {
+  grid-area: house;
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  font-family: var(--mono);
+  font-size: .72em;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #5c5f68;
+}
+
+.slab-label-mark {
+  font-family: var(--display-font);
+  font-size: 1.7em;
+  line-height: 1;
+  letter-spacing: -.06em;
+  text-transform: none;
+  color: #14151a;
+}
+
+.slab-label-id {
+  grid-area: id;
+  display: grid;
+  gap: .15em;
+}
+
+.slab-label-id strong {
+  font-size: 1.08em;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.slab-label-id span {
+  font-family: var(--mono);
+  font-size: .7em;
+  letter-spacing: .06em;
+  color: #5c5f68;
+}
+
+.slab-grade {
+  grid-area: grade;
+  display: grid;
+  justify-items: center;
+  gap: .05em;
+  padding-left: .9em;
+  border-left: 1px solid rgba(20, 21, 26, .16);
+}
+
+.slab-grade-word {
+  font-family: var(--mono);
+  font-size: .64em;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #5c5f68;
+}
+
+.slab-grade-num {
+  font-family: var(--display-font);
+  font-size: 2.6em;
+  line-height: .88;
+  letter-spacing: -.05em;
+}
+
+/* The window and the card -------------------------------------------------- */
+
+.slab-window {
+  position: relative;
+  padding: .85em;
+  border-radius: .5em;
+  background: #05060a;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .07),
+    inset 0 .3em 1.4em rgba(0, 0, 0, .8);
+  /* So the card can sit forward of the well in the tilt. No overflow here:
+     hidden overflow forces a preserve-3d subtree to flatten. */
+  transform-style: preserve-3d;
+}
+
+.gcard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* Trading card proportions. Recognition depends on this more than on any
+     single mark, so the ratio is fixed and the art absorbs the slack. */
+  aspect-ratio: 2.5 / 3.5;
+  display: flex;
+  flex-direction: column;
+  gap: .5em;
+  padding: .7em;
+  border-radius: .35em;
+  /* Card stock: a warm dark, so the holo has a ground that is not the same
+     near-black as the page behind the case. */
+  background: linear-gradient(165deg, #1b1723 0%, #10131c 46%, #131a22 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  transform: translateZ(1.2em);
+  animation: gcard-in .65s var(--ease) both;
+}
+
+/* Holo. Two layers, because foil is two things at once: a broad rainbow that
+   turns with the angle, and a fine directional grain that catches across it.
+   Both track the pointer, which is what sells the card as a physical object
+   being tilted rather than a picture with a gradient on it. */
+.gcard-holo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .5;
+  mix-blend-mode: screen;
+  filter: blur(7px) saturate(150%);
+  background:
+    conic-gradient(from calc(var(--px, .5) * 360deg) at 50% 46%,
+      rgba(255, 90, 210, .50) 0deg,
+      rgba(120, 130, 255, .44) 62deg,
+      rgba(90, 240, 255, .50) 124deg,
+      rgba(150, 255, 190, .44) 186deg,
+      rgba(255, 224, 120, .40) 248deg,
+      rgba(255, 120, 190, .50) 310deg,
+      rgba(255, 90, 210, .50) 360deg);
+}
+
+.gcard-holo::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  mix-blend-mode: overlay;
+  background: repeating-linear-gradient(
+    calc(64deg + var(--px, .5) * 26deg),
+    rgba(255, 255, 255, .16) 0 .16em,
+    rgba(255, 255, 255, 0) .16em .52em);
+}
+
+/* Everything with content sits above both foil layers. */
+.gcard-head,
+.gcard-art,
+.gcard-kind,
+.gcard-moves,
+.gcard-rules,
+.gcard-foot {
+  position: relative;
+  z-index: 1;
+}
+
+.gcard-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .6em;
+}
+
+.gcard-name {
+  margin: 0;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-size: 1.18em;
+  font-weight: var(--display-weight);
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+
+.gcard-hp {
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: 1.1em;
+  letter-spacing: -.03em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.gcard-hp span {
+  margin-right: .32em;
+  font-family: var(--mono);
+  font-size: .52em;
+  letter-spacing: .1em;
+  color: var(--fg-dim);
+}
+
+.gcard-art {
+  /* Takes the slack, so the fixed card ratio never pushes the moves out of
+     the bottom of the card. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: .18em;
+  background: #06070a;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16);
+}
+
+.gcard-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Near enough centred: the asset is already framed for this window by the
+     crop in scripts/optimize-images.mjs, which is the only way to be sure of
+     the composition when the box it lands in is sized by the card's content
+     rather than by a ratio this file controls. */
+  object-position: 50% 46%;
+  /* Black and white like the frame upstairs, and the foil is better for it:
+     the holo becomes the only colour on the card, which is what a holo
+     actually does — the rainbow belongs to the card stock, not to the
+     photograph. The grayscale here is a floor rather than the conversion; that
+     is the `mono` target in scripts/optimize-images.mjs. The contrast is
+     because the holo sits over this at .5 and a night exposure has little
+     latitude to spare underneath it. */
+  filter: grayscale(1) contrast(1.06);
+}
+
+.gcard-kind,
+.gcard-rules {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: .64em;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.gcard-moves {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: .45em;
+}
+
+.gcard-moves li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: .1em .6em;
+  padding-top: .45em;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+}
+
+.gcard-move-name {
+  font-size: .92em;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+.gcard-move-dmg {
+  font-family: var(--display-font);
+  font-size: 1.15em;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
+.gcard-moves p {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: .72em;
+  line-height: 1.4;
+  color: var(--fg-mute);
+}
+
+.gcard-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: .6em;
+  font-family: var(--mono);
+  font-size: .6em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.gcard-rarity {
+  color: var(--accent);
+}
+
+/* The glare on the card's own surface, under the case's. */
+.gcard-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: soft-light;
+  background: radial-gradient(38% 34% at calc(var(--px, .5) * 100%) calc(var(--py, .5) * 100%),
+    rgba(255, 255, 255, .32) 0%,
+    rgba(255, 255, 255, .06) 46%,
+    rgba(255, 255, 255, 0) 74%);
+}
+
+/* Cert line and close ------------------------------------------------------ */
+
+.slab-cert {
+  display: flex;
+  justify-content: space-between;
+  gap: .6em;
+  padding-inline: .3em;
+  font-family: var(--mono);
+  font-size: .68em;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .4);
+}
+
+/* In the slab's own flow rather than floated outside it: absolute placement
+   above the case runs off the top of a short window, and the one control that
+   dismisses this must never be the thing that scrolls out of reach. */
+.slab-close {
+  justify-self: end;
+  padding: .6em 1.2em;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: none;
+  font-family: var(--mono);
+  font-size: .7em;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .62);
+  cursor: pointer;
+  transition: color .25s var(--ease), border-color .25s var(--ease);
+}
+
+.slab-close:hover,
+.slab-close:focus-visible {
+  color: #fff;
+  border-color: rgba(255, 255, 255, .5);
+}
+
+.slab-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@keyframes slab-veil-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slab-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gcard-in {
+  from {
+    opacity: 0;
+    transform: translateZ(1.2em) translateY(1.4em) scale(.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(1.2em);
+  }
+}
+
+/* The egg still works with reduced motion — it just stops moving. The tilt is
+   already skipped in JS, so --rx/--ry stay 0 and the transform is flat; what
+   is left here is the entrance and the nudge. */
+@media (prefers-reduced-motion: reduce) {
+  .meet-portrait,
+  .slab,
+  .slab-close {
+    transition: none;
+  }
+
+  .meet-portrait[data-run] {
+    transform: none;
+  }
+
+  .gcard {
+    animation: slab-in .3s linear both;
+  }
+}

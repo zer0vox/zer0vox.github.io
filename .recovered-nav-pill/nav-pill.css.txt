@@ -1,0 +1,124 @@
+
+/* Liquid glass — one piece of it.
+
+   The bar carries a single highlight that TRAVELS between links, rather than a
+   pill per link that fades in wherever the pointer lands. That is the whole
+   difference between "a hover state" and the way an Apple bar moves: going from
+   Philosophy to About is one object sliding across, so the eye follows it
+   instead of watching one thing vanish and another appear somewhere else.
+
+   useNavPill measures the link that should be lit and publishes it as
+   --pill-x/y/w/h. How much larger than the label the glass sits is decided
+   here, not in the JS, so the padding around the highlight stays a design
+   decision in the stylesheet.
+
+   The easing is cubic-bezier(0.32, 0.72, 0, 1) throughout — Apple's curve, and
+   the reason this reads as smooth rather than slow. Most of the distance is
+   covered in the first third and the rest is a long settle, so a 0.52s travel
+   still feels immediate; a symmetric ease over the same 0.52s feels like syrup.
+   The curve is doing the work, not the clock.
+
+   The highlight is positioned against .inner, whose padding box is what
+   getBoundingClientRect() reports for it, so the --nav-gutter padding above
+   needs no compensation here. */
+nav.top .nav-pill {
+  --ease-glass: cubic-bezier(0.32, 0.72, 0, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: calc(var(--pill-w, 0px) + 26px);
+  height: calc(var(--pill-h, 0px) + 18px);
+  border-radius: 999px;
+  transform:
+    translate3d(calc(var(--pill-x, 0px) - 13px), calc(var(--pill-y, 0px) - 9px), 0)
+    scale(var(--pill-scale, 0.94));
+  /* Material: a blurred, saturated and slightly lifted backdrop under a top-lit
+     fill, with a lit upper rim and a hairline all round. The fill turning back
+     UP at the bottom (0.09 after 0.06) is bounce light — it is what makes the
+     shape read as a lens with depth rather than a flat film of white. */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.06) 55%,
+    rgba(255, 255, 255, 0.09)
+  );
+  -webkit-backdrop-filter: blur(18px) saturate(180%) brightness(1.08);
+  backdrop-filter: blur(18px) saturate(180%) brightness(1.08);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 6px 18px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  /* visibility, not opacity alone: backdrop-filter makes this a surface the
+     compositor re-samples every frame, and the bar is fixed over a WebGL
+     background for the whole scroll. A hidden element is not painted at all, so
+     that cost exists only while the highlight is on screen. visibility is
+     discrete, so holding it to the end of the fade keeps the blur at full
+     strength all the way out instead of snapping off mid-exit. */
+  visibility: hidden;
+  transition:
+    transform 0.52s var(--ease-glass),
+    width 0.52s var(--ease-glass),
+    height 0.52s var(--ease-glass),
+    opacity 0.36s var(--ease-glass),
+    visibility 0s linear 0.36s;
+}
+
+nav.top .inner[data-pill] .nav-pill {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+nav.top .inner[data-pill="on"] .nav-pill {
+  --pill-scale: 1;
+  opacity: 1;
+}
+
+/* The single frame in which the highlight is put in place before it is allowed
+   to move. Arriving from nothing it has to appear AT the link; without this it
+   would streak in across the bar from wherever it was last left. */
+nav.top .inner[data-pill="placing"] .nav-pill {
+  transition: none;
+}
+
+/* Above the glass. A positive z-index on the labels rather than a negative one
+   on the highlight, so nothing has to escape .inner's stacking context. */
+nav.top :where(ul, .right) a {
+  position: relative;
+  z-index: 1;
+}
+
+/* The global `a:hover { opacity: .7 }` would dim the label at the exact moment
+   the glass arrives to pick it out. The highlight is the feedback; the text
+   should not move or fade at all. */
+nav.top :where(ul, .right) a:hover {
+  opacity: 1;
+}
+
+/* Matched to the highlight rather than hugging the text, so keyboard focus
+   reads as the same object the pointer gets — and it travels on focus too. */
+nav.top :where(ul, .right) a:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 9px;
+  border-radius: 999px;
+}
+
+/* No backdrop-filter (older Firefox): the same shape on a flat tint, matching
+   how nav.top::before degrades. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  nav.top .nav-pill {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+/* The material survives, the travel does not: the highlight cuts to each link
+   and only fades. */
+@media (prefers-reduced-motion: reduce) {
+  nav.top .nav-pill {
+    --pill-scale: 1;
+    transition: opacity 0.2s linear, visibility 0s linear 0.2s;
+  }
+}

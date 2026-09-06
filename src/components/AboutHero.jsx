@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { useHeroTuner } from './useHeroTuner'
+import LiquidLoader from './LiquidLoader.jsx'
 import mountainPhoto from '../assets/about/mountain-photo.webp'
 import mountainRidge from '../assets/about/mountain-ridge.webp'
 import mountainGlow from '../assets/about/mountain-glow.webp'
@@ -48,8 +49,69 @@ const TUNING = {
   appearFadeFrom: 0.78, // standfirst + cue retire
 }
 
+// The four layers of the frame, and about half a megabyte of it. They arrive
+// independently and the composite is wrong until the last one lands — the ridge
+// without its glow, the night sky masked against a photo that is not there yet —
+// so the loader holds the frame rather than letting it assemble itself on
+// screen. This is the wait the loader exists for; everything else on the site is
+// text and a chunk.
+const HERO_LAYERS = [mountainPhoto, mountainRidge, mountainGlow, skyMask]
+
+// Past this a loading state has become a wall. A visitor on a bad connection
+// should get the hero half-composited — which is exactly what they would have
+// had before this — rather than a blob that never lifts.
+const HERO_TIMEOUT_MS = 8000
+
+// The layers are CSS backgrounds, so there is no load event on any element to
+// wait for. Pulling the same four URLs through an Image() gives one: the
+// browser serves both requests from a single fetch, so this costs nothing over
+// what the hero was already downloading.
+function useHeroLayersReady() {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    let settled = false
+    let pending = HERO_LAYERS.length
+
+    const done = () => {
+      if (settled) return
+      settled = true
+      setReady(true)
+    }
+
+    // A layer that 404s or is blocked must not hold the page: a failure counts
+    // as arrived, and the hero simply renders without it.
+    const arrived = () => {
+      pending -= 1
+      if (pending === 0) done()
+    }
+
+    const images = HERO_LAYERS.map((src) => {
+      const img = new Image()
+      img.onload = arrived
+      img.onerror = arrived
+      img.src = src
+      return img
+    })
+
+    const timeout = setTimeout(done, HERO_TIMEOUT_MS)
+
+    return () => {
+      clearTimeout(timeout)
+      settled = true
+      images.forEach((img) => {
+        img.onload = null
+        img.onerror = null
+      })
+    }
+  }, [])
+
+  return ready
+}
+
 export default function AboutHero() {
   const navigate = useNavigate()
+  const layersReady = useHeroLayersReady()
   const photoRef = useRef(null)
   const fgRef = useRef(null)
   const glowRef = useRef(null)
@@ -191,7 +253,13 @@ export default function AboutHero() {
   }, [navigate, t])
 
   return (
-    <div className="hero-wrap">
+    // The flag the stylesheet fades the frame in on. Holding the hero back
+    // until its layers exist is not the same job as the loader on top of it:
+    // the loader says a wait is happening, this stops the wait being spent
+    // looking at a ridge with no mountain under it and a night sky masked
+    // against nothing.
+    <div className="hero-wrap" data-hero-ready={layersReady ? '' : undefined}>
+      <LiquidLoader show={!layersReady} label="Loading About" />
       <div className="hero-dist" ref={distRef} />
       <div className="hero-stage">
         <div

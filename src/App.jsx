@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Lenis from 'lenis'
 import { setLenis } from './lib/lenis.js'
+import LiquidLoader from './components/LiquidLoader.jsx'
 import Home from './pages/Home.jsx'
 
 // Home stays a static import: it is the landing route and the one whose LCP
@@ -37,6 +38,14 @@ function usePrefetchRoutes() {
     idle = setTimeout(warm, 2000)
     return () => clearTimeout(idle)
   }, [])
+}
+
+// What the loader says it is waiting for. A split route is fetched by name, so
+// the name is known before a byte of it has arrived — and "Loading About" is
+// the difference between a loading screen and a shape on a black page.
+const ROUTE_NAMES = {
+  '/philosophy': 'Loading Philosophy',
+  '/about': 'Loading About'
 }
 
 export default function App() {
@@ -99,7 +108,12 @@ export default function App() {
   }, [pathname, hash])
 
   return (
-    <Suspense fallback={null}>
+    // A `null` fallback meant a split route that had not been warmed yet — a
+    // cold visit straight to /about, or a click before the idle prefetch has
+    // run — left the viewport empty for as long as the chunk took. The loader
+    // carries its own entry delay, so on the common path (chunk already in the
+    // module cache) it still resolves without ever painting.
+    <Suspense fallback={<LiquidLoader label={ROUTE_NAMES[pathname] ?? 'Loading'} />}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/philosophy" element={<Philosophy />} />

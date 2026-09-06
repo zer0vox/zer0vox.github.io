@@ -54,6 +54,17 @@
      keeps the authored 150% exactly and the desktop composition does not move. */
   --hero-bg-pos: 26% -24vw;
   --hero-bg-size: max(150%, 180vh) auto;
+  /* Held back until AboutHero has all four layers (see the `data-hero-ready`
+     note there). They are half a megabyte of photograph and they arrive
+     independently; painting the frame before the last one lands shows a ridge
+     with no mountain behind it. Long enough to be a dissolve rather than a
+     switch, so it lands underneath the loader's own fade rather than after it. */
+  opacity: 0;
+  transition: opacity .8s var(--ease);
+}
+
+.hero-wrap[data-hero-ready] .hero-stage {
+  opacity: 1;
 }
 
 .hero-spacer {
@@ -195,27 +206,90 @@
   }
 }
 
+/* The markup for this frame lives in components/PortraitSlab.jsx, which also
+   owns the nine-click easter egg behind it — the frame stays here because it is
+   part of the `meet` two-column layout, and the slab styles stay there because
+   they are not. */
 .meet-portrait {
   position: relative;
   width: 100%;
   max-width: 420px;
   aspect-ratio: 4 / 5;
-  border: 1px dashed rgba(255, 255, 255, .18);
+  /* A hairline on the site's own --line, so the frame reads as a printed edge.
+     The floor under it is darker than --bg: the portrait's own blacks are
+     close to the page's, and a slightly deeper ground keeps the frame from
+     dissolving into the section around it. */
+  border: 1px solid var(--line);
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, .02);
+  background: #0a0a0a;
+  overflow: hidden;
+  /* The tone and grain layers below are blended, and without this they would
+     blend with the page behind the frame as well as with the portrait. */
+  isolation: isolate;
 }
 
-.meet-portrait span {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--fg-dim);
-  text-align: center;
-  padding: 0 24px;
+.meet-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The master is 2:3 and the frame is 4:5, so cover drops about 17% of the
+     height. Biased upward rather than centred: a centred crop takes equal
+     bites off the hair and the forearms, and the head is the subject. */
+  object-position: 50% 18%;
+  /* The file is already black and white — see the `mono` target in
+     scripts/optimize-images.mjs. This is not the conversion; it is a floor, so
+     that if the master is ever swapped for a colour original the frame still
+     reads as intended rather than silently going colour. */
+  filter: grayscale(1);
+}
+
+/* Toning. Not a duotone — the brief was black and white, and a gradient map
+   would make it a coloured photograph. This is the printing equivalent: a
+   faint split tone, green accent through the highlights and blue through the
+   shadows, which is greenhueblues' own two-channel permutation (a8ffc7 /
+   a8c7ff) used as a tone rather than as a colour.
+
+   soft-light is what keeps it a tone. At this opacity it shifts the neutrals
+   perhaps a couple of degrees — enough that the portrait belongs to the page,
+   not enough to read as tinted. */
+.meet-portrait::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: .38;
+  background: linear-gradient(172deg,
+    rgba(168, 255, 199, .5) 0%,
+    rgba(190, 210, 235, .1) 52%,
+    rgba(168, 199, 255, .5) 100%);
+}
+
+/* Grain. The site already carries grain in the About hero and the Philosophy
+   ambient layer, so a clean portrait is the odd one out — it reads as a stock
+   headshot dropped onto a textured page. Generated rather than another image
+   request: one feTurbulence tile costs no bytes over the wire and tiles
+   without a seam (stitchTiles). overlay so it works into the mid-tones and
+   leaves the blacks alone, which is where film grain actually lives. */
+.meet-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: .1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* The grain is fixed-size texture, so on a 2x screen it would render at half
+   the apparent size and disappear into the panel. */
+@media (min-resolution: 2dppx) {
+  .meet-portrait::after {
+    background-size: 90px 90px;
+    opacity: .13;
+  }
 }
 
 .meet-body {
@@ -459,12 +533,23 @@
 /* Hover is the only thing that ever identified a tool in this marquee, so on a
    touch device the whole section was a row of unlabelled logos. With no hover to
    wait for, show the names outright -- the reveal is the affordance, and without
-   a pointer there is nothing to reveal them with. */
-@media (hover: none) {
+   a pointer there is nothing to reveal them with.
+
+   Phones are the exception: the track's gap shrinks with the viewport while the
+   names do not, so at these widths neighbouring labels run into each other
+   ("PROTEUSSALESFORCE"). Below the breakpoint the row is marks only. */
+@media (hover: none) and (min-width: 701px) {
   .stack-name {
     opacity: .85;
     transform: translateX(-50%) translateY(0);
   }
+}
+
+@media (max-width: 700px) {
+  /* display, not opacity — a tap on a touch device still fires :hover, and the
+     label it would reveal is the one that collides. The fallback name is kept:
+     there it is the item itself, not a caption under a mark. */
+  .stack-item:not(.is-fallback) .stack-name { display: none; }
 }
 
 /* Icon missing: the name stops being a label and becomes the item itself. */

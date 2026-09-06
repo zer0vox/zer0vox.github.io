@@ -282,8 +282,13 @@ nav.top.is-glass::before {
   }
 }
 
+/* z-index is load-bearing, not decoration: it makes .inner a stacking context,
+   which pins the travelling highlight above nav.top::before regardless of tree
+   order, so the bar's own capsule can never swallow it. A plain z-index context
+   is not a backdrop root, so the highlight still blurs the page behind it. */
 nav.top .inner {
   position: relative;
+  z-index: 1;
   max-width: var(--max);
   margin-inline: auto;
   display: grid;
@@ -300,7 +305,16 @@ nav.top .brand {
   line-height: 1;
 }
 
-nav.top ul {
+nav.top .nav-sheet {
+  /* `display: contents` makes the wrapper transparent to .inner's grid, so the
+     list and the actions land in the second and third columns exactly as they
+     would if it were not here. That is what lets the links be written once in
+     SiteChrome.jsx instead of once per breakpoint: below 810px this same
+     element stops being contents and becomes the sheet. */
+  display: contents;
+}
+
+nav.top .nav-links {
   display: flex;
   justify-content: center;
   gap: 34px;
@@ -311,17 +325,148 @@ nav.top ul {
   font-weight: 500;
 }
 
-nav.top ul a.is-current {
+nav.top .nav-links a.is-current {
   color: var(--accent);
 }
 
-nav.top .right {
+nav.top .nav-actions {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 18px;
   font-weight: 500;
   font-size: 18px;
+}
+
+/* `display: none` above the breakpoint, which takes the button out of the
+   accessibility tree as well: a menu control that opens nothing should not be
+   announced to a screen reader on a desktop bar. */
+nav.top .nav-toggle {
+  display: none;
+}
+
+/* Liquid glass — one piece of it.
+
+   The bar carries a single highlight that TRAVELS between links, rather than a
+   pill per link that fades in wherever the pointer lands. That is the whole
+   difference between "a hover state" and the way an Apple bar moves: going from
+   Philosophy to About is one object sliding across, so the eye follows it
+   instead of watching one thing vanish and another appear somewhere else.
+
+   useNavPill measures the link that should be lit and publishes it as
+   --pill-x/y/w/h. How much larger than the label the glass sits is decided
+   here, not in the JS, so the padding around the highlight stays a design
+   decision in the stylesheet.
+
+   The easing is cubic-bezier(0.32, 0.72, 0, 1) throughout — Apple's curve, and
+   the reason this reads as smooth rather than slow. Most of the distance is
+   covered in the first third and the rest is a long settle, so a 0.52s travel
+   still feels immediate; a symmetric ease over the same 0.52s feels like syrup.
+   The curve is doing the work, not the clock.
+
+   The highlight is positioned against .inner, whose padding box is what
+   getBoundingClientRect() reports for it, so the --nav-gutter padding above
+   needs no compensation here. */
+nav.top .nav-pill {
+  --ease-glass: cubic-bezier(0.32, 0.72, 0, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: calc(var(--pill-w, 0px) + 26px);
+  height: calc(var(--pill-h, 0px) + 18px);
+  border-radius: 999px;
+  transform:
+    translate3d(calc(var(--pill-x, 0px) - 13px), calc(var(--pill-y, 0px) - 9px), 0)
+    scale(var(--pill-scale, 0.94));
+  /* Material: a blurred, saturated and slightly lifted backdrop under a top-lit
+     fill, with a lit upper rim and a hairline all round. The fill turning back
+     UP at the bottom (0.09 after 0.06) is bounce light — it is what makes the
+     shape read as a lens with depth rather than a flat film of white. */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.06) 55%,
+    rgba(255, 255, 255, 0.09)
+  );
+  -webkit-backdrop-filter: blur(18px) saturate(180%) brightness(1.08);
+  backdrop-filter: blur(18px) saturate(180%) brightness(1.08);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 6px 18px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  /* visibility, not opacity alone: backdrop-filter makes this a surface the
+     compositor re-samples every frame, and the bar is fixed over a WebGL
+     background for the whole scroll. A hidden element is not painted at all, so
+     that cost exists only while the highlight is on screen. visibility is
+     discrete, so holding it to the end of the fade keeps the blur at full
+     strength all the way out instead of snapping off mid-exit. */
+  visibility: hidden;
+  transition:
+    transform 0.52s var(--ease-glass),
+    width 0.52s var(--ease-glass),
+    height 0.52s var(--ease-glass),
+    opacity 0.36s var(--ease-glass),
+    visibility 0s linear 0.36s;
+}
+
+nav.top .inner[data-pill] .nav-pill {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+nav.top .inner[data-pill="on"] .nav-pill {
+  --pill-scale: 1;
+  opacity: 1;
+}
+
+/* The single frame in which the highlight is put in place before it is allowed
+   to move. Arriving from nothing it has to appear AT the link; without this it
+   would streak in across the bar from wherever it was last left. */
+nav.top .inner[data-pill="placing"] .nav-pill {
+  transition: none;
+}
+
+/* Above the glass. A positive z-index on the labels rather than a negative one
+   on the highlight, so nothing has to escape .inner's stacking context. */
+nav.top :where(.nav-links, .nav-actions) a {
+  position: relative;
+  z-index: 1;
+}
+
+/* The global `a:hover { opacity: .7 }` would dim the label at the exact moment
+   the glass arrives to pick it out. The highlight is the feedback; the text
+   should not move or fade at all. */
+nav.top :where(.nav-links, .nav-actions) a:hover {
+  opacity: 1;
+}
+
+/* Matched to the highlight rather than hugging the text, so keyboard focus
+   reads as the same object the pointer gets — and it travels on focus too. */
+nav.top :where(.nav-links, .nav-actions) a:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 9px;
+  border-radius: 999px;
+}
+
+/* No backdrop-filter (older Firefox): the same shape on a flat tint, matching
+   how nav.top::before degrades. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  nav.top .nav-pill {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+/* The material survives, the travel does not: the highlight cuts to each link
+   and only fades. */
+@media (prefers-reduced-motion: reduce) {
+  nav.top .nav-pill {
+    --pill-scale: 1;
+    transition: opacity 0.2s linear, visibility 0s linear 0.2s;
+  }
 }
 
 .hero {
@@ -927,6 +1072,12 @@ nav.top .right {
      shoving the address onto its own row early. */
   min-width: 0;
   flex: 1 1 min(100%, 34ch);
+  /* A column rather than plain blocks so the children's margins do not
+     collapse. The headline's negative bottom margin offsets its own descender
+     padding; collapsed against the lede's top margin it would eat that gap
+     instead, and the copy would close up by roughly a fifth of a line. */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Liquid chrome ------------------------------------------------------------ */
@@ -1076,6 +1227,17 @@ nav.top .right {
   letter-spacing: var(--display-tracking);
   line-height: .94;
   max-width: 14ch;
+  /* background-clip: text paints only inside the element's background box, and
+     a .94 line-height puts the bottom of that box above the descender of the
+     "g" in "together" on the last line. Unpainted, and with the transparent
+     text-fill below, that part of the glyph is simply not drawn — the letter
+     reads as cut off rather than as a missing colour.
+
+     The padding extends the paint area past the baseline; the matching
+     negative margin gives the space back so the lede does not move. Both are
+     in em so they track the clamp on font-size. */
+  padding-bottom: .2em;
+  margin-bottom: -.2em;
 
   /* The headline is the chrome. A wide ramp is clipped to the glyphs and slid
      across them, so the highlight travels through the letterforms instead of
@@ -1122,6 +1284,91 @@ nav.top .right {
 }
 
 /* The address -------------------------------------------------------------- */
+
+/* The address and the profiles are one block: both answer "how do I reach you",
+   and stacking them keeps the icons tied to the button instead of leaving them
+   floating somewhere else in the band. .cta-inner bottom-aligns its children, so
+   it is this block's last row that lines up with the lede's last line. */
+.cta-reach {
+  display: flex;
+  flex-direction: column;
+  /* Right-aligned to match where the address sits in the row; the wrapped
+     layout below flips it back to the text edge. */
+  align-items: flex-end;
+  gap: clamp(16px, 1.6vw, 22px);
+}
+
+.cta-social {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* These moved here out of the nav bar, where three profile links were competing
+   with three routes in a bar that has to survive a 360px screen. As icons they
+   read as a secondary way to reach the same person, under the primary one. */
+.cta-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 44px square: the smallest controls in the section, and the design system
+     asks for >= 40px on touch. */
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+  /* --fg-mute, not --fg-dim: the design system reserves 50% white for
+     non-essential meta, and these are controls sitting on a busy,
+     brightly-lit band. */
+  color: var(--fg-mute);
+  transition:
+    color .3s var(--ease),
+    border-color .3s var(--ease),
+    background .3s var(--ease),
+    transform .3s var(--ease);
+}
+
+.cta-social-link svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+
+@media (hover: hover) {
+  .cta-social-link:hover {
+    /* The global `a:hover { opacity: .7 }` would dim the glyph at the moment the
+       rim lights up, which reads as the icon retreating from the pointer. */
+    opacity: 1;
+    color: var(--fg);
+    border-color: rgba(255, 255, 255, .32);
+    background: rgba(255, 255, 255, .09);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-social-link {
+    transition: color .2s linear, border-color .2s linear, background .2s linear;
+  }
+
+  .cta-social-link:hover {
+    transform: none;
+  }
+}
+
+/* Once .cta-inner has wrapped, this block is full width under the copy, so it
+   lines up with the text rather than with the far edge of the band. */
+@media (max-width: 810px) {
+  .cta-reach {
+    align-items: flex-start;
+  }
+}
 
 .cta-mail {
   display: inline-block;
@@ -1327,40 +1574,197 @@ footer .baseline {
   }}
 
 @media (max-width: 810px) {
-  /* This block used to open with `nav.top ul { display: none }`, which deleted
-     Home / Philosophy / About -- the site's entire primary navigation -- on every
-     phone and portrait tablet, with nothing put in their place. The two sub-
-     routes were then reachable only from the footer, at the bottom of a five-
-     panel scroll, and `display: none` takes them out of the accessibility tree
-     as well, so it was a loss of function, not of decoration.
-
-     Three links do not need a hamburger. The bar wraps to a second row instead:
-     brand and Contact stay on row one, the routes take row two full width. The
-     tracks are named explicitly because moving `ul` out of `display: none` puts
-     it back into auto-placement, where it would otherwise land in row one and
-     recreate the crowding this is meant to solve.
-
-     Nav height is measured live in useScrolledPastHero, so the taller bar needs
-     no counterpart change in JS. */
+  /* Three links do not fit beside the wordmark once the bar is this narrow, so
+     they move into a sheet under it. The sheet is the SAME markup as the
+     desktop row -- .nav-sheet stops being `display: contents` and becomes a
+     panel -- so nothing is duplicated and the two can never drift apart. */
   nav.top .inner {
     grid-template-columns: 1fr auto;
-    row-gap: 10px;
-    column-gap: 16px;
   }
-  nav.top .brand { grid-area: 1 / 1; font-size: 22px; }
-  nav.top .right { grid-area: 1 / 2; gap: 12px; font-size: 15px; }
-  nav.top ul {
-    grid-area: 2 / 1 / 3 / -1;
-    justify-content: flex-start;
-    gap: 22px;
-    font-size: 16px;
+
+  nav.top .brand {
+    font-size: 22px;
   }
+
+  nav.top .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* 44px square: the design system asks for >= 40px on touch, and this is the
+       only control in the bar. */
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    backdrop-filter: blur(12px) saturate(160%);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
+  }
+
+  nav.top.is-open .nav-toggle {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  /* Two bars, not three. They rotate into the X from the same centre, so the
+     mark stays symmetrical through the whole turn -- a third bar has to fade
+     out underneath the other two, which is the flicker most burger buttons
+     have in the middle of the animation. */
+  nav.top .nav-toggle-bars {
+    position: relative;
+    display: block;
+    width: 18px;
+    height: 12px;
+  }
+
+  nav.top .nav-toggle-bars span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 0.4s var(--ease), top 0.4s var(--ease);
+  }
+
+  nav.top .nav-toggle-bars span:nth-child(1) { top: 2px; }
+  nav.top .nav-toggle-bars span:nth-child(2) { top: 8px; }
+
+  nav.top.is-open .nav-toggle-bars span:nth-child(1) {
+    top: 5px;
+    transform: rotate(45deg);
+  }
+
+  nav.top.is-open .nav-toggle-bars span:nth-child(2) {
+    top: 5px;
+    transform: rotate(-45deg);
+  }
+
+  nav.top .nav-sheet {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    /* Anchored to .inner, whose inline edges already match the capsule's, so
+       the sheet lines up with the bar above it without repeating --pad-x. */
+    top: calc(100% + 16px);
+    left: 0;
+    right: 0;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 24px;
+    background: rgba(20, 20, 22, 0.72);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.28),
+      0 24px 64px rgba(0, 0, 0, 0.5);
+    /* Grows from the button it came out of rather than from its own middle. */
+    transform-origin: 100% 0;
+    transform: translateY(-8px) scale(0.96);
+    opacity: 0;
+    /* visibility is discrete, so holding it to the end of the fade keeps the
+       blur at full strength all the way out instead of snapping off mid-exit.
+       It is also what keeps the closed sheet from being painted at all. */
+    visibility: hidden;
+    transition:
+      transform 0.42s var(--ease),
+      opacity 0.28s var(--ease),
+      visibility 0s linear 0.28s;
+  }
+
+  nav.top.is-open .nav-sheet {
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  nav.top .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    font-size: 17px;
+  }
+
+  nav.top .nav-links a,
+  nav.top .nav-actions a {
+    display: flex;
+    align-items: center;
+    /* Full-width rows: the whole row is the target, not just the word. */
+    min-height: 52px;
+    padding-inline: 16px;
+    border-radius: 16px;
+    transition: background 0.2s var(--ease);
+  }
+
+  nav.top .nav-links a:active,
+  nav.top .nav-actions a:active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  nav.top .nav-links a.is-current {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Contact is the one thing the bar is asking for, so it reads as the action
+     rather than a fourth link. The rule above it does the separating. */
+  nav.top .nav-actions {
+    justify-content: stretch;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 4px;
+    font-size: 17px;
+  }
+
+  nav.top .nav-actions a {
+    flex: 1;
+    justify-content: space-between;
+    color: var(--accent);
+  }
+
+  nav.top .nav-actions a::after {
+    content: "\2192";
+    opacity: 0.6;
+  }
+
+  /* Covers the page so a tap anywhere else closes the sheet. Transparent on
+     purpose: the sheet's own blur is the depth cue, and dimming the page as
+     well would make a three-link menu feel like a modal. */
+  .nav-scrim {
+    position: fixed;
+    inset: 0;
+    /* One BELOW nav.top's 50, never above it. At a higher z-index the scrim
+       covers the sheet it is supposed to sit behind, and every tap meant for a
+       link is swallowed by the thing whose only job is to catch the taps that
+       miss. */
+    z-index: 49;
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: default;
+  }
+
   .hero .copy { grid-template-columns: 1fr; gap: 12px; }
   /* The 22ch measure is tuned for the desktop line lengths the three authored
      breaks assume; below 810 it forces a second wrap inside lines written to be
      one line each. */
   .hero h1 { max-width: none; }
-  footer .cols { grid-template-columns: 1fr 1fr; }}
+  footer .cols { grid-template-columns: 1fr 1fr; }
+}
+
+/* The sheet arrives without travelling. */
+@media (prefers-reduced-motion: reduce) {
+  nav.top .nav-sheet,
+  nav.top .nav-toggle-bars span {
+    transition: opacity 0.2s linear, visibility 0s linear 0.2s;
+  }
+}
 
 @media (max-width: 480px) {
   :root {
@@ -1378,21 +1782,6 @@ footer .baseline {
 
   nav.top .brand {
     font-size: 17px;
-  }
-
-  nav.top .right {
-    font-size: 13px;
-    gap: 10px;
-  }
-
-  /* When the bar can only carry one of the two link sets, keep the one that is
-     actually navigation. The three socials are repeated verbatim in the footer's
-     Social column; Home / Philosophy / About are repeated nowhere above the
-     fold. Matched on rel="me" -- the attribute SocialLinks() already sets --
-     rather than the old :not(:last-child), which selected by position and would
-     silently hide the wrong link the moment one was appended. */
-  nav.top .right a[rel~="me"] {
-    display: none;
   }
 
   .about {
@@ -1471,4 +1860,248 @@ footer .baseline {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* Liquid chrome loader ------------------------------------------------------ */
+
+/* Same material as the contact band above — near-black surface, screen-blended
+   specular pools, the same contrast/saturate grade — poured into a small
+   morphing blob. Used for the route chunks and for the About hero, whose four
+   photographic layers are the heaviest thing on the site. The boot phase, which
+   runs before this stylesheet exists, has a standalone copy of all of it in
+   index.html; retune the two together.
+
+   The loop lengths are 3.82s / 6.18s / 10s / 16.18s: each is the one before it
+   times PHI, so no two layers ever come back into the same arrangement and the
+   surface never settles into a visible cycle. On a site built around the ratio
+   that is not decoration — it is the reason the motion reads as liquid rather
+   than as a spinning wheel. */
+.ghb-loader {
+  position: fixed;
+  inset: 0;
+  /* Over everything, including the nav (50) and the skip link (200) — while it
+     is up there is nothing behind it worth reaching. */
+  z-index: 300;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  background: var(--bg);
+  opacity: 0;
+  /* The delay is the whole trick on the way in: a load that finishes inside it
+     never paints, so a warm cache shows content rather than a flash of loader.
+     A transition, not a keyframed fade, because only a transition can be
+     interrupted — one that resolves mid-fade reverses from wherever the opacity
+     had got to instead of snapping back to full first. */
+  transition: opacity .5s var(--ease) .14s;
+}
+
+.ghb-loader[data-shown] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Both the frame before it enters and the whole of its exit. The delay is
+   dropped so the reveal underneath starts immediately, and the pointer is let
+   through the moment it stops being something to look at — the node outlives
+   its own fade by a few hundred milliseconds and must not be catching clicks
+   while it is invisible. */
+.ghb-loader:not([data-shown]) {
+  transition-delay: 0s;
+  pointer-events: none;
+}
+
+/* The bloom the metal sits in. The one place the site's accent appears in the
+   loader — the blob's own colours are the chrome palette, and a periwinkle halo
+   is what ties it back to the rest of the page. */
+.ghb-blob-holder {
+  position: relative;
+  display: block;
+}
+
+.ghb-blob-holder::before {
+  content: "";
+  position: absolute;
+  inset: -58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(168, 199, 255, .22) 0%, rgba(168, 199, 255, .07) 48%, transparent 76%);
+  filter: blur(12px);
+  animation: ghb-blob-halo 3.82s ease-in-out infinite alternate;
+}
+
+/* The silhouette. Unfiltered on purpose: it is the clip, and the grade belongs
+   on the opaque surface inside it. */
+.ghb-blob {
+  position: relative;
+  display: block;
+  width: clamp(104px, 9.5vw, 148px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 63% 37% 44% 56% / 42% 58% 42% 58%;
+  /* Two rhythms, PHI apart: the bulges travelling around the outline, and a
+     squash and stretch across it. Neither ever lands on a circle. */
+  animation:
+    ghb-blob-morph 10s linear infinite,
+    ghb-blob-breathe 6.18s ease-in-out infinite;
+}
+
+.ghb-blob-metal {
+  position: absolute;
+  inset: 0;
+  /* The body of the metal. What makes a shape read as chrome rather than as a
+     coloured ball is this ramp: bright sky along the top, a hard dark horizon
+     through the middle, a second bounce of light off the ground below it.
+     Weighted dark, like the contact band, so the specular layers above still
+     have unlit surface to sit on. */
+  background: linear-gradient(176deg,
+    #dbe6ff 0%,
+    #7285a9 4%,
+    #222b3f 10%,
+    #070b13 21%,
+    #03040a 52%,
+    #06080f 67%,
+    #1e2536 79%,
+    #556384 89%,
+    #a8bade 96%,
+    #5c6a8a 100%);
+  filter: contrast(132%) saturate(118%);
+}
+
+.ghb-blob-flow,
+.ghb-blob-sheen,
+.ghb-blob-ribbon {
+  position: absolute;
+  /* Oversized so a layer turning through a full rotation never swings an edge
+     into the blob: at -40% the half-diagonal clears the box by ~2.5x. */
+  inset: -40%;
+  display: block;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+/* The haze the ridges are cut from. Turns slowly, so the colour under the crest
+   is different on every pass. */
+.ghb-blob-flow {
+  opacity: .44;
+  filter: blur(24px);
+  background: radial-gradient(36% 44% at 34% 30%, rgba(122, 58, 224, .72) 0%, transparent 62%),
+    radial-gradient(30% 38% at 72% 62%, rgba(0, 188, 196, .58) 0%, transparent 64%),
+    radial-gradient(28% 34% at 46% 86%, rgba(255, 88, 220, .5) 0%, transparent 62%);
+  animation: ghb-blob-turn 16.18s linear infinite;
+}
+
+/* The fold — two elongated lobes counter-turning against the haze. Two layers
+   rotating opposite ways is what makes the surface look like it is flowing
+   rather than being dragged around. */
+.ghb-blob-ribbon {
+  opacity: .42;
+  filter: blur(14px);
+  background: radial-gradient(46% 18% at 44% 40%, rgba(255, 110, 230, .66) 0%, rgba(150, 90, 255, .26) 48%, transparent 74%),
+    radial-gradient(38% 15% at 66% 66%, rgba(110, 230, 255, .5) 0%, transparent 72%);
+  animation: ghb-blob-turn 10s linear infinite reverse;
+}
+
+/* The specular crest. This one does NOT turn: on polished metal the highlight
+   belongs to the light, not to the surface, so it holds its angle and only
+   sweeps across while the material flows underneath. It is also the only layer
+   with a white core and a low blur — the hard edge is what the contrast grade
+   finds, and what makes the blob read as chrome instead of as a lava lamp. */
+.ghb-blob-sheen {
+  opacity: .92;
+  filter: blur(3.5px);
+  background: linear-gradient(102deg,
+    transparent 44%,
+    rgba(120, 80, 220, .32) 46.5%,
+    rgba(214, 150, 255, .55) 48.4%,
+    rgba(255, 252, 255, .95) 49.7%,
+    rgba(255, 252, 255, .95) 50.5%,
+    rgba(150, 210, 255, .55) 51.8%,
+    rgba(60, 190, 210, .28) 53.8%,
+    transparent 56.5%,
+    transparent 68%,
+    rgba(150, 235, 244, .38) 72%,
+    rgba(228, 255, 252, .46) 73.4%,
+    transparent 77%);
+  animation: ghb-blob-sheen 3.82s ease-in-out infinite alternate;
+}
+
+/* Who is loading. Without it the blob is a handsome shape with nothing to say,
+   and the first paint of a cold visit is exactly the moment the site should be
+   naming itself. The nav wordmark's treatment, one size down. */
+.ghb-loader-mark {
+  margin-top: clamp(26px, 3vw, 38px);
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg-mute);
+}
+
+/* And what it is loading. The site's mono meta voice, so the loader reads from
+   the same script as every other label on the page. */
+.ghb-loader-caption {
+  margin-top: 11px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+/* The outline, as four snapshots of one shape turned 90° at a time. A quarter
+   turn moves every corner on to the next one AND swaps its horizontal radius
+   with its vertical, so these are the same silhouette four ways up.
+   Interpolating between them walks the bulges around the edge without rotating
+   the element — which is the point: the light has to stay where the light is
+   while the surface moves under it. Linear, because a flowing surface does not
+   pause at the corners. */
+@keyframes ghb-blob-morph {
+  0% { border-radius: 63% 37% 44% 56% / 42% 58% 42% 58%; }
+  25% { border-radius: 58% 42% 58% 42% / 56% 63% 37% 44%; }
+  50% { border-radius: 44% 56% 63% 37% / 42% 58% 42% 58%; }
+  75% { border-radius: 58% 42% 58% 42% / 37% 44% 56% 63%; }
+  100% { border-radius: 63% 37% 44% 56% / 42% 58% 42% 58%; }
+}
+
+/* Volume, not travel. A liquid holding itself together pulls in on one axis as
+   it gives on the other. */
+@keyframes ghb-blob-breathe {
+  0%, 100% { scale: 1 1; }
+  33% { scale: 1.035 .965; }
+  66% { scale: .97 1.03; }
+}
+
+@keyframes ghb-blob-turn {
+  to { rotate: 360deg; }
+}
+
+@keyframes ghb-blob-sheen {
+  from { transform: translate3d(-22%, 7%, 0) rotate(-6deg); }
+  to { transform: translate3d(22%, -7%, 0) rotate(6deg); }
+}
+
+@keyframes ghb-blob-halo {
+  from { opacity: .5; transform: scale(.92); }
+  to { opacity: 1; transform: scale(1.06); }
+}
+
+/* The material, not the motion — the rule the contact band follows too. A
+   loader still has to say the page is alive, so unlike the band this one keeps
+   a breath: opacity only, on the halo, moving nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .ghb-blob,
+  .ghb-blob-flow,
+  .ghb-blob-sheen,
+  .ghb-blob-ribbon {
+    animation: none;
+  }
+
+  .ghb-blob-holder::before {
+    animation: ghb-blob-breath 2.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes ghb-blob-breath {
+    from { opacity: .45; }
+    to { opacity: 1; }
+  }
 }

@@ -1,0 +1,117 @@
+// The bar carries ONE highlight that travels between links, rather than a pill
+// per link that fades in wherever the pointer lands. That is the difference
+// between a hover state and the way an Apple bar moves: going from Philosophy
+// to About is a single object sliding across, so the eye follows it instead of
+// watching one thing vanish and another appear somewhere else.
+//
+// This only measures. The link that should be lit is published to CSS as
+// --pill-x/y/w/h on .inner, and the stylesheet decides how much larger than the
+// label the glass sits and does all of the animating — geometry here, design
+// there.
+//
+// Written straight to the DOM rather than held in React state on purpose: it
+// runs on every pointerover across the bar, and re-rendering the whole nav to
+// move a decoration would be work for nothing.
+const PILL_LINKS = 'ul a, .right a'
+
+function useNavPill(innerRef) {
+  useEffect(() => {
+    const inner = innerRef.current
+    if (!inner) return undefined
+
+    // Pointer and keyboard are tracked apart so the two cannot erase each
+    // other: tabbing away while the pointer still rests on a link should hand
+    // the highlight back to the pointer, not switch it off.
+    let hovered = null
+    let focused = null
+    let lit = null
+
+    const linkFor = (node) => (node instanceof Element ? node.closest(PILL_LINKS) : null)
+
+    // `animate: false` snaps — the geometry is written, the browser is forced
+    // to take it, and only then are transitions allowed back. Without that the
+    // highlight streaks in across the bar from the last link it sat on instead
+    // of simply appearing at the one under the pointer.
+    const place = (link, animate) => {
+      if (!animate) inner.setAttribute('data-pill', 'placing')
+
+      const host = inner.getBoundingClientRect()
+      const box = link.getBoundingClientRect()
+      inner.style.setProperty('--pill-x', `${box.left - host.left}px`)
+      inner.style.setProperty('--pill-y', `${box.top - host.top}px`)
+      inner.style.setProperty('--pill-w', `${box.width}px`)
+      inner.style.setProperty('--pill-h', `${box.height}px`)
+
+      // Reading a layout property is what commits the placement above before
+      // the next line lets the transitions run again.
+      if (!animate) void inner.offsetWidth
+      inner.setAttribute('data-pill', 'on')
+    }
+
+    const render = () => {
+      const next = focused ?? hovered
+      if (next === lit) return
+
+      if (!next) {
+        lit = null
+        inner.removeAttribute('data-pill')
+        return
+      }
+
+      place(next, lit !== null)
+      lit = next
+    }
+
+    // pointerover rather than pointerenter, because it bubbles: one listener
+    // covers every link and also fires for the wordmark and the gaps between
+    // them, which is what puts the highlight out when the pointer is over
+    // neither. A touch pointer is ignored outright — a tap is not a hover, and
+    // a highlight left stranded on the link you just tapped is the usual way
+    // this effect goes wrong on phones.
+    const onPointerOver = (event) => {
+      if (event.pointerType === 'touch') return
+      hovered = linkFor(event.target)
+      render()
+    }
+
+    const onPointerLeave = () => {
+      hovered = null
+      render()
+    }
+
+    // :focus-visible, not :focus — a click focuses the link too, and without
+    // this the highlight would stay pinned to it after the pointer had gone.
+    const onFocusIn = (event) => {
+      const link = linkFor(event.target)
+      focused = link?.matches(':focus-visible') ? link : null
+      render()
+    }
+
+    const onFocusOut = () => {
+      focused = null
+      render()
+    }
+
+    // The bar re-flows at 810px into two rows, which moves the links
+    // vertically. Re-measured without animation: a highlight gliding to a new
+    // position through every frame of a drag-resize is noise.
+    const onResize = () => {
+      if (lit) place(lit, false)
+    }
+
+    inner.addEventListener('pointerover', onPointerOver)
+    inner.addEventListener('pointerleave', onPointerLeave)
+    inner.addEventListener('focusin', onFocusIn)
+    inner.addEventListener('focusout', onFocusOut)
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      inner.removeEventListener('pointerover', onPointerOver)
+      inner.removeEventListener('pointerleave', onPointerLeave)
+      inner.removeEventListener('focusin', onFocusIn)
+      inner.removeEventListener('focusout', onFocusOut)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [innerRef])
+}
+

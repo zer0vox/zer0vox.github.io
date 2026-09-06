@@ -25,6 +25,37 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // alpha:     source has a real alpha channel that must survive.
 // grayscale: the layer is rendered through `filter: grayscale(1)`, so colour
 //            in the file is bytes nobody will ever see.
+// mono:      a real black-and-white conversion, as opposed to `grayscale`
+//            above. The two are not the same job. `grayscale` throws away
+//            colour nobody can see because CSS is already filtering it out;
+//            `mono` is the edit — the file is meant to BE black and white, and
+//            what it looks like matters.
+//
+//            format=gray on its own uses the Rec.601 luma weights
+//            (.299/.587/.114), which is a fine average and a poor photograph:
+//            it under-weights red, and red is most of what gives skin its
+//            modelling, so faces come out flat and slightly muddy. The mixer
+//            below is nearer a panchromatic film response — more red, less
+//            blue — which is what black-and-white portrait stock was designed
+//            to do. The small contrast lift is for the page rather than the
+//            print: this sits on a near-black ground, where a neutral scan
+//            reads softer than it does on white.
+// Orientation: there is deliberately no rotate option. ffmpeg applies a
+//            JPEG's EXIF orientation on decode, so a phone photo that is
+//            stored landscape with an orientation tag arrives here already
+//            upright and needs nothing. Note that ffprobe reports the CODED
+//            dimensions, so a portrait phone photo still shows as landscape
+//            there — which makes it very tempting to "fix" with a transpose
+//            that then rotates a correct image into a wrong one. If a master
+//            ever really is on its side, check by converting it and looking at
+//            the result before adding a filter.
+// crop:      an ffmpeg crop expression, applied before the scale. For art
+//            that has a composition rather than being a full-bleed layer:
+//            framing it into the asset means the element displaying it can
+//            crop from the centre and still be right, which object-position
+//            cannot promise when the box it lands in is sized by its content.
+//            Written with iw/ih so it survives the master being replaced at a
+//            different resolution.
 // denoise:   nlmeans strength. Only for files whose "grain" is Floyd-Steinberg
 //            dither speckle from a 256-colour palette quantisation, not real
 //            texture. That speckle is per-pixel noise, so it defeats the
@@ -41,6 +72,18 @@ const TARGETS = [
   // A soft luminance mask; banding here shows up as a hard edge in the sky,
   // so it keeps its resolution and a high quality number.
   { src: 'src/assets/about/sky-mask.png',       width: 1600, quality: 92, alpha: true },
+  // Meet the man — the portrait. 840 is 2x the 420px frame it is displayed in.
+  // The conversion lives here rather than in CSS so the asset is genuinely
+  // black and white: a filter: grayscale(1) still ships every colour byte, and
+  // still shows colour anywhere the filter does not apply.
+  { src: 'src/assets/about/portrait.jpg',      width: 840,  quality: 84, mono: true },
+  // The easter-egg card's art. Narrower than the portrait because it is only
+  // ever seen inside the card's art window, and mono for the same reason the
+  // portrait is — which leaves the holo as the only colour on the card.
+  // Framed for the card's art window: the top fifth is empty night sky and the
+  // bottom is the plinth, neither of which is the picture.
+  { src: 'src/assets/about/card-art.jpg',      width: 720,  quality: 82, mono: true,
+    crop: 'iw:ih*0.74:0:ih*0.18' },
 
   // Philosophy.
   { src: 'src/assets/philosophy/hero-ridgeline.jpg', width: 2560, quality: 74 },
@@ -79,11 +122,23 @@ for (const t of TARGETS) {
 
   // `scale` never upscales: -2 keeps the dimension even, which libwebp wants.
   const filters = [`scale='min(${t.width},iw)':-2`]
+  // Ahead of the scale, so `width` means the width of the cropped image.
+  if (t.crop) filters.unshift(`crop=${t.crop}`)
   // nlmeans is a spatial denoiser. hqdn3d is mostly temporal and does almost
   // nothing on a still; smartblur with a negative ls sharpens, which makes the
   // file bigger. Both were tried here first.
   if (t.denoise) filters.push(`nlmeans=s=${t.denoise}:p=7:r=15`)
   if (t.grayscale) filters.push('format=gray')
+  if (t.mono) {
+    // Panchromatic-ish weights; see `mono` above for why not format=gray alone.
+    filters.push('colorchannelmixer=.34:.5:.16:0:.34:.5:.16:0:.34:.5:.16:0')
+    filters.push('eq=contrast=1.08:gamma=0.98')
+    // Downscaling softens; this puts the edge back without haloing.
+    filters.push('unsharp=5:5:0.35:5:5:0')
+    // The mixer leaves an RGB image with three equal channels. This makes it
+    // one channel, so the chroma planes are flat and cost the encoder nothing.
+    filters.push('format=gray')
+  }
 
   const args = [
     '-hide_banner', '-loglevel', 'error', '-y',

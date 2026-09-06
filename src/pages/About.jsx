@@ -3,6 +3,7 @@ import { SiteNav, SiteFooter } from '../components/SiteChrome'
 import AboutHero from '../components/AboutHero'
 import ExperienceTimeline from '../components/ExperienceTimeline'
 import ContactCta from '../components/ContactCta.jsx'
+import PortraitSlab from '../components/PortraitSlab.jsx'
 import './About.css'
 
 // Ported from the "About.dc.html" file in the greenhueblues Claude Design
@@ -72,9 +73,7 @@ export default function About() {
           <div className="section-label">Meet the man</div>
         </div>
         <div className="meet-cols">
-          <div className="meet-portrait">
-            <span>Portrait — 4:5</span>
-          </div>
+          <PortraitSlab />
           <div className="meet-body">
             <p className="meet-lead">
               I&apos;m a tech enthusiast who loves to build — whether that means

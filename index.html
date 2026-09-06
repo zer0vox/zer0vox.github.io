@@ -93,8 +93,272 @@
       content="A personal creative practice based in Kathmandu, working globally. Shaping enlightened design with purposeful vision."
     />
     <meta name="twitter:image" content="https://greenhueblues.me/greenhueblues.png" />
+
+    <!-- Boot loader. Everything below this point in the load is JavaScript:
+         until the bundle has arrived, parsed and mounted, #root is empty and
+         the visitor is looking at an unexplained black rectangle. This is the
+         same liquid-chrome blob as LiquidLoader.jsx, hand-copied here because
+         it has to render before a single byte of the app stylesheet exists —
+         which is also why it names its colours literally instead of reaching
+         for the tokens in index.css, and why its class names are prefixed so
+         the two copies can never collide in the cascade.
+
+         Keep the two in step if the material is ever retuned; the canonical
+         version, comments and all, is index.css under "Liquid chrome loader".
+
+         The .28s delay is load-bearing: a warm cache mounts React inside it,
+         main.jsx removes this node while it is still fully transparent, and
+         nobody sees a loader for a page that was already there. -->
+    <style>
+      .boot {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        background: #0d0d0d;
+        opacity: 0;
+        animation: boot-in .5s cubic-bezier(.2, .7, .2, 1) .28s forwards;
+      }
+
+      .boot-sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+
+      @keyframes boot-in {
+        to { opacity: 1; }
+      }
+
+      /* The bloom the metal sits in. The one place the site's accent appears in the
+         loader — the blob's own colours are the chrome palette, and a periwinkle halo
+         is what ties it back to the rest of the page. */
+      .boot-halo {
+        position: relative;
+        display: block;
+      }
+
+      .boot-halo::before {
+        content: "";
+        position: absolute;
+        inset: -58%;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(168, 199, 255, .22) 0%, rgba(168, 199, 255, .07) 48%, transparent 76%);
+        filter: blur(12px);
+        animation: boot-halo 3.82s ease-in-out infinite alternate;
+      }
+
+      /* The silhouette. Unfiltered on purpose: it is the clip, and the grade belongs
+         on the opaque surface inside it. */
+      .boot-blob {
+        position: relative;
+        display: block;
+        width: clamp(104px, 9.5vw, 148px);
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 63% 37% 44% 56% / 42% 58% 42% 58%;
+        /* Two rhythms, PHI apart: the bulges travelling around the outline, and a
+           squash and stretch across it. Neither ever lands on a circle. */
+        animation:
+          boot-morph 10s linear infinite,
+          boot-breathe 6.18s ease-in-out infinite;
+      }
+
+      .boot-metal {
+        position: absolute;
+        inset: 0;
+        /* The body of the metal. What makes a shape read as chrome rather than as a
+           coloured ball is this ramp: bright sky along the top, a hard dark horizon
+           through the middle, a second bounce of light off the ground below it.
+           Weighted dark, like the contact band, so the specular layers above still
+           have unlit surface to sit on. */
+        background: linear-gradient(176deg,
+          #dbe6ff 0%,
+          #7285a9 4%,
+          #222b3f 10%,
+          #070b13 21%,
+          #03040a 52%,
+          #06080f 67%,
+          #1e2536 79%,
+          #556384 89%,
+          #a8bade 96%,
+          #5c6a8a 100%);
+        filter: contrast(132%) saturate(118%);
+      }
+
+      .boot-flow,
+      .boot-sheen,
+      .boot-ribbon {
+        position: absolute;
+        /* Oversized so a layer turning through a full rotation never swings an edge
+           into the blob: at -40% the half-diagonal clears the box by ~2.5x. */
+        inset: -40%;
+        display: block;
+        mix-blend-mode: screen;
+        will-change: transform;
+      }
+
+      /* The haze the ridges are cut from. Turns slowly, so the colour under the crest
+         is different on every pass. */
+      .boot-flow {
+        opacity: .44;
+        filter: blur(24px);
+        background: radial-gradient(36% 44% at 34% 30%, rgba(122, 58, 224, .72) 0%, transparent 62%),
+          radial-gradient(30% 38% at 72% 62%, rgba(0, 188, 196, .58) 0%, transparent 64%),
+          radial-gradient(28% 34% at 46% 86%, rgba(255, 88, 220, .5) 0%, transparent 62%);
+        animation: boot-turn 16.18s linear infinite;
+      }
+
+      /* The fold — two elongated lobes counter-turning against the haze. Two layers
+         rotating opposite ways is what makes the surface look like it is flowing
+         rather than being dragged around. */
+      .boot-ribbon {
+        opacity: .42;
+        filter: blur(14px);
+        background: radial-gradient(46% 18% at 44% 40%, rgba(255, 110, 230, .66) 0%, rgba(150, 90, 255, .26) 48%, transparent 74%),
+          radial-gradient(38% 15% at 66% 66%, rgba(110, 230, 255, .5) 0%, transparent 72%);
+        animation: boot-turn 10s linear infinite reverse;
+      }
+
+      /* The specular crest. This one does NOT turn: on polished metal the highlight
+         belongs to the light, not to the surface, so it holds its angle and only
+         sweeps across while the material flows underneath. It is also the only layer
+         with a white core and a low blur — the hard edge is what the contrast grade
+         finds, and what makes the blob read as chrome instead of as a lava lamp. */
+      .boot-sheen {
+        opacity: .92;
+        filter: blur(3.5px);
+        background: linear-gradient(102deg,
+          transparent 44%,
+          rgba(120, 80, 220, .32) 46.5%,
+          rgba(214, 150, 255, .55) 48.4%,
+          rgba(255, 252, 255, .95) 49.7%,
+          rgba(255, 252, 255, .95) 50.5%,
+          rgba(150, 210, 255, .55) 51.8%,
+          rgba(60, 190, 210, .28) 53.8%,
+          transparent 56.5%,
+          transparent 68%,
+          rgba(150, 235, 244, .38) 72%,
+          rgba(228, 255, 252, .46) 73.4%,
+          transparent 77%);
+        animation: boot-sheen 3.82s ease-in-out infinite alternate;
+      }
+
+      /* Who is loading. Without it the blob is a handsome shape with nothing to say,
+         and the first paint of a cold visit is exactly the moment the site should be
+         naming itself. The nav wordmark's treatment, one size down. */
+      .boot-mark {
+        margin-top: clamp(26px, 3vw, 38px);
+        font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        color: rgba(255, 255, 255, .7);
+      }
+
+      /* And what it is loading. The site's mono meta voice, so the loader reads from
+         the same script as every other label on the page. */
+      .boot-caption {
+        margin-top: 11px;
+        font-family: "Fragment Mono", ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .5);
+      }
+
+      /* The outline, as four snapshots of one shape turned 90° at a time. A quarter
+         turn moves every corner on to the next one AND swaps its horizontal radius
+         with its vertical, so these are the same silhouette four ways up.
+         Interpolating between them walks the bulges around the edge without rotating
+         the element — which is the point: the light has to stay where the light is
+         while the surface moves under it. Linear, because a flowing surface does not
+         pause at the corners. */
+      @keyframes boot-morph {
+        0% { border-radius: 63% 37% 44% 56% / 42% 58% 42% 58%; }
+        25% { border-radius: 58% 42% 58% 42% / 56% 63% 37% 44%; }
+        50% { border-radius: 44% 56% 63% 37% / 42% 58% 42% 58%; }
+        75% { border-radius: 58% 42% 58% 42% / 37% 44% 56% 63%; }
+        100% { border-radius: 63% 37% 44% 56% / 42% 58% 42% 58%; }
+      }
+
+      /* Volume, not travel. A liquid holding itself together pulls in on one axis as
+         it gives on the other. */
+      @keyframes boot-breathe {
+        0%, 100% { scale: 1 1; }
+        33% { scale: 1.035 .965; }
+        66% { scale: .97 1.03; }
+      }
+
+      @keyframes boot-turn {
+        to { rotate: 360deg; }
+      }
+
+      @keyframes boot-sheen {
+        from { transform: translate3d(-22%, 7%, 0) rotate(-6deg); }
+        to { transform: translate3d(22%, -7%, 0) rotate(6deg); }
+      }
+
+      @keyframes boot-halo {
+        from { opacity: .5; transform: scale(.92); }
+        to { opacity: 1; transform: scale(1.06); }
+      }
+
+      /* The material, not the motion — the rule the contact band follows too. A
+         loader still has to say the page is alive, so unlike the band this one keeps
+         a breath: opacity only, on the halo, moving nothing. */
+      @media (prefers-reduced-motion: reduce) {
+        .boot-blob,
+        .boot-flow,
+        .boot-sheen,
+        .boot-ribbon {
+          animation: none;
+        }
+
+        .boot-halo::before {
+          animation: boot-breath 2.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes boot-breath {
+          from { opacity: .45; }
+          to { opacity: 1; }
+        }
+      }
+    </style>
+
+    <!-- Nothing below here ever runs without JavaScript, so the loader must not
+         sit spinning over a page that is never coming. -->
+    <noscript>
+      <style>
+        .boot { display: none; }
+      </style>
+    </noscript>
   </head>
   <body>
+    <!-- Removed by main.jsx once React has painted. It sits outside #root
+         rather than inside it so the handover can be a cross-fade: React
+         clearing the container would cut straight from the blob to the page. -->
+    <div class="boot" id="boot" role="status">
+      <span class="boot-halo" aria-hidden="true">
+        <span class="boot-blob">
+          <span class="boot-metal">
+            <span class="boot-flow"></span>
+            <span class="boot-ribbon"></span>
+            <span class="boot-sheen"></span>
+          </span>
+        </span>
+      </span>
+      <span class="boot-mark" aria-hidden="true">greenhueblues</span>
+      <span class="boot-caption" aria-hidden="true">Loading</span>
+      <span class="boot-sr">Loading greenhueblues</span>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
