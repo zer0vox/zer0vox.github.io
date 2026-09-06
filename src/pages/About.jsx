@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { SiteNav, SiteFooter } from '../components/SiteChrome'
 import AboutHero from '../components/AboutHero'
 import ExperienceTimeline from '../components/ExperienceTimeline'
-import { CONTACT_EMAIL, CONTACT_MAILTO } from '../lib/contact.js'
+import ContactCta from '../components/ContactCta.jsx'
 import './About.css'
 
 // Ported from the "About.dc.html" file in the greenhueblues Claude Design
@@ -169,11 +169,7 @@ export default function About() {
 
       <ExperienceTimeline />
 
-      <section className="about-contact wrap" id="contact">
-        <a className="about-contact-link" href={CONTACT_MAILTO}>
-          {CONTACT_EMAIL}
-        </a>
-      </section>
+      <ContactCta />
 
       </main>
       <SiteFooter />

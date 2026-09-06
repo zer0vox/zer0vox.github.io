@@ -7,7 +7,7 @@ import heroImg from '../assets/philosophy/hero-ridgeline.webp'
 import markBandImg from '../assets/philosophy/mark-band.webp'
 import practiceImg from '../assets/philosophy/practice.webp'
 import markLogo from '../assets/philosophy/greenhueblues-mark.webp'
-import { CONTACT_EMAIL, CONTACT_MAILTO } from '../lib/contact.js'
+import ContactCta from '../components/ContactCta.jsx'
 import './Philosophy.css'
 
 // The six stages the dial turns through. Devanagari numerals are the design's,
@@ -89,8 +89,6 @@ export default function Philosophy() {
       rise('.ph-rule-row', { y: 14, duration: 0.6 })
       rise('.ph-practice-head')
       rise('.ph-practice-body p', { y: 20, stagger: 0.1 })
-      rise('.ph-contact h2')
-      rise('.ph-contact-link', { y: 16, duration: 0.7 })
     })
 
     return () => ctx.revert()
@@ -147,7 +145,19 @@ export default function Philosophy() {
     // that already exist fly there from where they are, so the glyph dissolves
     // and reforms rather than cutting.
     const buildGlyph = (ch, w, h) => {
-      const size = Math.min(h * 0.72, w * 0.42)
+      // Below 900px the drum rides at 36% of the stage and the copy sits under
+      // it, which leaves the numeral and the stage names both wanting the middle
+      // of the screen -- on a phone the particles were landing straight on top of
+      // GATHER and STILLNESS. The numeral is the one that can move: the names are
+      // the content. Right and a little high clears the label column at every
+      // narrow size, and it is free space here because .ph-lens, which owns that
+      // edge on desktop, is display:none under the same breakpoint.
+      const narrow = w < 900
+      const size = narrow
+        ? Math.min(h * 0.30, w * 0.40)
+        : Math.min(h * 0.72, w * 0.42)
+      const gx = narrow ? w * 0.74 : w / 2
+      const gy = narrow ? h * 0.30 : h * 0.5
       const off = document.createElement('canvas')
       const S = 132
       off.width = S
@@ -164,7 +174,7 @@ export default function Philosophy() {
       for (let y = 0; y < S; y += 1) {
         for (let x = 0; x < S; x += 1) {
           if (data[(y * S + x) * 4 + 3] > 130) {
-            pts.push([(x / S - 0.5) * size + w / 2, (y / S - 0.5) * size + h * 0.5])
+            pts.push([(x / S - 0.5) * size + gx, (y / S - 0.5) * size + gy])
           }
         }
       }
@@ -619,12 +629,7 @@ export default function Philosophy() {
         </div>
       </section>
 
-      <section className="ph-contact" id="contact">
-        <div className="inner">
-          <h2>Have something that needs noticing?</h2>
-          <a className="ph-contact-link" href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a>
-        </div>
-      </section>
+      <ContactCta />
 
       </main>
       <SiteFooter />

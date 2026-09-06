@@ -10,13 +10,30 @@
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0d0d0d" />
 
-    <!-- Favicon: crisp scalable SVG mark first (modern browsers), PNG fallback
-         for older ones. apple-touch-icon must be a PNG — iOS has never
-         supported SVG for the home-screen icon and silently falls back to a
-         screenshot of the page when handed one. -->
+    <!-- Favicon: the golden spiral, as vector. The construction lives in
+         public/favicon.svg -- a PHI:1 rectangle subdivided square by square,
+         with the quarter-arc inscribed in each.
+
+         SVG first so it stays crisp at every size a browser or OS asks for,
+         including the oversized ones (bookmark bars, the Windows task bar) a
+         fixed PNG has to be upscaled into. The two PNGs are the fallback for
+         browsers that never took SVG icons, at the exact sizes they ask for:
+         handing them one large master means a cheap box-filter downscale, and
+         this mark is a thin curve, which is the worst case for it.
+
+         apple-touch-icon must be a PNG regardless -- iOS has never supported
+         SVG there and silently falls back to a screenshot of the page when
+         handed one. Its copy is drawn with more padding than the tab icon,
+         because iOS masks the corners and would clip the spiral's outer tail.
+
+         Not the wordmark. greenhueblues.png is black line-art occupying 9.9%
+         of a 1080x1080 transparent canvas, so at 16px the mark lands in about
+         10x6 pixels and renders as a faint grey smudge. It stays on as the
+         social share image below, where it has 1080px to work with. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/greenhueblues.png" />
-    <link rel="apple-touch-icon" href="/greenhueblues.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     <!-- Fonts. These two hints open the TLS connections while the HTML is still
          being read, so the font CSS is not paying for a cold handshake. The

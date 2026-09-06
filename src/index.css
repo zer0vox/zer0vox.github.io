@@ -45,7 +45,7 @@
   --hero-size: clamp(22px, 2.8vw, 40px);
   --display: clamp(40px, 5vw, 70px);
   --huge: clamp(44px, 7.2vw, 112px);
-  --body: 18px;
+  --body: 1.125rem;
   --ease: cubic-bezier(.2, .7, .2, 1);
 }
 
@@ -64,7 +64,18 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* iOS Safari inflates text in landscape unless told not to; the site sets its
+     own fluid sizes and does not want that second, invisible scale factor. */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Unconditional smooth scroll was the one piece of motion a reduced-motion
+   reader could not escape: Lenis bows out for them in App.jsx, which left this
+   rule as the only thing still animating the scroll position. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 html,
@@ -100,8 +111,22 @@ a {
   transition: opacity .25s var(--ease), color .25s var(--ease);
 }
 
-a:hover {
-  opacity: 0.7;
+/* Was ungated, so on iOS the 0.7 latched onto the last-tapped link and stayed
+   there until something else was tapped. */
+@media (hover: hover) {
+  a:hover {
+    opacity: 0.7;
+  }
+}
+
+/* :focus-visible, not :focus -- a mouse click should not leave a ring behind.
+   Not one nav or footer link had an authored focus style before this. */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 .wrap {
@@ -301,8 +326,17 @@ nav.top .right {
 
 .hero {
   position: relative;
+  /* svh, not vh: vh is the address-bar-hidden height, so a vh-tall hero starts
+     out taller than the screen it is on and the bottom-anchored copy begins
+     below the fold. The plain vh line is the fallback for engines without svh
+     and is deliberately first.
+
+     `min-height: 640px` went with it. Its job was to stop short desktop windows
+     crushing the hero, but it is a hard floor with no escape, so on a landscape
+     phone (740x360) it made the hero 640px tall inside a 360px viewport -- and it
+     is inert at every desktop size the site actually sees. */
   height: 100vh;
-  min-height: 640px;
+  height: 100svh;
   overflow: hidden;
   /* Live glare vars — written by useHeroGlare's rAF loop, inherited by
      .hero-glare. Defaults keep the glare invisible (--gi 0) until interaction. */
@@ -689,8 +723,11 @@ nav.top .right {
 .panel {
   position: sticky;
   top: 0;
+  /* See .hero. The 640px floor mattered more here: a sticky box taller than the
+     scrollport does not stick at all, so on any short viewport the panels used
+     to scroll past instead of holding. */
   height: 100vh;
-  min-height: 640px;
+  height: 100svh;
   overflow: hidden;
   color: #fff;
   isolation: isolate;
@@ -845,132 +882,176 @@ nav.top .right {
 
 .cta {
   position: relative;
+  /* Above the 1 the section group above assigns. The banner closes all three
+     routes now, and on About it follows the Experience timeline's sticky
+     stage — which is what the .about-contact rule this replaced was clearing
+     with a 2 of its own. */
+  z-index: 2;
   isolation: isolate;
   overflow: hidden;
-  background: rgba(13, 13, 13, 0.45);
-  /* The inline value is spelled out rather than left at 0: this shorthand sits
-     after .wrap in the cascade, so a 0 here silently cancels .wrap's
-     padding-inline and pins the copy to the very edge of the viewport, out of
-     line with the hero above and the footer below. */
-  padding: clamp(120px, 18vw, 240px) var(--pad-x) clamp(40px, 6vw, 80px);
+  /* Near-black rather than the 13,13,13 used elsewhere: the screen-blended
+     chrome above needs a floor dark enough that the unlit parts of the ramp
+     stay black instead of coming up grey. */
+  background: #06070a;
+  /* Hairlines top and bottom. The band runs edge to edge, so it has no left or
+     right rim to light — these two rules are the whole of its frame, and what
+     separate it from the About copy above and the footer below. */
+  border-block: 1px solid rgba(255, 255, 255, .08);
+  /* Banner proportions. The old top value was sized for a section that filled
+     most of a viewport; a band takes its height from the copy instead. The
+     inline gutter is kept here rather than left to .wrap because .cta is no
+     longer .wrap — the max-width moved to .cta-inner below so the material can
+     reach both edges of the viewport. */
+  padding: clamp(56px, 7vw, 104px) var(--pad-x);
 }
 
 .cta-inner {
   position: relative;
   z-index: 2;
+  /* .wrap's job, done here instead, so the eyebrow still lines up with the
+     hero above and the footer below even though the band behind it does not. */
+  max-width: var(--max);
+  margin-inline: auto;
+  display: flex;
+  flex-wrap: wrap;
+  /* Bottom-aligned so the address sits on the lede's last line rather than
+     floating against the middle of the block. */
+  align-items: flex-end;
+  justify-content: space-between;
+  /* Also the vertical gap once the address wraps under the copy. */
+  gap: clamp(28px, 4vw, 64px);
+}
+
+.cta-copy {
+  /* min-width: 0 so the headline can shrink within its column instead of
+     shoving the address onto its own row early. */
+  min-width: 0;
+  flex: 1 1 min(100%, 34ch);
 }
 
 /* Liquid chrome ------------------------------------------------------------ */
 
+/* The material is folded silk: a near-black surface with a few bright specular
+   ridges across it and a fast falloff either side. The reference is roughly
+   three-quarters black, and that ratio is the whole effect — the ridges only
+   read as ridges because there is a lot of unlit surface around them.
+
+   Two rules follow from it, and both were wrong in the first pass here. The
+   lit shapes have to be small relative to the box: this band is about 5:1, so
+   an ellipse sized in percentages covers far more of it than the same numbers
+   would cover on the 16:9 the values were picked for. And they have to sit
+   apart from each other, because mix-blend-mode: screen is additive — three
+   overlapping pools do not read as depth, they sum to a flat bright wash.
+
+   contrast() then shapes what is left, pushing mid-tones down into the black
+   and pulling the crests up. It only works while there is unlit surface for it
+   to push down; over a full-coverage wash it just saturates. Hence the modest
+   132% rather than something more dramatic.
+
+   The background is opaque rather than inherited: contrast() on a transparent
+   layer crushes the alpha too and leaves grey fringes, and the screen-blended
+   children need an explicit black to blend against. */
 .cta-chrome {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  /* Pool the metal toward the lower left, behind and under the headline, and
-     let it fall away before it reaches the footer seam. */
-  -webkit-mask-image: radial-gradient(120% 100% at 22% 62%, #000 0%, rgba(0, 0, 0, .6) 42%, transparent 78%);
-          mask-image: radial-gradient(120% 100% at 22% 62%, #000 0%, rgba(0, 0, 0, .6) 42%, transparent 78%);
+  background: #04050a;
+  filter: contrast(132%) saturate(118%);
+}
+
+/* The material blooms from the right of the band and is held off the left,
+   where the headline and lede sit. Without this the ridges run straight under
+   the copy and there is no contrast left to read it by — which is also why
+   every lit shape below is positioned past the halfway mark. */
+.cta-chrome::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    #04050a 0%,
+    rgba(4, 5, 10, .94) 20%,
+    rgba(4, 5, 10, .62) 40%,
+    rgba(4, 5, 10, .18) 60%,
+    rgba(4, 5, 10, 0) 74%);
 }
 
 .cta-chrome-flow,
-.cta-chrome-sheen {
+.cta-chrome-sheen,
+.cta-chrome-ribbon {
   position: absolute;
   /* Oversized so the drift never exposes an edge. */
-  inset: -45%;
+  inset: -40%;
   display: block;
   mix-blend-mode: screen;
   will-change: transform;
 }
 
-/* The body of the metal: broad conic bands whose overlaps read as the rolling
-   highlights on a poured, moving surface. */
+/* The haze between the folds: the colour the ridges are cut from. Three pools
+   kept small and set apart so they tint rather than merge. */
 .cta-chrome-flow {
-  opacity: .3;
-  filter: blur(46px) saturate(135%) contrast(115%);
+  opacity: .55;
+  filter: blur(44px);
   background:
-    conic-gradient(from 165deg at 38% 58%,
-      rgba(168, 199, 255, 0) 0deg,
-      rgba(168, 199, 255, .55) 58deg,
-      rgba(255, 255, 255, .75) 104deg,
-      rgba(168, 255, 199, .5) 158deg,
-      rgba(120, 136, 158, .2) 212deg,
-      rgba(255, 255, 255, .62) 268deg,
-      rgba(168, 199, 255, .42) 316deg,
-      rgba(168, 199, 255, 0) 360deg);
+    radial-gradient(32% 74% at 70% 26%, rgba(122, 58, 224, .60) 0%, transparent 60%),
+    radial-gradient(28% 64% at 90% 72%, rgba(0, 188, 196, .48) 0%, transparent 62%),
+    radial-gradient(24% 58% at 56% 98%, rgba(255, 88, 220, .42) 0%, transparent 60%);
 }
 
-/* A narrower, brighter pass at a different rate. Two speeds are what stop it
-   reading as one rotating gradient. */
+/* The ridges. Irregular stops rather than a repeating gradient: evenly spaced
+   bands read as corduroy, and the reference has a handful of creases at
+   unequal intervals. The low blur is what lets contrast() find an edge. */
 .cta-chrome-sheen {
-  opacity: .22;
-  filter: blur(30px) saturate(120%);
+  opacity: .6;
+  filter: blur(13px);
   background:
-    conic-gradient(from 20deg at 64% 40%,
-      rgba(255, 255, 255, 0) 0deg,
-      rgba(255, 255, 255, .7) 42deg,
-      rgba(168, 255, 199, .35) 88deg,
-      rgba(255, 255, 255, 0) 150deg,
-      rgba(168, 199, 255, .45) 232deg,
-      rgba(255, 255, 255, 0) 300deg,
-      rgba(255, 255, 255, 0) 360deg);
+    linear-gradient(102deg,
+      transparent 44%,
+      rgba(140, 90, 255, .40) 53%,
+      rgba(255, 120, 235, .70) 56.5%,
+      rgba(255, 236, 255, .55) 58.5%,
+      rgba(190, 130, 255, .42) 61%,
+      transparent 67%,
+      transparent 75%,
+      rgba(86, 220, 232, .48) 80.5%,
+      rgba(176, 255, 246, .42) 83%,
+      transparent 89%);
 }
 
-.cta[data-live] .cta-chrome-flow { animation: cta-flow 22s linear infinite; }
-.cta[data-live] .cta-chrome-sheen { animation: cta-sheen 15s linear infinite reverse; }
+/* The fold. Two very elongated ellipses laid across the ridges — this is what
+   gives the surface its lobes rather than flat stripes on a dark ground. */
+.cta-chrome-ribbon {
+  opacity: .6;
+  filter: blur(24px);
+  background:
+    radial-gradient(42% 17% at 72% 44%, rgba(255, 110, 230, .66) 0%, rgba(150, 90, 255, .26) 48%, transparent 74%),
+    radial-gradient(34% 13% at 86% 66%, rgba(110, 230, 255, .50) 0%, transparent 72%);
+  transform: rotate(-9deg);
+}
+
+/* Slow drift rather than rotation. The layers are directional now — spinning a
+   set of diagonal creases through a full turn would read as a rotating disc,
+   which is the one thing the ridges are there to avoid. The travel is small so
+   the pools stay on their own side of the band and never stack up. */
+.cta[data-live] .cta-chrome-flow { animation: cta-flow 34s ease-in-out infinite alternate; }
+.cta[data-live] .cta-chrome-sheen { animation: cta-sheen 26s ease-in-out infinite alternate; }
+.cta[data-live] .cta-chrome-ribbon { animation: cta-ribbon 21s ease-in-out infinite alternate; }
 
 @keyframes cta-flow {
-  to { transform: rotate(1turn); }
+  from { transform: translate3d(-3%, -2%, 0) scale(1); }
+  to { transform: translate3d(3%, 2%, 0) scale(1.08); }
 }
 
+/* Along the creases, so they slide rather than cross themselves. */
 @keyframes cta-sheen {
-  to { transform: rotate(1turn) scale(1.08); }
+  from { transform: translate3d(-5%, 1.5%, 0); }
+  to { transform: translate3d(5%, -1.5%, 0); }
 }
 
-/* Scintillations ----------------------------------------------------------- */
-
-.cta-scint {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Each spark is one element painting a soft dot, scaled and faded on a loop.
-   box-shadow supplies the bloom, so there is no second element and no blur
-   filter per spark — twenty blurred layers would cost far more than twenty
-   composited transforms. */
-.cta-spark {
-  position: absolute;
-  width: var(--s);
-  height: var(--s);
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 0 4px 1px rgba(255, 255, 255, .7),
-    0 0 10px 2px rgba(168, 199, 255, .45);
-  opacity: 0;
-  transform: scale(.4);
-  will-change: transform, opacity;
-}
-
-/* Every third spark takes the green accent, so the field reads as the same
-   two-tone as the chrome rather than plain white. */
-.cta-spark:nth-child(3n) {
-  box-shadow:
-    0 0 4px 1px rgba(255, 255, 255, .7),
-    0 0 10px 2px rgba(168, 255, 199, .45);
-}
-
-.cta[data-live] .cta-spark {
-  animation: cta-twinkle var(--dur) var(--ease) var(--d) infinite;
-}
-
-@keyframes cta-twinkle {
-  0%, 100% { opacity: 0; transform: scale(.4); }
-  45% { opacity: .9; transform: scale(1); }
-  70% { opacity: .25; transform: scale(.8); }
+@keyframes cta-ribbon {
+  from { transform: translate3d(-6%, -3%, 0) rotate(-13deg); }
+  to { transform: translate3d(6%, 3%, 0) rotate(-4deg); }
 }
 
 /* Copy --------------------------------------------------------------------- */
@@ -989,7 +1070,9 @@ nav.top .right {
   font-family: var(--display-font);
   font-optical-sizing: auto;
   font-weight: var(--display-weight);
-  font-size: var(--huge);
+  /* Stepped down from --huge: the headline shares the band with the address
+     now, so it is sized for its own column rather than for the full width. */
+  font-size: clamp(36px, 4.6vw, 72px);
   letter-spacing: var(--display-tracking);
   line-height: .94;
   max-width: 14ch;
@@ -997,20 +1080,22 @@ nav.top .right {
   /* The headline is the chrome. A wide ramp is clipped to the glyphs and slid
      across them, so the highlight travels through the letterforms instead of
      the text simply being a silver colour. background-position is the only
-     animated property, which keeps this to a repaint of the text box. */
+     animated property, which keeps this to a repaint of the text box. The
+     whites are load-bearing — they are what stops an iridescent ramp at this
+     size from reading as a rainbow. */
   background-image: linear-gradient(100deg,
-    #6d788a 0%,
-    #dbe4ef 9%,
-    #ffffff 16%,
-    #aab8ca 25%,
-    #6b7889 34%,
-    #a8c7ff 44%,
-    #eaf1fb 53%,
-    #ffffff 59%,
-    #a8ffc7 69%,
-    #8f9dae 79%,
-    #dfe7f1 89%,
-    #75818f 100%);
+    #7c6d9a 0%,
+    #e6dbf3 8%,
+    #ffffff 15%,
+    #d69cf0 23%,
+    #8e6bc4 32%,
+    #a8c7ff 42%,
+    #eef4ff 51%,
+    #ffffff 57%,
+    #8ef0ff 66%,
+    #a8ffc7 74%,
+    #cfd6ea 85%,
+    #7d6f9c 100%);
   background-size: 300% 100%;
   background-position: 0% 50%;
   -webkit-background-clip: text;
@@ -1040,7 +1125,10 @@ nav.top .right {
 
 .cta-mail {
   display: inline-block;
-  margin-top: clamp(30px, 4vw, 48px);
+  /* Spacing is .cta-inner's gap in both the row and the wrapped layout. This
+     is only an optical nudge — flex-end lines the capsule's border box up with
+     the lede's, which leaves it sitting a shade low against the text. */
+  margin-bottom: clamp(0px, .5vw, 8px);
   border-radius: 999px;
   text-decoration: none;
   /* The rim is a gradient, so it is drawn as a padded background pair: this
@@ -1048,8 +1136,8 @@ nav.top .right {
   padding: 1px;
   background:
     linear-gradient(140deg,
-      rgba(255, 255, 255, .8) 0%,
-      rgba(168, 199, 255, .45) 28%,
+      rgba(255, 255, 255, .85) 0%,
+      rgba(236, 150, 255, .5) 26%,
       rgba(255, 255, 255, .12) 50%,
       rgba(168, 255, 199, .4) 76%,
       rgba(255, 255, 255, .7) 100%);
@@ -1102,7 +1190,7 @@ nav.top .right {
   transform: translateY(-2px);
   box-shadow:
     0 10px 34px rgba(0, 0, 0, .5),
-    0 0 22px rgba(168, 199, 255, .22);
+    0 0 22px rgba(198, 140, 255, .28);
 }
 
 .cta-mail:hover .cta-mail-face::before,
@@ -1121,15 +1209,32 @@ nav.top .right {
   outline-offset: 4px;
 }
 
-/* A reader who has asked for less movement gets the material, not the motion:
-   the chrome still tints the headline and the capsule still lights up, but
-   nothing loops. The sparks are removed outright rather than frozen, because a
-   field of dots stopped mid-twinkle at assorted opacities looks like damage. */
-@media (prefers-reduced-motion: reduce) {
-  .cta-scint { display: none; }
+/* Below this there is not enough width for the headline and the address to sit
+   side by side, so the address drops under the copy and both go full width.
+   flex-wrap would get there on its own, but only after squeezing the headline
+   into a very narrow column first. */
+@media (max-width: 900px) {
+  .cta-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
+  .cta-copy {
+    flex-basis: auto;
+  }
+
+  .cta-mail {
+    margin-bottom: 0;
+  }
+}
+
+/* A reader who has asked for less movement gets the material, not the motion:
+   the chrome still fills the band and tints the headline, and the capsule
+   still lights up, but nothing loops. */
+@media (prefers-reduced-motion: reduce) {
   .cta-chrome-flow,
   .cta-chrome-sheen,
+  .cta-chrome-ribbon,
   .cta-title {
     animation: none !important;
   }
@@ -1222,11 +1327,39 @@ footer .baseline {
   }}
 
 @media (max-width: 810px) {
-  nav.top ul { display: none; }
-  nav.top .inner { grid-template-columns: 1fr auto; }
-  nav.top .brand { font-size: 22px; }
-  nav.top .right { gap: 12px; font-size: 15px; }
+  /* This block used to open with `nav.top ul { display: none }`, which deleted
+     Home / Philosophy / About -- the site's entire primary navigation -- on every
+     phone and portrait tablet, with nothing put in their place. The two sub-
+     routes were then reachable only from the footer, at the bottom of a five-
+     panel scroll, and `display: none` takes them out of the accessibility tree
+     as well, so it was a loss of function, not of decoration.
+
+     Three links do not need a hamburger. The bar wraps to a second row instead:
+     brand and Contact stay on row one, the routes take row two full width. The
+     tracks are named explicitly because moving `ul` out of `display: none` puts
+     it back into auto-placement, where it would otherwise land in row one and
+     recreate the crowding this is meant to solve.
+
+     Nav height is measured live in useScrolledPastHero, so the taller bar needs
+     no counterpart change in JS. */
+  nav.top .inner {
+    grid-template-columns: 1fr auto;
+    row-gap: 10px;
+    column-gap: 16px;
+  }
+  nav.top .brand { grid-area: 1 / 1; font-size: 22px; }
+  nav.top .right { grid-area: 1 / 2; gap: 12px; font-size: 15px; }
+  nav.top ul {
+    grid-area: 2 / 1 / 3 / -1;
+    justify-content: flex-start;
+    gap: 22px;
+    font-size: 16px;
+  }
   .hero .copy { grid-template-columns: 1fr; gap: 12px; }
+  /* The 22ch measure is tuned for the desktop line lengths the three authored
+     breaks assume; below 810 it forces a second wrap inside lines written to be
+     one line each. */
+  .hero h1 { max-width: none; }
   footer .cols { grid-template-columns: 1fr 1fr; }}
 
 @media (max-width: 480px) {
@@ -1252,12 +1385,14 @@ footer .baseline {
     gap: 10px;
   }
 
-  nav.top .right a:not(:last-child) {
+  /* When the bar can only carry one of the two link sets, keep the one that is
+     actually navigation. The three socials are repeated verbatim in the footer's
+     Social column; Home / Philosophy / About are repeated nowhere above the
+     fold. Matched on rel="me" -- the attribute SocialLinks() already sets --
+     rather than the old :not(:last-child), which selected by position and would
+     silently hide the wrong link the moment one was appended. */
+  nav.top .right a[rel~="me"] {
     display: none;
-  }
-
-  .hero {
-    min-height: 100svh;
   }
 
   .about {
@@ -1270,8 +1405,14 @@ footer .baseline {
     padding-bottom: 32px;
   }
 
+  /* The base rule is clamp(64px, 11.5vw, 176px), pinned to its 64px floor from
+     557px down -- so the old clamp(36px, 9vw, 64px) dropped the wordmark from
+     64px to 43px across the single pixel between 481 and 480. This meets the
+     base rule exactly at 480 and then tracks the viewport, which is what the
+     wordmark needs anyway: it is a 13-character full-bleed word, so what governs
+     its size is the gutter-to-gutter width available to it. */
   footer .word {
-    font-size: clamp(36px, 9vw, 64px);
+    font-size: min(64px, calc(14.4vw - 5px));
   }
 
   .cta h2 {
@@ -1281,11 +1422,43 @@ footer .baseline {
 @media (max-width: 360px) {
   nav.top .brand {
     font-size: 15px;
+  }}
+/* Touch targets. DESIGN_SYSTEM.md section 9 asks for >= ~40px on touch, and
+   nothing on the site met it: the nav wordmark measured 17px tall, Contact 16px,
+   the footer's seven links 30px, "More About" 27px.
+
+   Scoped to `pointer: coarse` on purpose. The requirement is a touch
+   requirement -- a mouse pointer is precise and needs no padding -- and keeping
+   it out of the desktop cascade means the bar, the footer and the About link
+   stay pixel-identical for a pointer user. `pointer`, not `any-pointer`, asks
+   about the PRIMARY input, so a touchscreen laptop driven by its trackpad is
+   correctly treated as fine-pointer. */
+@media (pointer: coarse) {
+  nav.top .brand,
+  nav.top ul a,
+  nav.top .right a,
+  .skip-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 
-  footer .word {
-    font-size: 32px;
-  }}
+  /* Block links in a stack: give them the space rather than overlapping their
+     neighbours' hit areas with an overlay. */
+  footer .col a {
+    padding-block: 11px;
+  }
+
+  /* Padding on the TOP only. The underline is this link's whole treatment and it
+     hangs off the bottom of the padding box, so growing the box downward would
+     push the rule away from the word; growing it upward moves nothing. The
+     margin gives back exactly what the padding took. 27px + 18px = 45px. */
+  .about-more {
+    padding-top: 18px;
+    margin-top: calc(clamp(40px, 5vw, 72px) - 18px);
+  }
+}
+
 /* Available to a screen reader and to selection, but not laid out. Used where a
    decorative canvas or transform-driven element carries the only copy. */
 .visually-hidden {

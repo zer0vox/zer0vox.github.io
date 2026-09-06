@@ -45,6 +45,14 @@ const DEG = Math.PI / 180
 // model at the same place on screen at every size.
 const MODEL_NDC_X = -0.429
 
+// The same idea on the other axis, for the narrow layout only. Below 900px the
+// year rail is pinned to the top of the stage and the card to the bottom, so the
+// object belongs in the band between them. The aim used to be a hard-coded y of
+// -1.15, which on a phone put the object about 20% down -- tucked up behind the
+// nav bar, with the empty middle of the stage left over below it. +0.4 is about
+// 30% down, the centre of that band.
+const MODEL_NDC_Y_NARROW = 0.4
+
 // How much of the stage a model may fill, as a fraction of the frame at the
 // model's distance. Two limits rather than one: height alone lets a wide model
 // run off the sides of a narrow window, width alone lets a tall one overrun a
@@ -75,6 +83,18 @@ function pointAt(p, out) {
 // Wide screens read the card beside the model, narrow ones read it below. The
 // breakpoint is shared with About.css — see the note above `.xp` there.
 const isWide = (state) => state.size.width >= 900
+
+// Solve the camera's aim so the world origin lands at MODEL_NDC_Y_NARROW on
+// screen. Derived rather than dialled in, for the same reason MODEL_NDC_X is:
+// the aim needed to put a point at a given screen position depends on where the
+// camera is standing, so a constant that looks right on one phone drifts on the
+// next.
+function narrowLookY(state) {
+  const camera = state.camera
+  const pitchToOrigin = Math.atan2(-camera.position.y, camera.position.z)
+  const pitchOfAxis = pitchToOrigin - MODEL_NDC_Y_NARROW * ((camera.fov * DEG) / 2)
+  return camera.position.y + camera.position.z * Math.tan(pitchOfAxis)
+}
 
 // The frame at the world origin, in world units, for the camera as it is now.
 // Both the camera aim and the model scale are solved from this, which is what
@@ -257,7 +277,7 @@ function Scene({ entries, easedRef }) {
     const wide = isWide(state)
     state.camera.position.set(0, wide ? 0.25 : 0.1, wide ? 5.4 : 6.4)
     const lookX = wide ? -MODEL_NDC_X * 0.5 * frameAt(state).width : 0
-    state.camera.lookAt(lookTarget.set(lookX, wide ? 0.08 : -1.15, 0))
+    state.camera.lookAt(lookTarget.set(lookX, wide ? 0.08 : narrowLookY(state), 0))
   })
 
   return (

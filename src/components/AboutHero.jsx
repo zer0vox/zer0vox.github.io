@@ -22,8 +22,14 @@ import skyMask from '../assets/about/sky-mask.webp'
 // of it clipped to the sky above the ridgeline. Removing the mask does not
 // "simplify" this — it paints the whole sky black at rest and kills the
 // effect entirely.
-const BG_POS = '26% -24vw'
-const BG_SIZE = '150% auto'
+// Size and position for all four hero layers. They are one 4:3 frame cut into
+// photo / ridge / glow / sky-mask, so these must stay identical across the four
+// or the composite comes apart. They live in About.css as --hero-bg-pos and
+// --hero-bg-size (rather than as constants here) so the stylesheet can widen the
+// frame on a portrait viewport, where a width-derived size leaves the bottom of
+// the screen uncovered.
+const BG_POS = 'var(--hero-bg-pos)'
+const BG_SIZE = 'var(--hero-bg-size)'
 const CUE_POINTS = '599,584 599,623 590,613 590,616 600,626 610,616 610,613 601,623 601,584'
 
 // The authored values. Every one of these is dial-able in dev via Tweakpane

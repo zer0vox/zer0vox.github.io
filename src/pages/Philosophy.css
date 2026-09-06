@@ -5,6 +5,7 @@
 .ph {
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
   background: var(--bg);
 }
 
@@ -68,6 +69,7 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: flex-end;
   background: #000;
@@ -257,8 +259,7 @@
   padding-block: var(--section-y);
 }
 
-.ph-statement .inner,
-.ph-contact .inner {
+.ph-statement .inner {
   max-width: var(--max);
   margin-inline: auto;
   padding-inline: var(--pad-x);
@@ -297,7 +298,10 @@
 .ph-dial-stage {
   position: sticky;
   top: 0;
+  /* svh: a sticky box taller than the scrollport does not stick, and on a phone
+     100vh is exactly that until the address bar retracts. */
   height: 100vh;
+  height: 100svh;
   overflow: hidden;
 }
 
@@ -711,43 +715,6 @@
   padding-left: 20px;
   border-left: 1px solid rgba(168, 199, 255, .45);
   color: var(--fg);
-}
-
-/* Contact ------------------------------------------------------------------ */
-
-.ph-contact {
-  position: relative;
-  z-index: 1;
-  background: rgba(13, 13, 13, .45);
-  padding-block: var(--section-y);
-}
-
-.ph-contact h2 {
-  margin: 0;
-  font-size: var(--huge);
-  font-weight: 500;
-  letter-spacing: -.045em;
-  line-height: .94;
-  text-wrap: balance;
-}
-
-.ph-contact-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 48px;
-  padding: 14px 24px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 500;
-  transition: background .25s var(--ease), border-color .25s var(--ease);
-}
-
-.ph a.ph-contact-link:hover {
-  background: rgba(168, 199, 255, .05);
-  border-color: rgba(168, 199, 255, .5);
-  opacity: 1;
 }
 
 /* Narrow ------------------------------------------------------------------- */

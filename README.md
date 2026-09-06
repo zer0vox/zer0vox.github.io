@@ -30,7 +30,10 @@ src/
   assets/                        panel imagery
 public/
   CNAME                          custom domain for GitHub Pages
-  favicon.svg, greenhueblues.png favicon and social share image
+  favicon.svg                    golden-spiral tab icon (PHI construction)
+  favicon-16.png, favicon-32.png PNG fallback for browsers without SVG icons
+  apple-touch-icon.png           iOS home-screen icon (180x180)
+  greenhueblues.png              the wordmark: social share image
 ```
 
 Design tokens (colour, type, spacing, easing) live in `:root` at the top of

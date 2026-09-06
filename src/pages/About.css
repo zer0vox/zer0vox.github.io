@@ -39,6 +39,21 @@
   z-index: 0;
   background: var(--bg);
   overflow: hidden;
+  /* Read by every layer in AboutHero.jsx (photo, ridge, glow and the sky-mask).
+     They are one 4:3 frame cut four ways, so they must share these to the
+     pixel -- change them here, never on an individual layer.
+
+     The size was `150% auto`: 1.5x the CONTAINER WIDTH, height following the
+     4:3 frame. On a landscape window that comfortably overshoots the screen, but
+     on a portrait phone it resolves to 585x439 against an 844px-tall viewport,
+     so the artwork stopped about 40% down and the rest of the hero was flat
+     #0d0d0d. The max() adds a height-derived floor so the frame is sized by
+     whichever axis is actually starved: 180vh clears 100vh of stage, the -24vw
+     position offset and the 78px of parallax travel, with margin, down to 320px.
+     The two terms cross at an aspect ratio of 6:5, so every landscape viewport
+     keeps the authored 150% exactly and the desktop composition does not move. */
+  --hero-bg-pos: 26% -24vw;
+  --hero-bg-size: max(150%, 180vh) auto;
 }
 
 .hero-spacer {
@@ -122,7 +137,10 @@
   letter-spacing: -.01em;
   position: absolute;
   left: clamp(16px, 8.9vw, 81px);
-  top: 287px;
+  /* 287px is the authored position and stays exact on any viewport taller than
+     407px; the calc only takes over on short ones -- landscape phones -- where a
+     fixed offset put the hero's only copy below the fold. */
+  top: min(287px, calc(100vh - 120px));
   color: #fff;
   display: flex;
   align-items: baseline;
@@ -136,6 +154,7 @@
   .hero-stage {
     position: relative;
     height: 100vh;
+    height: 100svh;
   }
 
   .hero-dist,
@@ -159,11 +178,21 @@
   padding-block: clamp(150px, 22vh, 300px) clamp(48px, 6vw, 80px);
 }
 
+/* Same shape of bug as .about-story-cols, less acute: auto-fit and a 300px floor
+   flipped this to two columns at 672px, where each track is 303px -- narrower
+   than the single-column layout it had just left. Hold one column until there is
+   genuinely room for two. */
 .meet-cols {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(40px, 5vw, 88px);
   align-items: start;
+}
+
+@media (min-width: 900px) {
+  .meet-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .meet-portrait {
@@ -247,11 +276,23 @@
   padding-block: clamp(72px, 8vw, 120px);
 }
 
+/* `minmax(340px, 1fr)` cannot go below 340px, so on any viewport under 372px the
+   single auto-fit track was still 340px wide inside a 288px content box and the
+   second column was pushed off the page with no way to scroll to it. A px floor
+   is the wrong way to say "two columns from here" -- it is a minimum the track
+   keeps even when there is only one of them. The min-width query says it
+   directly, and minmax(0, 1fr) lets the tracks actually shrink. */
 .about-story-cols {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(28px, 4vw, 72px);
   align-items: start;
+}
+
+@media (min-width: 860px) {
+  .about-story-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .about-story-head {
@@ -415,6 +456,17 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* Hover is the only thing that ever identified a tool in this marquee, so on a
+   touch device the whole section was a row of unlabelled logos. With no hover to
+   wait for, show the names outright -- the reveal is the affordance, and without
+   a pointer there is nothing to reveal them with. */
+@media (hover: none) {
+  .stack-name {
+    opacity: .85;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* Icon missing: the name stops being a label and becomes the item itself. */
 .is-fallback .stack-name {
   position: static;
@@ -468,24 +520,6 @@
   .stack-item:hover .stack-name { transform: translateX(-50%); }
 }
 
-/* Contact — closing mailto. -------------------------------------------------- */
-
-.about-contact {
-  position: relative;
-  z-index: 2;
-  background: rgba(13, 13, 13, .45);
-  padding-block: 80px clamp(80px, 10vw, 160px);
-}
-
-.about-contact-link {
-  font-family: var(--display-font);
-  font-optical-sizing: auto;
-  font-size: clamp(29px, 4.1vw, 58px);
-  font-weight: var(--display-weight);
-  letter-spacing: var(--display-tracking);
-  color: var(--accent);
-}
-
 /* Experience — a scroll-scrubbed 3D timeline. -------------------------------
 
    The stage is sticky inside a tall track, the same arrangement as the
@@ -512,8 +546,11 @@
 .xp-stage {
   position: sticky;
   top: 0;
+  /* svh for the same reason as .hero and .panel in index.css, and the 620px
+     floor goes for the same reason too: this is a sticky element, and a sticky
+     box taller than the scrollport does not stick. */
   height: 100vh;
-  min-height: 620px;
+  height: 100svh;
   overflow: hidden;
   isolation: isolate;
 }
@@ -793,10 +830,6 @@
 /* Narrow: the helix centres itself and the card reads underneath it. --------- */
 
 @media (max-width: 900px) {
-  .xp-stage {
-    min-height: 560px;
-  }
-
   .xp-veil {
     background:
       radial-gradient(72% 34% at 50% 78%, rgba(13, 13, 13, .86) 0%, rgba(13, 13, 13, 0) 100%),
@@ -899,5 +932,19 @@
   .xp-flat-row {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+}
+
+/* Touch targets, last in the file on purpose. The year rail measured 55x27 --
+   these are the only controls on the page and the design system asks for >=40px
+   on touch. This has to come after the max-width: 700px block above, which sets
+   `padding` as a shorthand and would otherwise win on source order.
+
+   Padding rather than min-height: the button is a flex row whose dot and label
+   are already centred, so the space wants to go around them. Scoped to coarse
+   pointers so the desktop rail keeps its tight rhythm. */
+@media (pointer: coarse) {
+  .xp-rail-btn {
+    padding-block: 15px;
   }
 }
