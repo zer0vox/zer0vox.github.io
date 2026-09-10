@@ -6,7 +6,6 @@ import { useRevealInView, EASE_PANEL } from '../components/reveal.js'
 // so the hero text renders first and the canvas fades in behind it, which is
 // the order it already appears in anyway thanks to its 0.9s fade.
 const FibonacciPsyBackground = lazy(() => import('../components/FibonacciPsyBackground'))
-import { useHeroGlare } from '../components/useHeroGlare'
 import { SiteNav, SiteFooter } from '../components/SiteChrome'
 import ContactCta from '../components/ContactCta.jsx'
 import dnaImg from '../assets/dna.webp'
@@ -40,7 +39,6 @@ function PanelReveal({ children, delay = 0, from = 'left' }) {
 
 export default function Home() {
   const heroRef = useRef(null)
-  useHeroGlare(heroRef)
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -137,7 +135,6 @@ export default function Home() {
           <span className="irid irid--a" />
           <span className="irid irid--b" />
         </div>
-        <div className="hero-glare" aria-hidden="true" />
         <div className="copy">
           <h1 id="heroTitle">
             <span className="line"><span className="inner">Building mindful systems for a</span></span>

@@ -1253,40 +1253,7 @@ nav.top :where(.nav-links, .nav-actions) a:focus-visible {
   padding-bottom: .2em;
   margin-bottom: -.2em;
 
-  /* The headline is the chrome. A wide ramp is clipped to the glyphs and slid
-     across them, so the highlight travels through the letterforms instead of
-     the text simply being a silver colour. background-position is the only
-     animated property, which keeps this to a repaint of the text box. The
-     whites are load-bearing — they are what stops an iridescent ramp at this
-     size from reading as a rainbow. */
-  background-image: linear-gradient(100deg,
-    #7c6d9a 0%,
-    #e6dbf3 8%,
-    #ffffff 15%,
-    #d69cf0 23%,
-    #8e6bc4 32%,
-    #a8c7ff 42%,
-    #eef4ff 51%,
-    #ffffff 57%,
-    #8ef0ff 66%,
-    #a8ffc7 74%,
-    #cfd6ea 85%,
-    #7d6f9c 100%);
-  background-size: 300% 100%;
-  background-position: 0% 50%;
-  -webkit-background-clip: text;
-          background-clip: text;
-  color: transparent;
-  /* Safari needs this as well as the transparent colour or the fill wins. */
-  -webkit-text-fill-color: transparent;
-}
-
-.cta[data-live] .cta-title {
-  animation: cta-metal 9s linear infinite;
-}
-
-@keyframes cta-metal {
-  to { background-position: 300% 50%; }
+  color: var(--fg);
 }
 
 .cta-lede {
