@@ -25,3 +25,9 @@ dist-ssr
 
 # Local scratch / large source assets
 src/WIP/
+
+# Large source files (masters/exports); the site uses the optimised copies in src/assets
+src/*.MOV
+src/*.mov
+design-handover/*.zip
+src/Dashain Tihar Popup.html
