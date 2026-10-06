@@ -1,0 +1,129 @@
+/* HeroFx -- load and scroll effects for the home hero. The hero itself is
+   styled in index.css ("Hero: ink on paper"); this file only adds what the
+   effects need. Anything that moves is gated on .hfx-live, which the hook
+   adds only when motion is allowed, so without it the hero is simply the
+   printed sheet. The one exception is the name's start state just below,
+   which has to be in place from the first paint, before any effect runs. */
+
+/* The name waits unseen until its entrance begins. The throw-up in index.css
+   starts when Home adds .in, a frame or more after the first paint, and fills
+   forwards only: without this the printed name shows for those frames, then
+   each line blinks out and comes back up from its mask -- the second and third
+   after a further 0.3s and 0.5s of delay. The id lifts these rules over
+   index.css wherever the two stylesheets land in the cascade. Script renders
+   the hero, so this never hides it from a reader without script, and reduced
+   motion keeps the printed name from the first frame. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero--print #heroTitle .line:not(.in) .inner {
+    opacity: 0;
+    transform: translateY(118%) skewY(5deg);
+  }
+
+  .hero--print #heroTitle .line.in .inner {
+    animation-fill-mode: both;
+  }
+}
+
+/* The slogan's 2px rule as an element of its own. It draws in from the left
+   on load and retracts toward the right on scroll: two transform origins, so
+   two nested spans. The border it replaces keeps its 2px, transparent, so the
+   slogan does not move by a pixel. */
+.hero--print .copy .hero-sub {
+  position: relative;
+  border-top-color: transparent;
+}
+
+.hero--print .hfx-rule {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transform-origin: 100% 50%;
+  pointer-events: none;
+}
+
+.hero--print .hfx-rule-ink {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: 0 50%;
+}
+
+/* The decode replaces index.css's fade-in, and until it starts the slogan
+   waits unseen. Opacity rather than visibility, so screen readers still have
+   it from the first frame. */
+.hero--print.hfx-live .copy .hero-sub {
+  animation: none;
+}
+
+.hero--print .hfx-sub-text.hfx-pending {
+  opacity: 0;
+}
+
+/* Out of register as the sheet leaves: the exact inverse of WorkStatement's
+   lock, with the same butter and red plates at the same em offsets, here on
+   paper. Two scrubbed values drive it, both 0 at rest (start states live
+   here, so a line whose tween has not begun reads them):
+
+   --hfx-mis   the whole hero's scroll. The plates part a little while the
+               name is still being read, and the key thins only slightly.
+   --hfx-lift  one line meeting the masthead. The plates spread the rest of
+               the way while the key drains out of them, and they fade a beat
+               behind it -- so a line never carries its ink into the nav
+               labels, and what leaves last is a trace of colour, as in
+               WorkStatement's first frame. Only a trace: at this size a
+               full-strength red plate would be a red fill, not an accent.
+
+   The key thins toward the paper rather than going transparent, so while
+   the name is read it stays a crisp, opaque ink with the plates showing only
+   at its edges; a see-through key would let them muddy every letter. Only
+   the lift takes its alpha. */
+.hero--print.hfx-live h1 .line {
+  --hfx-mis: 0;
+  --hfx-lift: 0;
+  --hfx-m: max(var(--hfx-mis), var(--hfx-lift));
+  --hfx-thin: calc(var(--hfx-m) * 0.15);
+  --hfx-key: clamp(0, 1 - var(--hfx-lift) * 1.6, 1);
+  --hfx-plates: clamp(0, (1 - var(--hfx-lift)) * 1.1, 1);
+  /* ink #0f1b23 mixed toward paper #f4f2ed by --hfx-thin */
+  color: rgb(
+    calc(15 + 229 * var(--hfx-thin))
+    calc(27 + 215 * var(--hfx-thin))
+    calc(35 + 202 * var(--hfx-thin))
+    / var(--hfx-key)
+  );
+  text-shadow:
+    calc(var(--hfx-m) * 0.09em) calc(var(--hfx-m) * -0.05em) 0 rgb(255 217 102 / calc(var(--hfx-m) * 0.9 * var(--hfx-plates))),
+    calc(var(--hfx-m) * -0.07em) calc(var(--hfx-m) * 0.04em) 0 rgb(255 59 48 / calc(var(--hfx-m) * 0.85 * var(--hfx-plates)));
+}
+
+/* The red stop holds register -- the one fixed point the rest loosens
+   around, as the statement's stop stays crisp while its words lock -- and
+   leaves with the red plate it belongs to. Colour, not opacity: the stamp
+   animation in index.css owns the stop's opacity. */
+.hero--print.hfx-live h1 .dot {
+  color: rgb(255 59 48 / var(--hfx-plates));
+  text-shadow: none;
+}
+
+/* Once the entrance is over the masks have nothing left to hide, and left
+   closed they would shave the loose plates (red sits left of each first
+   letter, butter above the cap line). */
+.hero--print.hfx-settled h1 .line {
+  overflow: visible;
+}
+
+/* The two prints move on every scrolled frame; on their own layers they are
+   moved by the compositor instead of repainted. */
+.hero--print.hfx-live :is(.hero-butter, .hero-print) {
+  will-change: transform;
+}
+
+/* Never hold the slogan back from a reader who asked for less motion, even
+   if a pending class outlived its effect. */
+@media (prefers-reduced-motion: reduce) {
+  .hero--print .hfx-sub-text.hfx-pending {
+    opacity: 1;
+  }
+}

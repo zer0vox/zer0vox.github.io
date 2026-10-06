@@ -1,9 +1,12 @@
 import { Suspense, lazy, useEffect, useRef } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Lenis from 'lenis'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { setLenis } from './lib/lenis.js'
 import LiquidLoader from './components/LiquidLoader.jsx'
 import Home from './pages/Home.jsx'
+import FestivePopup from './components/FestivePopup.jsx'
 
 // Home stays a static import: it is the landing route and the one whose LCP
 // matters, and making it lazy would put a second round trip in front of first
@@ -70,6 +73,12 @@ export default function App() {
     })
     lenisRef.current = lenis
     setLenis(lenis)
+    // ScrollTrigger reads the scroll position on every Lenis step rather than
+    // waiting for the native scroll event, so scrubbed timelines stay locked
+    // to the smoothed position instead of trailing it by a frame.
+    gsap.registerPlugin(ScrollTrigger)
+    const syncTriggers = () => ScrollTrigger.update()
+    lenis.on('scroll', syncTriggers)
 
     let rafId = 0
     const raf = (time) => {
@@ -113,12 +122,17 @@ export default function App() {
     // run — left the viewport empty for as long as the chunk took. The loader
     // carries its own entry delay, so on the common path (chunk already in the
     // module cache) it still resolves without ever painting.
-    <Suspense fallback={<LiquidLoader label={ROUTE_NAMES[pathname] ?? 'Loading'} />}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/philosophy" element={<Philosophy />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </Suspense>
+    <>
+      <Suspense fallback={<LiquidLoader label={ROUTE_NAMES[pathname] ?? 'Loading'} />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/philosophy" element={<Philosophy />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </Suspense>
+      {/* Outside the routes: it greets a first visit on whichever page it
+          lands, and is not remounted by navigation. */}
+      <FestivePopup />
+    </>
   )
 }

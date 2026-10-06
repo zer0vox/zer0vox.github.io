@@ -1,0 +1,133 @@
+/* WorkStatement — the practice statement in the pinned work section's left
+   column. Set like the hero (2px rule, display type, red full stop) but on the
+   section's marine: paper type, butter and red for the loose plates. */
+.ws {
+  --ink: #f4f2ed;
+  --butter: #ffd966;
+  --red: #ff3b30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--ink);
+}
+
+.ws-rule {
+  display: block;
+  align-self: stretch;
+  height: 2px;
+  margin-bottom: clamp(20px, 2.4vw, 32px);
+  background: var(--ink);
+}
+
+.ws-copy {
+  margin: 0;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: clamp(28px, 3.3vw, 54px);
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* The house full stop, added here so the statement's own text is unchanged. */
+.ws-copy::after {
+  content: ".";
+  color: var(--red);
+}
+
+/* Out of register: --mis runs 1 (plates apart, key faint) -> 0 (registered).
+   Only applied once the script has split the words, so without it the
+   statement is simply printed. Offsets are in em so they scale with the type. */
+.ws.is-printing .ws-copy .w {
+  /* Start state lives here, not in the tween: staggered words that have not
+     begun yet read it, so they wait out of register. */
+  --mis: 1;
+  color: rgb(244 242 237 / calc(1 - var(--mis) * 0.88));
+  text-shadow:
+    calc(var(--mis) * 0.09em) calc(var(--mis) * -0.05em) 0 rgb(255 217 102 / calc(var(--mis) * 0.9)),
+    calc(var(--mis) * -0.07em) calc(var(--mis) * 0.04em) 0 rgb(255 59 48 / calc(var(--mis) * 0.85));
+}
+
+/* Once the helix is past its second card the statement steps back to 70%
+   ink, so the work leads; the link keeps full strength, being the one thing
+   here to act on. Paper at 70% on marine still clears 5.9:1. */
+.ws-rule,
+.ws-copy {
+  transition: opacity 0.9s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.ws.is-receded .ws-rule,
+.ws.is-receded .ws-copy {
+  opacity: 0.7;
+}
+
+/* Design-system text link on marine: underlined, butter on hover. The rule
+   is drawn under the words alone, so it holds still while they decode and
+   the arrow is free to move past its end. */
+.ws-more {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.32em;
+  margin-top: clamp(24px, 3vw, 44px);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.14s var(--ease);
+}
+
+.ws-more-words {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.ws-more-words::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+}
+
+.ws-more-arrow {
+  display: inline-block;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ws-more:hover {
+  opacity: 1;
+  color: var(--butter);
+}
+
+.ws-more:hover .ws-more-arrow,
+.ws-more:focus-visible .ws-more-arrow {
+  transform: translateX(4px);
+}
+
+.ws-more:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+
+/* On narrow screens the column spans the stage, and the red band (at 76% of
+   the width there) would run straight through the sentence, laid flat under
+   paper type rather than overprinted. The statement stops a gutter short of
+   it instead: page margin + 16px clear of the band's edge. */
+@media (max-width: 810px) {
+  .ws {
+    max-width: calc(76vw - clamp(20px, 4vw, 56px) - 16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-rule,
+  .ws-copy,
+  .ws-more-arrow {
+    transition: none;
+  }
+}

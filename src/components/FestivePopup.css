@@ -1,0 +1,167 @@
+/* FestivePopup -- the Dashain and Tihar greeting. Values are the design's:
+   a marine scrim at 48% with a 3px blur, a 3:2 watercolour plate on its own
+   apricot ground, the title in deep vermilion over the sky, and a paper close
+   button. Sizes inside the plate are in container units so the lettering
+   keeps its place on the painting at any width. */
+
+.fp-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 31, 49, 0.48);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+.fp-scrim[data-state="open"] {
+  opacity: 1;
+}
+
+.fp-panel {
+  position: relative;
+  width: 100%;
+  /* As wide as 920px allows, but never so tall the 3:2 plate leaves the
+     viewport. */
+  max-width: min(920px, calc((100vh - 48px) * 1.5));
+  max-width: min(920px, calc((100svh - 48px) * 1.5));
+  overflow: hidden;
+  background: #f1cb9e;
+  box-shadow:
+    0 1px 0 rgba(0, 31, 49, 0.04),
+    0 16px 40px -12px rgba(0, 31, 49, 0.24);
+  outline: none;
+  transform: translateY(8px);
+  transition: transform 380ms cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+.fp-scrim[data-state="open"] .fp-panel {
+  transform: none;
+}
+
+.fp-plate {
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+.fp-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transform: scale(1.04);
+}
+
+.fp-copy {
+  position: absolute;
+  top: 9.5cqw;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* At least 8px: on a phone the English line's 13px floor is large next
+     to the title, and the Devanagari descenders reach down into the gap. */
+  gap: max(8px, 1.4cqw);
+  text-align: center;
+  color: #732113;
+  pointer-events: none;
+}
+
+.fp-title {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: "Ananda Fanko 2", serif;
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: 7.2cqw;
+  line-height: 1.08;
+}
+
+.fp-en {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: max(13px, 1.9cqw);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.fp-stop {
+  color: #c85f48;
+}
+
+/* Icon button, pill as the design system draws controls: paper ground,
+   vermilion glyph, a 40px disc inside a 44px target. */
+.fp-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #732113;
+}
+
+.fp-close::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 999px;
+  background: #faf9f6;
+  box-shadow:
+    0 1px 2px rgba(0, 31, 49, 0.06),
+    0 4px 12px rgba(0, 31, 49, 0.08);
+  transition: background 140ms cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+.fp-close:hover::before {
+  background: #ffffff;
+}
+
+.fp-close svg {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fp-close:focus-visible {
+  outline: 2px solid #ff3b30;
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-scrim,
+  .fp-panel {
+    transition: none;
+  }
+
+  .fp-panel {
+    transform: none;
+  }
+}
+
+@media print {
+  .fp-scrim {
+    display: none;
+  }
+}

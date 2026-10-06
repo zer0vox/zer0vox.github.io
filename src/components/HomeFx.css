@@ -1,0 +1,96 @@
+/* HomeFx -- the home page's finishing layer: paper grain and the reading rule
+   under the masthead. Every layer is fixed, decorative and transparent to the
+   pointer. Stacking, against the page's own: sections 1, grain 40, scrim 49,
+   masthead 50, reading rule 51, skip link 200. */
+
+/* ── Paper grain ──────────────────────────────────────────────────────────
+   Black ink at a few percent rather than a grey noise in `multiply`. The two
+   are the same arithmetic -- a pixel of black at alpha a leaves C·(1−a), which
+   is multiplying by (1−a) -- but a blend mode across the whole viewport makes
+   the browser render everything beneath it into a separate surface, every
+   frame, WebGL helix included. Being multiplicative, it gives paper and butter
+   a percent or two of tooth and leaves marine and ink all but untouched, so
+   text contrast moves by a rounding error, not a grade.
+   The tile is a stitched fractal noise mapped so only the low end of it
+   prints: sparse tooth instead of a grey veil, which keeps the paper its own
+   colour (mean shift about 1.5%). Static, so it is painted once; sized to the
+   large viewport so a retracting mobile toolbar never uncovers an edge. */
+.hfx-grain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
+  z-index: 40;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3.2 0 0 0 1.7'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  opacity: 0.07;
+}
+
+/* ── Reading rule ─────────────────────────────────────────────────────────
+   Two pixels of red seated in the masthead's last two, over its ink hairline,
+   scaled from the left with page progress. --hfx-mast is the bar's measured
+   height (64px on the desktop bar, 60px on the compact one). It appears and
+   goes with the paper strip, on the strip's own timing, and stands down while
+   the compact menu is open: bar and sheet should read as one slip then. */
+.hfx-progress {
+  position: fixed;
+  top: calc(var(--hfx-mast, 64px) - 2px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 51;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+
+.hfx-progress-ink {
+  display: block;
+  height: 100%;
+  background: #ff3b30;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+body:has(nav.top.is-glass) .hfx-progress {
+  opacity: 1;
+}
+
+body:has(nav.top.is-open) .hfx-progress {
+  opacity: 0;
+}
+
+/* ── Masthead decode ──────────────────────────────────────────────────────
+   While a masthead link decodes, textFx puts the glyph noise in an
+   aria-hidden span inside it. Held at zero width here, the noise paints from
+   where the label starts but takes no room, so the link stays at the width
+   lockWidth pinned and nothing further along the bar moves, however wide the
+   glyphs run. text-decoration is passed down because an inline-block is not
+   reached by its parent's underline -- Contact keeps its rule, and a hovered
+   link its hover rule, through the decode. Only HomeFx decodes these links. */
+nav.top :where(.nav-links, .nav-actions) a > span[aria-hidden="true"] {
+  display: inline-block;
+  width: 0;
+  white-space: nowrap;
+  text-decoration: inherit;
+}
+
+/* Reduced motion: the rule fades with the strip on the strip's reduced timing. */
+@media (prefers-reduced-motion: reduce) {
+  .hfx-progress {
+    transition: opacity 0.2s linear;
+  }
+}
+
+/* Forced colours repaint the page in the reader's own palette; texture and
+   ornament laid over it would only get in the way. Print has no viewport to
+   fix them to. */
+@media (forced-colors: active), print {
+  .hfx {
+    display: none;
+  }
+}

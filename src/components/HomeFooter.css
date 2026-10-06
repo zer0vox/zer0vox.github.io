@@ -1,0 +1,521 @@
+/* HomeFooter -- the home page's last printed page: a colophon set in ink.
+
+   One sheet of ink. Near its top edge, the end of the hero's red band; below,
+   a small ruled colophon locked to the band's column; at the foot, the
+   wordmark printed across the full measure. Everything else is left empty on
+   purpose -- the space is the page.
+
+   Also undoes the legacy bare `footer` rule in index.css (translucent dark
+   ground, padding, top border), which still matches this element. */
+
+.hf {
+  --hf-ink: #0f1b23;
+  --hf-paper: #f4f2ed;
+  --hf-mute: rgba(244, 242, 237, 0.55);
+  --hf-hair: rgba(244, 242, 237, 0.18);
+  --hf-red: #ff3b30;
+  --hf-butter: #ffd966;
+  /* The page margin every section on the home page sets its type against. */
+  --hf-m: clamp(20px, 4vw, 56px);
+  /* One design pixel of the 1440x900 board, exactly as the hero declares it,
+     so the band's column lands on the same x here as everywhere above. */
+  --u: max(calc(100vw / 1440), calc(100vh / 900));
+  --u: max(calc(100vw / 1440), calc(100svh / 900));
+
+  position: relative;
+  z-index: 1;
+  /* The sheet is the measuring stick for the colophon's band lock: inside it,
+     100cqi is the footer's own width, the same 100% the band is laid out in. */
+  container-type: inline-size;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--hf-ink);
+  color: var(--hf-paper);
+}
+
+.hf-inner {
+  /* Generous at the head, where only the band's end lives; tighter between
+     the colophon and the wordmark; the wordmark itself sits close to the foot
+     of the sheet, measured from the tail of its g. */
+  padding: clamp(120px, 20svh, 220px) var(--hf-m) clamp(12px, 1.6vw, 24px);
+}
+
+/* Visually hidden, read aloud. */
+.hf-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── The band's end ───────────────────────────────────────────────────────
+   The band itself stops at the sheet's edge (the contact block draws it down
+   to there). Its column is carried on by two short hairline ticks, the way a
+   trim is marked, with a red square set between them as its full stop. */
+.hf-term {
+  position: absolute;
+  top: 0;
+  left: calc(100% - 213 * var(--u));
+  width: calc(72 * var(--u));
+  height: calc(40 * var(--u));
+  pointer-events: none;
+}
+
+.hf-term-tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--hf-mute);
+  transform-origin: 50% 0;
+}
+
+.hf-term-tick:first-child {
+  left: 0;
+}
+
+.hf-term-tick:nth-child(2) {
+  right: 0;
+}
+
+/* Centred with margins rather than a transform, so the reveal can animate
+   transforms freely without undoing the centring. */
+.hf-term-stop {
+  position: absolute;
+  top: calc(14 * var(--u));
+  left: 50%;
+  width: calc(12 * var(--u));
+  height: calc(12 * var(--u));
+  margin-left: calc(-6 * var(--u));
+  background: var(--hf-red);
+}
+
+/* ── The colophon ─────────────────────────────────────────────────────────
+   A ruled block: a 2px rule at the head, a hairline under every row, a 1px
+   rule to close. Its right edge is the band's right edge and its last column
+   is exactly the band's width, so the spine stands in the band's column and
+   its two rules continue the ticks above. Its left edge sits on the sheet's
+   centre line, giving way to a fixed minimum on narrow screens. */
+.hf-spread {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(24px, 4vw, 64px);
+}
+
+/* The painting keeps to the left of the colophon, on the page margin, its
+   top level with the colophon's top rule. The colophon keeps its own width
+   rules and its auto left margin, so it stays locked to the band column. */
+.hf-art {
+  flex: 0 1 clamp(240px, 30vw, 560px);
+  min-width: 0;
+  margin: 0;
+}
+
+.hf-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hf-colophon {
+  --hf-rule: 1;
+  --hf-row-y: clamp(16px, 1.45vw, 22px);
+  --hf-lab: clamp(132px, 11vw, 196px);
+  --hf-spine: calc(72 * var(--u));
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--hf-spine);
+  width: clamp(
+    520px,
+    calc(50cqi - 141 * var(--u)),
+    calc(100cqi - 141 * var(--u) - var(--hf-m))
+  );
+  margin: 0 calc(141 * var(--u) - var(--hf-m)) 0 auto;
+}
+
+/* The head and closing rules span the spine too. Drawn as scaled boxes so the
+   reveal can lay them in from the left (--hf-rule: 0 -> 1). */
+.hf-colophon::before,
+.hf-colophon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: var(--hf-paper);
+  transform: scaleX(var(--hf-rule));
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.hf-colophon::before {
+  top: 0;
+  height: 2px;
+}
+
+.hf-colophon::after {
+  bottom: 0;
+  height: 1px;
+}
+
+.hf-rows {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  padding: 2px 0 0;
+}
+
+.hf-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--hf-lab) minmax(0, 1fr);
+  align-items: baseline;
+  padding: var(--hf-row-y) clamp(16px, 1.7vw, 28px) calc(var(--hf-row-y) + 1px) 0;
+}
+
+.hf-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--hf-hair);
+  transform: scaleX(var(--hf-rule));
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* Labels are the small voice: mono capitals, muted, each with its bracketed
+   index on a fixed width so the three words start on one line. */
+.hf-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hf-mute);
+}
+
+.hf-idx {
+  display: inline-block;
+  width: 6ch;
+}
+
+.hf-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px clamp(18px, 1.7vw, 28px);
+  margin: 0;
+  font-family: var(--sans);
+  font-size: clamp(17px, 1.3vw, 20px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+}
+
+/* Inline-block so the decode can hold each link's width while it runs, and
+   so the hit area can be padded without moving the row: the padding is taken
+   back by an equal negative margin. */
+.hf-value a {
+  --hf-hit: 6px;
+  position: relative;
+  display: inline-block;
+  padding-block: var(--hf-hit);
+  margin-block: calc(var(--hf-hit) * -1);
+  color: var(--hf-paper);
+}
+
+/* The underline is drawn rather than set, so it can run in from the left on
+   hover and keep its place while the letters churn. A drawn line cannot skip
+   ink the way a text decoration does, so it sits just under the descenders
+   (0.2em below the baseline) instead of cutting through the p and the y. */
+.hf-value a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--hf-hit) - 0.05em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 100% 50%;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.hf-value a:focus-visible::before {
+  transform: scaleX(1);
+  transform-origin: 0 50%;
+}
+
+@media (hover: hover) {
+  .hf-value a:hover::before {
+    transform: scaleX(1);
+    transform-origin: 0 50%;
+  }
+}
+
+/* The global `a:hover { opacity: .7 }` would grey the link at the moment it
+   decodes; the underline is the whole of the hover state. */
+.hf a:hover {
+  opacity: 1;
+}
+
+.hf a:focus-visible {
+  outline: 2px solid var(--hf-red);
+  outline-offset: 4px;
+  border-radius: 0;
+}
+
+/* The closing line of the colophon: the copyright, in the labels' voice, on
+   the label column's left edge. */
+.hf-copy {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  padding: var(--hf-row-y) 0 calc(var(--hf-row-y) + 1px);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--hf-mute);
+}
+
+/* The spine: the title run down the block's edge, the year at its foot with
+   its figures upright, one above the other. Its rules are the band's edges. */
+.hf-spine {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: calc(var(--hf-row-y) + 2px) 0 calc(var(--hf-row-y) + 1px);
+}
+
+.hf-spine::before,
+.hf-spine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hf-hair);
+  transform: scaleY(var(--hf-rule));
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+.hf-spine::before {
+  left: 0;
+}
+
+.hf-spine::after {
+  right: 0;
+}
+
+.hf-spine-title {
+  writing-mode: vertical-rl;
+  font-family: var(--display-font);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--hf-paper);
+}
+
+.hf-spine-year {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--hf-mute);
+}
+
+/* ── The wordmark ─────────────────────────────────────────────────────────
+   Set so its INK spans the measure exactly: the letters are sized as
+   measure / --hf-k (the ink's width in em; HomeFooter.jsx re-derives it from
+   the set letters), pulled left by the g's side bearing, and the block is
+   trimmed top and bottom to the ink -- the b's ascender to the g's tail -- so
+   the spacing around it is measured from what is printed, not from the
+   font's line box. */
+.hf-word {
+  /* Ink width of "greenhueblues." in em at this tracking; a fallback until
+     the script measures. */
+  --hf-k: 6.595;
+  container-type: inline-size;
+  display: flow-root;
+  margin: clamp(72px, 11svh, 128px) 0 0;
+}
+
+.hf-word-ink {
+  display: block;
+  /* Line box 1em, baseline at 0.915em, ascender ink 0.712em above it and the
+     g's tail 0.194em below: the margins trim the box to that ink; the padding
+     keeps the tail inside the reveal mask; the right side gives the full
+     stop's last pixel room before the clip. */
+  margin: -0.203em -0.05em -0.051em -0.035em;
+  padding: 0 0.05em 0.16em 0;
+  overflow: hidden;
+  font-family: var(--display-font);
+  font-weight: 700;
+  font-size: calc((100vw - 2 * var(--hf-m)) / var(--hf-k));
+  font-size: calc(100cqi / var(--hf-k));
+  line-height: 1;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  color: var(--hf-paper);
+  user-select: none;
+}
+
+/* Its own stacking context, so the plates can sit under the letter's ink
+   whether or not a transform is applied at the moment. */
+.hf-ch {
+  position: relative;
+  z-index: 0;
+  display: inline-block;
+}
+
+.hf-plate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.hf-plate--butter {
+  color: var(--hf-butter);
+}
+
+.hf-plate--red {
+  color: var(--hf-red);
+}
+
+.hf-stop {
+  display: inline-block;
+  color: var(--hf-red);
+}
+
+/* Start state for the reveal (HomeFooter.jsx adds the class, never under
+   reduced motion). */
+.hf.is-armed .hf-colophon,
+.hf.is-armed .hf-row {
+  --hf-rule: 0;
+}
+
+/* ── Narrow screens ───────────────────────────────────────────────────────
+   The band moves to 76% / 8% here, as it does in every section; the colophon
+   follows it, runs from the margin to the band, and stacks each label over
+   its value. The wordmark keeps the full measure. */
+@media (max-width: 810px) {
+  .hf-spread {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .hf-art {
+    flex: none;
+    width: min(100%, 420px);
+  }
+
+  .hf-inner {
+    padding-top: 104px;
+    padding-bottom: 14px;
+  }
+
+  .hf-term {
+    left: 76%;
+    width: 8%;
+    height: 32px;
+  }
+
+  .hf-term-stop {
+    top: 12px;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+  }
+
+  .hf-colophon {
+    --hf-row-y: 16px;
+    --hf-spine: 8cqi;
+    width: auto;
+    margin: 0 calc(16cqi - var(--hf-m)) 0 0;
+  }
+
+  .hf-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+    padding-right: 16px;
+  }
+
+  .hf-value {
+    font-size: 17px;
+    column-gap: 16px;
+  }
+
+  .hf-copy {
+    padding-right: 16px;
+  }
+
+  .hf-spine-title {
+    font-size: 12px;
+  }
+
+  .hf-spine-year {
+    font-size: 10px;
+  }
+
+  .hf-word {
+    margin-top: 72px;
+  }
+}
+
+/* Touch: a full 40px to land a finger on, given as real space rather than
+   overlapping the neighbouring lines' hit areas. The row gives up the same
+   space, so the type stays where it was: side by side, the label follows the
+   link's baseline down, so the row's top padding shrinks; stacked, the label
+   stays put and the gap under it shrinks instead. */
+@media (pointer: coarse) {
+  .hf-value a {
+    --hf-hit: 10px;
+    margin-block: 0;
+  }
+
+  .hf-value {
+    row-gap: 0;
+  }
+
+  .hf-row {
+    padding-block: calc(var(--hf-row-y) - 10px) calc(var(--hf-row-y) - 9px);
+  }
+}
+
+@media (pointer: coarse) and (max-width: 810px) {
+  .hf-row {
+    padding-top: var(--hf-row-y);
+    row-gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-value a::before {
+    transition: none;
+  }
+}

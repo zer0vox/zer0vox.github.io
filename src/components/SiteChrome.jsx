@@ -25,11 +25,18 @@ function useScrolledPastHero(navRef) {
       frame = 0
       const hero = document.querySelector(HERO_SELECTOR)
       const navHeight = navRef.current?.offsetHeight ?? 0
+      // The home hero is a printed sheet whose relief and band run right up
+      // under the labels, which are only legible on it at rest. There the
+      // paper strip comes in with the first scroll instead of once the hero
+      // has gone.
+      const printed = hero?.classList.contains('hero--print')
 
       setPastHero(
-        hero
-          ? hero.getBoundingClientRect().bottom <= navHeight
-          : window.scrollY > navHeight
+        printed
+          ? window.scrollY > 16
+          : hero
+            ? hero.getBoundingClientRect().bottom <= navHeight
+            : window.scrollY > navHeight
       )
     }
 
@@ -94,7 +101,7 @@ function scrollHomeToTop(pathname) {
 // component is the point — the footer's copy is exactly the one that was left
 // behind pointing at #work when the nav item was renamed, because there was
 // nothing tying them together.
-function HomeLink({ className, markCurrent = false, children }) {
+export function HomeLink({ className, markCurrent = false, children }) {
   const { pathname } = useLocation()
   const current = markCurrent && pathname === '/'
 

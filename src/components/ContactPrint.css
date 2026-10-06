@@ -1,0 +1,589 @@
+/* ContactPrint — the closing call to action as one printed sheet: the page's
+   single butter field, trimmed by crop marks, with the hero's red band still
+   running through it. The message is set on a ten-column grid that stops a
+   gutter short of the band, so nothing that has to be read ever sits under
+   it; the strip the band leaves at the fore-edge carries the press furniture
+   (registration mark, running head, tint ramp). */
+.cp {
+  --paper: #f4f2ed;
+  --ink: #0f1b23;
+  --ink-2: #3f4b53;
+  --marine: #003b5c;
+  --red: #ff3b30;
+  --butter: #ffd966;
+  --margin: clamp(20px, 4vw, 56px);
+  --gutter: clamp(12px, 1.6vw, 24px);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* The masthead is fixed over the top of whatever is on screen, so the trim
+     starts below it when the sheet is scrolled to its head. */
+  --nav-h: 64px;
+  --crop-gap: clamp(5px, 0.62vw, 9px);
+  --crop-len: clamp(10px, 1.25vw, 18px);
+  /* The trim is inset by exactly a mark's reach plus a little air, so the
+     arms clear the masthead above and the footer below by the same amount. */
+  --crop-reach: calc(var(--crop-gap) + var(--crop-len) + clamp(6px, 1svh, 10px));
+  --trim-t: calc(var(--nav-h) + var(--crop-reach));
+  --trim-b: var(--crop-reach);
+  /* The type area inside the trim. */
+  --top: calc(var(--trim-t) + clamp(32px, 7svh, 72px));
+  --bottom: calc(var(--trim-b) + clamp(28px, 5svh, 56px));
+  /* One design pixel of the 1440x900 board, as in the hero, so the band
+     lands on the same x. The band is measured from the sheet's right edge. */
+  --u: max(calc(100vw / 1440), calc(100vh / 900));
+  --u: max(calc(100vw / 1440), calc(100svh / 900));
+  --band-r: calc(213 * var(--u));
+  --band-w: calc(72 * var(--u));
+  /* Type is sized off the type area's own width (the section's content box,
+     which stops a gutter short of the band), not the window's: the band moves
+     with the viewport's aspect, and the heading must always clear it. Held
+     here so the spine, outside the grid, can line up with the heading. */
+  /* Capped at the hero name's scale, so the footer wordmark is the page's one
+     finale. */
+  --title-fs: clamp(56px, 13cqi, 150px);
+  --mail-fs: clamp(28px, 5cqi, 64px);
+  container-type: inline-size;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: var(--top) calc(var(--band-r) + var(--gutter)) var(--bottom) var(--margin);
+  background: var(--butter);
+  color: var(--ink);
+}
+
+.cp ::selection {
+  background: var(--ink);
+  color: var(--butter);
+}
+
+/* ── Grid ─────────────────────────────────────────────────────────────────
+   Heading and lede across the head of the sheet, address and profiles across
+   its foot, and the open butter between them is the point. Seven columns to
+   three: the large voice on the left, the small one on the right. */
+.cp-sheet {
+  position: relative;
+  z-index: 1;
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-rows: auto minmax(clamp(40px, 9svh, 120px), 1fr) auto;
+  column-gap: var(--gutter);
+}
+
+/* ── Heading ──────────────────────────────────────────────────────────── */
+.cp-title {
+  grid-column: 1 / span 7;
+  grid-row: 1;
+  align-self: end;
+  /* The lede beside it sits on the same last baseline. */
+  align-self: last baseline;
+  /* Pulled out by the L's side bearing, so its stem stands on the margin,
+     under the arm of the crop mark above it. */
+  margin: 0 0 0 -0.08em;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: var(--title-fs);
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+}
+
+/* Each line is its own mask. Padded and pulled back so the clip clears the
+   descenders, the last glyph's overhang and the loose plates on every side
+   without moving the type. clip, not hidden: it is not a scroll container,
+   so the line still has a baseline to align on. */
+.cp-line {
+  display: block;
+  overflow: hidden;
+  overflow: clip;
+  padding: 0.08em 0.18em 0.16em 0.08em;
+  margin: -0.08em -0.18em -0.16em -0.08em;
+}
+
+.cp-ink {
+  display: inline-block;
+}
+
+.cp-dot {
+  color: var(--red);
+}
+
+/* Out of register: --mis runs 1 (plates apart, key faint) -> 0 (registered).
+   On butter the loose plates are marine and red. Only applied once the script
+   is running, so without it the heading is simply printed. The start state
+   lives here rather than in the tween, so a line whose tween has not begun
+   still waits out of register. Offsets are in em so they scale with the type. */
+.cp.is-printing .cp-ink {
+  --mis: 1;
+  color: rgb(15 27 35 / calc(1 - var(--mis) * 0.86));
+  text-shadow:
+    calc(var(--mis) * 0.055em) calc(var(--mis) * -0.035em) 0 rgb(0 59 92 / calc(var(--mis) * 0.92)),
+    calc(var(--mis) * -0.045em) calc(var(--mis) * 0.03em) 0 rgb(255 59 48 / calc(var(--mis) * 0.88));
+}
+
+.cp.is-printing .cp-dot {
+  color: rgb(255 59 48 / calc(1 - var(--mis) * 0.86));
+}
+
+/* ── Lede ─────────────────────────────────────────────────────────────────
+   The quiet voice, as under the hero's name: light, small, on the 2px rule. */
+.cp-lede-block {
+  grid-column: 8 / span 3;
+  grid-row: 1;
+  align-self: end;
+  align-self: last baseline;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-rule {
+  display: block;
+  height: 2px;
+  background: var(--ink);
+  transform-origin: left center;
+}
+
+.cp-lede {
+  margin: 14px 0 0;
+  font-size: clamp(16px, 1.45vw, 20px);
+  font-weight: 300;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.cp-nobr {
+  white-space: nowrap;
+}
+
+/* ── Address ──────────────────────────────────────────────────────────── */
+.cp-mail-wrap {
+  position: relative;
+  grid-column: 1 / span 7;
+  grid-row: 3;
+  align-self: end;
+  display: flex;
+  align-items: flex-end;
+}
+
+.cp-mail {
+  position: relative;
+  display: block;
+  padding-bottom: 0.2em;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: var(--mail-fs);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+/* The two halves are atomic, so the only place the line can break is between
+   them -- at the "@". The arrow travels with the domain. */
+.cp-mail-part,
+.cp-mail-tail {
+  display: inline-block;
+}
+
+.cp-mail-tail {
+  white-space: nowrap;
+}
+
+/* The wrapper takes the magnetic pull; the glyph inside takes the hover
+   nudge, so the two transforms never overwrite each other. */
+.cp-mail-arrow {
+  display: inline-block;
+  width: 0.62em;
+  height: 0.62em;
+  margin-left: 0.16em;
+}
+
+.cp-mail-arrow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  /* Near the weight of the Medium's stems at this size. */
+  stroke-width: 2.2;
+  stroke-linecap: square;
+  transition: transform 0.55s var(--ease-out);
+}
+
+/* The underline proper: 2px of ink drawn over the datum from the left on
+   hover, and taken off to the right on leave. The origin flips while the line
+   is either empty or full, so the flip itself is never seen. */
+.cp-mail::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.7s var(--ease-out);
+}
+
+.cp-mail:hover {
+  /* The global link hover dims to 0.7; not here. */
+  opacity: 1;
+}
+
+.cp-mail:hover::after,
+.cp-mail:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.cp-mail:hover .cp-mail-arrow svg,
+.cp-mail:focus-visible .cp-mail-arrow svg {
+  transform: translate(0.09em, -0.09em);
+}
+
+.cp-mail:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 8px;
+  border-radius: 0;
+}
+
+.cp-mail-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--ink);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+/* ── Profiles ─────────────────────────────────────────────────────────────
+   A colophon table in mono: index, name, arrow, between hairlines. Its foot
+   is level with the address's datum. */
+.cp-social {
+  grid-column: 8 / span 3;
+  grid-row: 3;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  counter-reset: cp-social;
+}
+
+.cp-social a {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.6em minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 38px;
+  border-top: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  counter-increment: cp-social;
+  /* The global link transition would chase every frame of the reveal's
+     opacity tween and smear it. The hover states animate the pseudo-elements. */
+  transition: none;
+}
+
+.cp-social a:last-child {
+  border-bottom: 1px solid var(--ink);
+}
+
+/* Generated, so the names stay exactly the profile names; the empty
+   alternative keeps the figures out of what assistive technology reads. */
+.cp-social a::before {
+  content: "(" counter(cp-social, decimal-leading-zero) ")";
+  content: "(" counter(cp-social, decimal-leading-zero) ")" / "";
+  color: var(--ink-2);
+  transition: color 0.2s var(--ease-out);
+}
+
+/* The same arrow as the address, cut from the same path. */
+.cp-social a::after {
+  content: "";
+  width: 11px;
+  height: 11px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M6 18 18 6M8.5 6H18v9.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M6 18 18 6M8.5 6H18v9.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.cp-social a:hover {
+  opacity: 1;
+}
+
+.cp-social a:hover::before,
+.cp-social a:focus-visible::before {
+  color: var(--ink);
+}
+
+.cp-social a:hover::after,
+.cp-social a:focus-visible::after {
+  transform: translate(2px, -2px);
+}
+
+.cp-social a:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+  border-radius: 0;
+}
+
+/* ── Spine ────────────────────────────────────────────────────────────────
+   Registration mark and running head at the fore-edge. Its head stands on the
+   heading's cap line: the first baseline is 0.849em below the line top in
+   Unica at this leading and the cap height is 0.714em, which leaves 0.135em. */
+.cp-spine {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--top) + var(--title-fs) * 0.135);
+  right: var(--margin);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cp-reg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+  fill: none;
+  stroke-width: 1.1;
+}
+
+/* Same --mis as the heading: the plates sit apart and close as it prints.
+   Registered, they vanish under the key, as plates in register do. */
+.cp.is-printing .cp-reg {
+  --mis: 1;
+}
+
+.cp-reg-plate--marine {
+  stroke: var(--marine);
+  opacity: calc(var(--mis, 0) * 0.95);
+  transform: translate(calc(var(--mis, 0) * 2.6px), calc(var(--mis, 0) * -1.8px));
+}
+
+.cp-reg-plate--red {
+  stroke: var(--red);
+  opacity: calc(var(--mis, 0) * 0.95);
+  transform: translate(calc(var(--mis, 0) * -2.2px), calc(var(--mis, 0) * 1.6px));
+}
+
+.cp-reg-key {
+  stroke: var(--ink);
+  opacity: calc(1 - var(--mis, 0) * 0.8);
+}
+
+.cp-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+
+.cp-eyebrow-rule {
+  display: block;
+  inline-size: 28px;
+  block-size: 1px;
+  background: currentColor;
+}
+
+/* ── Trim marks ───────────────────────────────────────────────────────────
+   Each mark is a zero-size point on a corner of the trim with two hairline
+   arms pointing away from the sheet, held off the corner by a small gap, as
+   on a press sheet. Every arm sits on the inner side of its trim line, so the
+   left arms are flush with the type's left edge. */
+.cp-crop {
+  position: absolute;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.cp-crop i {
+  position: absolute;
+  display: block;
+  background: var(--ink);
+}
+
+.cp-crop i:first-child {
+  top: 0;
+  width: var(--crop-len);
+  height: 1px;
+}
+
+.cp-crop i:last-child {
+  left: 0;
+  width: 1px;
+  height: var(--crop-len);
+}
+
+.cp-crop--tl,
+.cp-crop--bl {
+  left: var(--margin);
+}
+
+.cp-crop--tr,
+.cp-crop--br {
+  left: calc(100% - var(--margin));
+}
+
+.cp-crop--tl,
+.cp-crop--tr {
+  top: var(--trim-t);
+}
+
+.cp-crop--bl,
+.cp-crop--br {
+  top: calc(100% - var(--trim-b));
+}
+
+.cp-crop--tl i:first-child,
+.cp-crop--bl i:first-child {
+  right: var(--crop-gap);
+  transform-origin: right center;
+}
+
+.cp-crop--tr i:first-child,
+.cp-crop--br i:first-child {
+  left: var(--crop-gap);
+  transform-origin: left center;
+}
+
+.cp-crop--tl i:last-child,
+.cp-crop--tr i:last-child {
+  bottom: var(--crop-gap);
+  transform-origin: center bottom;
+}
+
+.cp-crop--bl i:last-child,
+.cp-crop--br i:last-child {
+  top: var(--crop-gap);
+  transform-origin: center top;
+}
+
+.cp-crop--tr i:last-child,
+.cp-crop--br i:last-child {
+  left: -1px;
+}
+
+.cp-crop--bl i:first-child,
+.cp-crop--br i:first-child {
+  top: -1px;
+}
+
+/* ── Tint ramp ────────────────────────────────────────────────────────────
+   Inside the trim, in the fore-edge strip: it starts under the band's left
+   edge and stops at the trim corner the bottom-right mark points to. */
+.cp-halftone {
+  position: absolute;
+  z-index: 0;
+  right: var(--margin);
+  bottom: var(--trim-b);
+  display: block;
+  width: calc(var(--band-r) - var(--margin));
+  height: 40%;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+/* ── Band ─────────────────────────────────────────────────────────────────
+   The hero's red overprint, continued down to the footer. Multiply lets the
+   tint under it show through as a second plate would. */
+.cp-band {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - var(--band-r));
+  width: var(--band-w);
+  background: rgba(255, 59, 48, 0.74);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ── Phone ────────────────────────────────────────────────────────────────
+   One column left of the band, read top to bottom; the address and the
+   profiles still sit at the foot of the sheet. */
+@media (max-width: 810px) {
+  .cp {
+    --nav-h: 60px;
+    --top: calc(var(--trim-t) + 28px);
+    --bottom: calc(var(--trim-b) + 28px);
+    --band-r: 24%;
+    --band-w: 8%;
+    --title-fs: clamp(44px, 23cqi, 84px);
+    --mail-fs: clamp(26px, 13.5cqi, 44px);
+  }
+
+  .cp-sheet {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cp-title,
+  .cp-lede-block,
+  .cp-mail-wrap,
+  .cp-social {
+    align-self: stretch;
+  }
+
+  .cp-lede-block {
+    margin-top: 26px;
+  }
+
+  .cp-lede {
+    font-size: 16px;
+  }
+
+  .cp-mail-wrap {
+    margin-top: auto;
+    padding-top: clamp(48px, 9svh, 80px);
+  }
+
+  /* Stacked, the address's datum is the table's head rule. */
+  .cp-social a {
+    min-height: 44px;
+  }
+
+  .cp-social a:first-child {
+    border-top: 0;
+  }
+
+  .cp-spine {
+    gap: 12px;
+  }
+
+  .cp-halftone {
+    height: 30%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-mail::after,
+  .cp-mail-arrow svg,
+  .cp-social a::before,
+  .cp-social a::after {
+    transition: none;
+  }
+}

@@ -1,0 +1,309 @@
+/* Surface for DitherHelixCarousel. The canvas reads its page colour and lit
+   tone from computed `background-color` / `color`, so those two lines are the
+   theme: paper and ink here, matching the hero. */
+/* Themed from outside through --dhc-paper / --dhc-ink / --dhc-mute (they
+   inherit), defaulting to paper and ink. */
+.dhc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 24rem;
+  overflow: hidden;
+  user-select: none;
+  background: var(--dhc-paper, #f4f2ed);
+  color: var(--dhc-ink, #0f1b23);
+}
+
+.dhc-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--dhc-paper, #f4f2ed);
+  color: var(--dhc-ink, #0f1b23);
+  cursor: grab;
+  /* Vertical pans belong to the page; the helix never swallows a swipe. */
+  touch-action: pan-y;
+  outline: none;
+}
+
+.dhc-canvas:active {
+  cursor: grabbing;
+}
+
+.dhc-canvas:focus-visible {
+  outline: 2px solid #ff3b30;
+  outline-offset: -4px;
+}
+
+.dhc-sr,
+.dhc-vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+  list-style: none;
+}
+
+.dhc-brand,
+.dhc-caption,
+.dhc-rail {
+  position: absolute;
+  pointer-events: none;
+}
+
+.dhc-brand {
+  top: 6%;
+  left: 5%;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Project caption, set like the design system's index: mono number in
+   brackets above the title, which takes the house red full stop. */
+.dhc-caption {
+  left: var(--dhc-caption-left, clamp(20px, 4vw, 56px));
+  bottom: var(--dhc-caption-bottom, clamp(24px, 6.2svh, 56px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dhc-count {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Every piece of the counter is a box one line tall hung from the same top
+   edge, so the figures in their windows keep the brackets' baseline. */
+.dhc-count-face {
+  display: flex;
+  align-items: flex-start;
+}
+
+.dhc-count-total {
+  white-space: pre;
+  color: var(--dhc-mute, #5c6870);
+}
+
+/* One window per figure, exactly one figure tall; the strip of 0-9 behind it
+   slides, so 01 -> 03 rolls past the 2 on the way. */
+.dhc-reel {
+  display: block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.dhc-reel-strip {
+  display: block;
+  transform: translateY(calc(var(--dhc-digit, 0) * -1em));
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dhc-reel-strip > span {
+  display: block;
+  height: 1em;
+}
+
+.dhc-title {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--display-font, inherit);
+  font-size: clamp(40px, 5.6vw, 88px);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}
+
+.dhc-title-text {
+  white-space: nowrap;
+}
+
+/* While the noise runs the title is held at its new width and cut at that
+   edge -- a window, like the counter's -- so no wide glyph can run over the
+   full stop. Horizontal only: the descender of "Logic" must not be cropped. */
+.dhc-title-text.is-decoding {
+  overflow-x: clip;
+}
+
+.dhc-title-stop {
+  color: #ff3b30;
+}
+
+/* ── Index rail ───────────────────────────────────────────────────────────
+   Tategaki: one vertical column per card, set right to left as vertical text
+   runs, so (01) stands at the right. Each column hangs its number from a
+   common head line and stands its title on a common foot line (the caption's
+   baseline), which makes the four side rules one length: read together they
+   are a meter of how far the helix has turned. The title letters stand
+   upright; the brackets turn with the column, as they do in vertical type,
+   and the two figures share one upright cell. */
+.dhc-rail {
+  left: var(--dhc-rail-left, clamp(20px, 4vw, 56px));
+  /* The feet of the columns stand on the baseline of the big title: the
+     caption's bottom, raised by the depth of its line box below that
+     baseline (0.045em of the title at line-height 0.9), lowered by the room
+     an upright letter keeps below its own baseline (descent plus tracking,
+     0.353em of the rail). */
+  bottom: var(
+    --dhc-rail-bottom,
+    calc(clamp(24px, 6.2svh, 56px) + 0.045 * clamp(40px, 5.6vw, 88px) - 0.353em)
+  );
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 17px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dhc-ink, #0f1b23);
+}
+
+.dhc-rail-item {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.4em;
+  writing-mode: vertical-rl;
+}
+
+/* The foot of the rail stands in the canvas's lower grain band, and 11px
+   type at 40% would break up against cells of much its own size. So each
+   letter is trapped the way a printer traps a knockout: a crisp 1px of the
+   page colour around and under it clears the grain from the letterform and
+   nowhere else. The dimming is in the colour, not in opacity, so the trap
+   itself stays solid. */
+.dhc-rail-num,
+.dhc-rail-name {
+  /* 60%: about 4.7:1 paper-on-marine, readable at 11px while still clearly
+     behind the active entry. */
+  color: color-mix(in srgb, var(--dhc-ink, #0f1b23) 60%, transparent);
+  text-shadow:
+    1px 0 var(--dhc-paper, #f4f2ed),
+    -1px 0 var(--dhc-paper, #f4f2ed),
+    0 1px var(--dhc-paper, #f4f2ed),
+    0 -1px var(--dhc-paper, #f4f2ed);
+  transition: color 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.dhc-rail-item.is-active .dhc-rail-num,
+.dhc-rail-item.is-active .dhc-rail-name {
+  color: var(--dhc-ink, #0f1b23);
+}
+
+.dhc-rail-tcy {
+  text-combine-upright: all;
+  letter-spacing: 0;
+}
+
+.dhc-rail-name {
+  text-orientation: upright;
+}
+
+/* The side rule (on the right of the column, where vertical type takes its
+   side lines): a faint track, and a fill that the render loop scales down
+   from the head as the helix turns. */
+.dhc-rail-rule {
+  position: absolute;
+  top: 0;
+  right: -7px;
+  bottom: 0;
+  width: 1px;
+}
+
+.dhc-rail-rule::before,
+.dhc-rail-fill {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+}
+
+.dhc-rail-rule::before {
+  content: "";
+  opacity: 0.22;
+}
+
+.dhc-rail-fill {
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+}
+
+/* The first card faces from the start; its rule is full before any frame. */
+.dhc-rail-item:first-child .dhc-rail-fill {
+  transform: none;
+}
+
+/* On a phone the stage has no quiet margin to hold it, and on a short screen
+   it would meet the statement; the caption alone carries the count there. */
+@media (max-width: 810px), (max-height: 640px) {
+  .dhc-rail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dhc-reel-strip,
+  .dhc-rail-num,
+  .dhc-rail-name {
+    transition: none;
+  }
+}
+
+/* No-WebGL fallback: a native snap scroller of the same pictures. */
+.dhc-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  margin: 0;
+  padding: 6% 0;
+  overflow-y: auto;
+  list-style: none;
+  scroll-snap-type: y mandatory;
+}
+
+.dhc-list li {
+  flex: none;
+  width: 62%;
+  scroll-snap-align: center;
+}
+
+.dhc-list img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* When the column is shifted off centre (--dhc-shift, set where the carousel
+   shares its stage), the fallback keeps the pictures in the column the helix
+   would occupy instead of running them under whatever sits beside it. */
+.dhc--static .dhc-list {
+  align-items: stretch;
+  padding: 8% 24% 8% calc(var(--dhc-shift, 0) * 100% + 22%);
+}
+
+.dhc--static .dhc-list li {
+  width: 100%;
+}
+
+@media (max-width: 810px) {
+  .dhc--static .dhc-list {
+    padding: 6% calc(24% + 16px) 6% 20px;
+  }
+}

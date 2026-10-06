@@ -20,6 +20,36 @@
    <link> in the document head the preload scanner sees it immediately and the
    two stylesheets download in parallel. */
 
+/* Neue Haas Unica Pro — supplied by the studio. House weights only. */
+@font-face {
+  font-family: "Neue Haas Unica Pro";
+  src: url("./assets/fonts/NeueHaasUnicaPro-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Haas Unica Pro";
+  src: url("./assets/fonts/NeueHaasUnicaPro-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Haas Unica Pro";
+  src: url("./assets/fonts/NeueHaasUnicaPro-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Haas Unica Pro";
+  src: url("./assets/fonts/NeueHaasUnicaPro-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #0d0d0d;
   --fg: #ffffff;
@@ -28,15 +58,15 @@
   --line: rgba(255, 255, 255, 0.15);
   --accent: #a8c7ff;
   --accent-green: #a8ffc7;
-  --sans: "Geist", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sans: "Neue Haas Unica Pro", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --devanagari: "Noto Sans Devanagari", "Fragment Mono", ui-monospace, monospace;
   /* Display voice. The tracking matters as much as the family: a grotesk this
      heavy at 112px closes up its counters unless it's pulled well negative.
      --display-tracking is for the big moments (hero, statement, CTA);
      --display-tracking-sm for mid-size display (bio lead, marquee). */
-  --display-font: "Schibsted Grotesk", var(--sans);
-  --display-weight: 800;
+  --display-font: "Neue Haas Unica Pro", var(--sans);
+  --display-weight: 500;
   --display-tracking: -0.042em;
   --display-tracking-sm: -0.028em;
   --max: 1600px;
@@ -118,6 +148,11 @@ html.lenis body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Legacy pages only: on home, components tween anchors' opacity with GSAP and
+   a CSS transition on the same property restarts on every frame. */
+body:not(:has(.work-helix)) a {
   transition: opacity .25s var(--ease), color .25s var(--ease);
 }
 
@@ -216,6 +251,7 @@ main:focus {
 nav.top,
 .hero,
 .panels,
+.work-helix,
 .about,
 .work-sect,
 .index-sect,
@@ -877,6 +913,193 @@ nav.top :where(.nav-links, .nav-actions) a:focus-visible {
 
 .hero .scroll .par {
   color: var(--fg-dim);
+}
+
+/* ── Hero: ink on paper ────────────────────────────────────────────────────
+   Print-room look for the home hero only. Paper stock, one marine-ink halftone
+   relief on a butter shape, a red overprint band, and ink type. The art is laid
+   out on the 1440x900 board it was designed on, as percentages of the hero, so
+   it scales with the viewport instead of re-flowing. */
+.hero--print {
+  --paper: #f4f2ed;
+  --ink: #0f1b23;
+  --ink-mute: #5c6870;
+  --marine: #003b5c;
+  --red: #ff3b30;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.hero--print .hero-art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero--print .hero-art img {
+  position: absolute;
+  max-width: none;
+  user-select: none;
+}
+
+/* One design pixel. The art is laid out on a 1440x900 board and scaled as a
+   single piece (cover-style: whichever axis is tighter wins, the other crops),
+   anchored to the right edge so the print always bleeds off it. Sizing some
+   parts off the height and others off the width is what made the proportions
+   drift on any window that was not 16:10. */
+.hero--print {
+  --u: max(calc(100vw / 1440), calc(100vh / 900));
+  --u: max(calc(100vw / 1440), calc(100svh / 900));
+}
+
+.hero--print .hero-butter {
+  top: 0;
+  left: calc(100% - 719 * var(--u));
+  height: calc(900 * var(--u));
+  width: auto;
+}
+
+.hero--print .hero-print {
+  top: calc(32 * var(--u));
+  left: calc(100% - 492 * var(--u));
+  height: calc(962 * var(--u));
+  width: auto;
+}
+
+/* Overprint: multiply lets the marine halftone show through the red, the way a
+   second plate would. */
+.hero--print .hero-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - 213 * var(--u));
+  width: calc(72 * var(--u));
+  background: rgba(255, 59, 48, 0.74);
+  mix-blend-mode: multiply;
+}
+
+.hero--print .copy {
+  /* Same full-bleed margin as every other sheet: uncapped by --max, so at
+     1600px and wider the name starts on the page margin too. */
+  max-width: none;
+  margin-inline: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(20px, 2.6vw, 36px);
+  padding-inline: clamp(20px, 4vw, 56px);
+  bottom: clamp(24px, 6.2svh, 56px);
+}
+
+.hero--print h1 {
+  font-size: clamp(52px, 10.4vw, 156px);
+  letter-spacing: -0.058em;
+  line-height: 0.86;
+  color: var(--ink);
+  max-width: none;
+}
+
+/* Drama: each line is thrown up from below its mask on a long, late-settling
+   curve, slightly slower and later than the site's other reveals, and the red
+   stop lands last like a stamp. The slogan only arrives once the name has. */
+.hero--print h1 .line.in .inner {
+  animation: heroPrintIn 1.5s cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+.hero--print h1 .line:nth-child(1) .inner { animation-delay: 0.1s; }
+.hero--print h1 .line:nth-child(2) .inner { animation-delay: 0.3s; }
+.hero--print h1 .line:nth-child(3) .inner { animation-delay: 0.5s; }
+
+@keyframes heroPrintIn {
+  from { transform: translateY(118%) skewY(5deg); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.hero--print h1 .dot {
+  display: inline-block;
+  transform-origin: 50% 90%;
+}
+.hero--print h1 .line.in .dot {
+  animation: heroDotStamp 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) 1.5s both;
+}
+@keyframes heroDotStamp {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.hero--print .hero-sub {
+  animation: heroSubIn 1s var(--ease) 1.35s both;
+}
+@keyframes heroSubIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero--print h1 .line.in .inner,
+  .hero--print h1 .line.in .dot,
+  .hero--print .hero-sub {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The reveal mask (.line, overflow hidden) would shave the descenders at this
+   tight leading, and the last glyph's overhang (negative tracking pulls the
+   box in past the ink, e.g. the y of Chaudhary); pad it and pull it back. */
+.hero--print h1 .line {
+  padding: 0 0.16em 0.14em 0;
+  margin: 0 -0.16em -0.14em 0;
+}
+
+/* The slogan is the quiet voice: light, small, set off by a hairline. */
+.hero--print .hero-sub {
+  margin: 0;
+  width: max-content;
+  max-width: 100%;
+  padding-top: 14px;
+  border-top: 2px solid var(--ink);
+  font-size: clamp(16px, 1.45vw, 20px);
+  font-weight: 300;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: #3f4b53;
+}
+
+/* The full stop is the brand's signature red. */
+.hero--print h1 .dot {
+  color: var(--red);
+}
+
+@media (max-width: 810px) {
+  .hero--print .hero-butter {
+    left: 8%;
+    top: 4%;
+    height: 56%;
+  }
+  .hero--print .hero-print {
+    left: auto;
+    right: -10vw;
+    top: 10%;
+    height: 48%;
+  }
+  .hero--print .hero-band {
+    left: 76%;
+    width: 8%;
+  }
+  .hero--print .hero-sub {
+    width: auto;
+  }
+  .hero--print h1 {
+    max-width: none;
+    font-size: clamp(44px, 15vw, 84px);
+  }
+  /* The band sits at 76% here; the name, its red stop and the slogan stop a
+     gutter short of it, as the type on every other sheet does. */
+  .hero--print .copy {
+    gap: 14px;
+    padding-right: calc(24% + 16px);
+  }
 }
 
 .panel {
@@ -2123,4 +2346,286 @@ footer .baseline {
     from { opacity: .45; }
     to { opacity: 1; }
   }
+}
+
+/* ── Work: dither helix ────────────────────────────────────────────────────
+   A tall wrapper whose scroll distance is the carousel's travel (one card per
+   70svh), with the stage pinned to the viewport while it is read. */
+.work-helix {
+  height: calc(100svh + 3 * 70svh);
+  /* Marine inverse spread: paper type, and the carousel themed to match. */
+  background: #003b5c;
+  color: #f4f2ed;
+  --dhc-paper: #003b5c;
+  --dhc-ink: #f4f2ed;
+  --dhc-mute: rgba(244, 242, 237, 0.6);
+  /* Helix column off to the right of the statement, caption under it. */
+  --dhc-shift: 0.18;
+  --dhc-caption-left: 40%;
+}
+
+/* No-WebGL fallback on the marine spread: print the pictures as one light ink
+   on marine, like the live helix, instead of raw full colour. */
+.work-helix .dhc--static img {
+  filter: grayscale(1) contrast(1.05);
+  mix-blend-mode: screen;
+}
+
+/* Statement in the left column, under the masthead. The carousel runs
+   full-bleed behind it (so its grain bands have no visible edge) with the
+   column itself shifted right. */
+.work-helix-text {
+  position: absolute;
+  z-index: 2;
+  top: calc(64px + clamp(40px, 8svh, 96px));
+  left: clamp(20px, 4vw, 56px);
+  width: min(34vw, 560px);
+}
+
+.work-helix-carousel {
+  position: absolute;
+  inset: 0;
+}
+
+.work-helix-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  /* Same design-pixel unit as the hero, so the band lands on the same x. */
+  --u: max(calc(100vw / 1440), calc(100vh / 900));
+  --u: max(calc(100vw / 1440), calc(100svh / 900));
+}
+
+/* Continues the hero's red band down the sheet. Multiply would sink it into
+   the marine, so here it is laid on flat, a little translucent over the cards. */
+.work-helix .work-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - 213 * var(--u));
+  width: calc(72 * var(--u));
+  background: rgba(255, 59, 48, 0.86);
+  pointer-events: none;
+}
+
+@media (max-width: 810px) {
+  .work-helix .work-band {
+    left: 76%;
+    width: 8%;
+  }
+
+  /* Stops a gutter short of the band (at 76% here). */
+  .work-helix-text {
+    top: calc(60px + 28px);
+    right: calc(24% + 16px);
+    width: auto;
+  }
+
+  .work-helix {
+    --dhc-shift: 0;
+    --dhc-caption-left: 20px;
+  }
+
+  .work-helix-carousel {
+    inset: 46% 0 0 0;
+  }
+}
+
+/* ── Nav: masthead (home) ──────────────────────────────────────────────────
+   Reduced to type on paper. No capsule and no travelling glass: the wordmark
+   with its red full stop and the page links on the left, Contact on the right.
+   Bare over the hero; past it, a full-bleed paper strip closed by one ink
+   hairline, like the head of a printed sheet -- which also keeps the labels
+   legible over the dark sections further down. The current page is marked
+   with a small red square; Contact, the one action, keeps its underline. */
+body:has(.work-helix) nav.top {
+  padding: 0;
+}
+
+/* Opaque paper, no blur: a translucent strip glowed pink over the red band and
+   smudged the big type passing under it. */
+body:has(.work-helix) nav.top::before {
+  inset: 0;
+  max-width: none;
+  border-radius: 0;
+  background: #f4f2ed;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 -1px 0 #0f1b23;
+  transform: none;
+}
+
+/* On the page grid: the wordmark starts and Contact ends on the same
+   clamp(20px, 4vw, 56px) margin as every sheet below, clear of the band. */
+body:has(.work-helix) nav.top .inner {
+  grid-template-columns: auto 1fr auto;
+  gap: 32px;
+  min-height: 64px;
+  max-width: none;
+  margin: 0;
+  padding-inline: clamp(20px, 4vw, 56px);
+  color: #0f1b23;
+}
+
+body:has(.work-helix) nav.top :is(.brand, .nav-toggle):focus-visible {
+  outline: 2px solid #ff3b30;
+  outline-offset: 4px;
+  border-radius: 0;
+}
+
+body:has(.work-helix) nav.top .nav-pill {
+  display: none;
+}
+
+body:has(.work-helix) nav.top .brand {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+body:has(.work-helix) nav.top .brand::after {
+  content: ".";
+  color: #ff3b30;
+}
+
+/* Page links sit with the wordmark, over paper, rather than on the right
+   where they would land on the hero's print and red band. Contact stands
+   alone at the far edge. */
+body:has(.work-helix) nav.top .nav-links {
+  justify-content: flex-start;
+  gap: 28px;
+  padding-left: clamp(16px, 5vw, 80px);
+}
+
+body:has(.work-helix) nav.top :where(.nav-links, .nav-actions) {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+body:has(.work-helix) nav.top :where(.nav-links, .nav-actions) a {
+  color: #3f4b53;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 1px;
+  transition: color 0.14s var(--ease);
+}
+
+body:has(.work-helix) nav.top :where(.nav-links, .nav-actions) a:hover {
+  color: #0f1b23;
+  text-decoration-line: underline;
+}
+
+body:has(.work-helix) nav.top .nav-links a.is-current {
+  color: #0f1b23;
+}
+
+body:has(.work-helix) nav.top .nav-links a.is-current::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 8px;
+  vertical-align: 0.2em;
+  background: #ff3b30;
+}
+
+body:has(.work-helix) nav.top .nav-actions a {
+  color: #0f1b23;
+  text-decoration-line: underline;
+}
+
+body:has(.work-helix) nav.top :where(.nav-links, .nav-actions) a:focus-visible {
+  outline: 2px solid #ff3b30;
+  outline-offset: 4px;
+  border-radius: 0;
+}
+
+@media (max-width: 810px) {
+  body:has(.work-helix) nav.top .inner {
+    grid-template-columns: 1fr auto;
+    min-height: 60px;
+  }
+
+  /* The menu button loses its glass disc: two ink rules, nothing else. */
+  body:has(.work-helix) nav.top .nav-toggle,
+  body:has(.work-helix) nav.top.is-open .nav-toggle {
+    border: 0;
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    color: #0f1b23;
+  }
+
+  /* The sheet becomes a paper slip with an ink hairline, flush to the bar. */
+  body:has(.work-helix) nav.top .nav-sheet {
+    top: 100%;
+    left: 0;
+    right: 0;
+    /* Content lines up with the wordmark, on the page margin. */
+    padding: 8px clamp(20px, 4vw, 56px) 16px;
+    border: 0;
+    border-radius: 0;
+    background: #f4f2ed;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: inset 0 -1px 0 #0f1b23;
+    transform: translateY(-6px);
+  }
+
+  body:has(.work-helix) nav.top.is-open .nav-sheet {
+    transform: none;
+  }
+
+  body:has(.work-helix) nav.top .nav-links {
+    padding-left: 0;
+  }
+
+  body:has(.work-helix) nav.top .nav-actions a {
+    text-decoration-line: none;
+  }
+
+  body:has(.work-helix) nav.top :where(.nav-links, .nav-actions) {
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  body:has(.work-helix) nav.top .nav-links a,
+  body:has(.work-helix) nav.top .nav-actions a {
+    min-height: 52px;
+    padding-inline: 0;
+    border-radius: 0;
+    box-shadow: inset 0 -1px 0 rgba(15, 27, 35, 0.12);
+  }
+
+  body:has(.work-helix) nav.top.is-open::before {
+    opacity: 1;
+  }
+}
+
+/* ── Cursors: macOS-style ──────────────────────────────────────────────────
+   The arrow and the pointing hand drawn the way macOS draws them (black arrow
+   with a white keyline, white hand with a black keyline, a soft drop shadow),
+   so every platform gets the same pointer. Hotspots sit on the arrow's tip and
+   the hand's fingertip. The keyword after each image is the fallback when an
+   image cannot be used. !important on the hand: several components set a bare
+   `cursor: pointer` on their controls, which would otherwise swap in the
+   platform hand. Text fields keep the native I-beam; the carousel keeps grab. */
+html {
+  cursor: url("/cursors/arrow.svg") 5 3, auto;
+}
+
+a[href],
+button:not(:disabled),
+summary,
+select,
+label[for],
+[role="button"],
+[role="link"],
+[role="tab"] {
+  cursor: url("/cursors/pointer.svg") 11 3, pointer !important;
+}
+
+input:not([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="range"]),
+textarea,
+[contenteditable="true"] {
+  cursor: text;
 }
