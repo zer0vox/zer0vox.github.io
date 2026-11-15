@@ -64,21 +64,6 @@ body:has(nav.top.is-open) .hfx-progress {
   opacity: 0;
 }
 
-/* ── Masthead decode ──────────────────────────────────────────────────────
-   While a masthead link decodes, textFx puts the glyph noise in an
-   aria-hidden span inside it. Held at zero width here, the noise paints from
-   where the label starts but takes no room, so the link stays at the width
-   lockWidth pinned and nothing further along the bar moves, however wide the
-   glyphs run. text-decoration is passed down because an inline-block is not
-   reached by its parent's underline -- Contact keeps its rule, and a hovered
-   link its hover rule, through the decode. Only HomeFx decodes these links. */
-nav.top :where(.nav-links, .nav-actions) a > span[aria-hidden="true"] {
-  display: inline-block;
-  width: 0;
-  white-space: nowrap;
-  text-decoration: inherit;
-}
-
 /* Reduced motion: the rule fades with the strip on the strip's reduced timing. */
 @media (prefers-reduced-motion: reduce) {
   .hfx-progress {

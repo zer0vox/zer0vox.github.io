@@ -62,8 +62,8 @@
 }
 
 /* Design-system text link on marine: underlined, butter on hover. The rule
-   is drawn under the words alone, so it holds still while they decode and
-   the arrow is free to move past its end. */
+   is drawn under the words alone, so the arrow is free to move past its
+   end. */
 .ws-more {
   display: inline-flex;
   align-items: baseline;

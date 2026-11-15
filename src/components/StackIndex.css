@@ -1,0 +1,204 @@
+/* StackIndex -- the stack as a type specimen's index on a sheet of ink: the
+   running head, then four sections, each a key head in mono and its tools
+   run in as display type, every name, where it was used on a step of the
+   path, with a footnote letter.
+   The notes close the sheet. Stops a gutter short of the band, as every
+   sheet's type does. */
+.si {
+  --ink: #0f1b23;
+  --paper: #f4f2ed;
+  --red: #ff3b30;
+  --butter: #ffd966;
+  --margin: clamp(20px, 4vw, 56px);
+  --gutter: clamp(12px, 1.6vw, 24px);
+  --u: max(calc(100vw / 1440), calc(100vh / 900));
+  --u: max(calc(100vw / 1440), calc(100svh / 900));
+  --band-l: calc(213 * var(--u));
+  --band-w: calc(72 * var(--u));
+  position: relative;
+  z-index: 1;
+  padding: clamp(96px, 16svh, 176px) calc(var(--band-l) + var(--gutter)) clamp(96px, 16svh, 176px)
+    var(--margin);
+  background: var(--ink);
+  color: var(--paper);
+  container-type: inline-size;
+}
+
+.si ::selection {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+.si-sheet {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+/* ── Heading ───────────────────────────────────────────────────────────────
+   The sheet's title: a clear step above the entries it heads. */
+.si-title {
+  grid-column: 1 / -1;
+  margin: 0 0 clamp(36px, 7svh, 72px) -0.04em;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: clamp(44px, 7.6cqi, 104px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+/* ── Sections ─────────────────────────────────────────────────────────────
+   A key head in the first three columns, the entries in the other seven,
+   on the sheet's own grid. Each opens on a hairline, drawn as a box rather
+   than a border so it can be printed in from the left. */
+.si-sec {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: subgrid;
+  column-gap: var(--gutter);
+  position: relative;
+  padding: clamp(18px, 3svh, 32px) 0 clamp(22px, 3.6svh, 40px);
+}
+
+.si-sec-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgb(244 242 237 / 0.2);
+  transform-origin: 0 50%;
+}
+
+/* A fixed drop, so the head sits near the cap line of the entries' first
+   line without leaning on first-baseline alignment. */
+.si-sec-head {
+  grid-column: 1 / 4;
+  padding-top: calc(var(--si-fs) * 0.2);
+}
+
+/* The same voice as the proof's key heads: no new face on the page. */
+.si-sec-title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(244 242 237 / 0.88);
+}
+
+/* ── The entries ──────────────────────────────────────────────────────────
+   Entries are atoms that wrap as words do: a name never breaks inside
+   itself (Remix IDE), and the line is balanced so the last line is not left
+   holding one word. --si-fs is set on the sheet so the key heads can drop
+   by it too. */
+.si-sheet {
+  --si-fs: clamp(28px, 4.4cqi, 64px);
+}
+
+.si-list {
+  grid-column: 4 / -1;
+  margin: 0 0 0 -0.04em;
+  padding: 0;
+  list-style: none;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: var(--si-fs);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+  color: var(--paper);
+}
+
+.si-item {
+  position: relative;
+  display: inline-block;
+  margin-right: 0.55em;
+  white-space: nowrap;
+}
+
+/* The sheet's one red mark: the stop after the last entry. */
+.si-dot {
+  color: var(--red);
+}
+
+/* A hairline waits under every name at no width; pointed at, it draws. The
+   type itself never changes. */
+.si-name {
+  padding-bottom: 0.04em;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0% 1px no-repeat;
+}
+
+/* ── Close ──────────────────────────────────────────────────────────────
+   Only the rule that closes the last section. */
+.si-foot {
+  position: relative;
+  margin-top: clamp(8px, 2svh, 24px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .si-name {
+    transition: background-size 0.45s var(--ease);
+  }
+
+  .si-item:hover .si-name {
+    background-size: 100% 1px;
+  }
+}
+
+/* ── Band ─────────────────────────────────────────────────────────────────
+   Flat on ink, as on marine: multiply would print it black. */
+.si-band {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - var(--band-l));
+  width: var(--band-w);
+  background: rgba(255, 59, 48, 0.86);
+  pointer-events: none;
+}
+
+/* ── Phone ────────────────────────────────────────────────────────────── */
+@media (max-width: 810px) {
+  .si {
+    --band-l: 24%;
+    --band-w: 8%;
+    padding: clamp(72px, 12svh, 112px) calc(24% + 16px) clamp(72px, 12svh, 112px) var(--margin);
+  }
+
+  .si-sheet,
+  .si-sec,
+  .si-foot {
+    display: block;
+  }
+
+  .si-sheet {
+    --si-fs: clamp(26px, 9.6cqi, 38px);
+  }
+
+  .si-title {
+    font-size: clamp(40px, 15cqi, 60px);
+  }
+
+  .si-sec-head {
+    padding-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .si-list {
+    line-height: 1.08;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .si-name {
+    transition: none;
+  }
+}

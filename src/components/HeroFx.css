@@ -50,15 +50,12 @@
   transform-origin: 0 50%;
 }
 
-/* The decode replaces index.css's fade-in, and until it starts the slogan
-   waits unseen. Opacity rather than visibility, so screen readers still have
-   it from the first frame. */
+/* index.css fades the whole slogan in, rule and all, and its fill would hold
+   the paragraph's opacity and transform against the scroll-away. Live, the
+   hook fades in the text alone instead (opacity, so screen readers still have
+   it from the first frame), under the rule it lays itself. */
 .hero--print.hfx-live .copy .hero-sub {
   animation: none;
-}
-
-.hero--print .hfx-sub-text.hfx-pending {
-  opacity: 0;
 }
 
 /* Out of register as the sheet leaves: the exact inverse of WorkStatement's
@@ -118,12 +115,4 @@
    moved by the compositor instead of repainted. */
 .hero--print.hfx-live :is(.hero-butter, .hero-print) {
   will-change: transform;
-}
-
-/* Never hold the slogan back from a reader who asked for less motion, even
-   if a pending class outlived its effect. */
-@media (prefers-reduced-motion: reduce) {
-  .hero--print .hfx-sub-text.hfx-pending {
-    opacity: 1;
-  }
 }

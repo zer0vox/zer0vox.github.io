@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { CONTACT_EMAIL, CONTACT_MAILTO } from '../lib/contact.js'
-import { GLYPHS, bindHoverScramble, scramble } from '../lib/textFx.js'
 import { SocialTextLinks } from './social.jsx'
 import './ContactPrint.css'
 
@@ -124,8 +123,6 @@ export default function ContactPrint() {
     root.classList.add('is-printing')
 
     let cancelled = false
-    let eyebrowCancel = null
-    const mailCancels = []
     const off = []
     const listen = (el, type, fn, opts) => {
       el.addEventListener(type, fn, opts)
@@ -134,40 +131,7 @@ export default function ContactPrint() {
 
     const mail = root.querySelector('.cp-mail')
     const mailWrap = root.querySelector('.cp-mail-wrap')
-    const mailParts = [...root.querySelectorAll('.cp-mail-part')]
     const arrow = root.querySelector('.cp-mail-arrow')
-    const eyebrow = root.querySelector('.cp-eyebrow-text')
-
-    // Decode the address out of glyph noise, left to right, each half on its
-    // own text-only span (the decode rewrites text, so it never touches the
-    // arrow beside them). A new run replaces the last one on each half.
-    // Each half is held at its printed width and clipped sideways while it
-    // runs: lockWidth only sets a minimum, so a run of wide noise glyphs would
-    // otherwise push the arrow along and back. Measured once, from the printed
-    // text, and released when the decode lands.
-    const decodeMail = (duration, delay = 0) => {
-      mailParts.forEach((part, i) => {
-        if (!part.style.width) {
-          part.style.display = 'inline-block'
-          part.style.width = `${part.getBoundingClientRect().width}px`
-          part.style.overflowX = 'clip'
-        }
-        const release = () => {
-          part.style.width = ''
-          part.style.overflowX = ''
-          part.style.display = ''
-        }
-        mailCancels[i] = scramble(part, {
-          duration,
-          delay: delay + i * duration * 0.35,
-          chars: GLYPHS.ascii,
-          order: 'ltr',
-          spread: 0.4,
-          fps: 30,
-          onDone: release,
-        })
-      })
-    }
 
     // The once-only reveals, so focus can finish them early (below).
     let reveals = []
@@ -208,16 +172,6 @@ export default function ContactPrint() {
       trim(['tl', 'tr'], 'top 80%')
       trim(['bl', 'br'], 'bottom 104%')
 
-      // The running head decodes once the spine is in view.
-      ScrollTrigger.create({
-        trigger: '.cp-spine',
-        start: 'top 85%',
-        once: true,
-        onEnter: () => {
-          eyebrowCancel = scramble(eyebrow, { duration: 0.7, chars: GLYPHS.upper, order: 'ltr', spread: 0.3 })
-        },
-      })
-
       // The rule draws, then the lede comes up off it. Opacity only, never
       // visibility: a hidden element would drop out of the accessibility tree
       // and the tab order until the reader happened to scroll to it.
@@ -226,14 +180,11 @@ export default function ContactPrint() {
         .fromTo('.cp-rule', { scaleX: 0 }, { scaleX: 1, duration: 1.1, ease: 'power4.inOut' })
         .fromTo('.cp-lede', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0.45)
 
-      // The address arrives decoding and its datum line draws under it; the
+      // The address rises into place and its datum line draws under it; the
       // profiles follow down the column. clearProps hands everything back to
       // the stylesheet afterwards, where the hover states live.
       const reach = gsap
-        .timeline({
-          scrollTrigger: { trigger: mailWrap, start: 'top 92%', once: true },
-          onStart: () => decodeMail(0.9, 0.05),
-        })
+        .timeline({ scrollTrigger: { trigger: mailWrap, start: 'top 92%', once: true } })
         .fromTo(mailWrap, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', clearProps: 'opacity,transform' })
         .fromTo('.cp-mail-rule', { scaleX: 0 }, { scaleX: 1, duration: 1, ease: 'power4.inOut', clearProps: 'transform' }, 0.35)
         .fromTo(
@@ -267,18 +218,6 @@ export default function ContactPrint() {
     // A keyboard user can tab in before the reveals have run; whatever takes
     // focus in here is finished at once rather than fading in under the ring.
     listen(root, 'focusin', () => reveals.forEach((tl) => tl.progress(1)))
-
-    // Hover and focus: the address decodes again. Bound on the link rather
-    // than on a text span, so the arrow is part of the hit area and keyboard
-    // focus (which a span never receives) gets the same response.
-    const redecode = () => decodeMail(0.5)
-    listen(mail, 'pointerenter', redecode)
-    listen(mail, 'focus', redecode)
-
-    // The profiles decode their own names the same way.
-    root.querySelectorAll('.cp-social a').forEach((a) => {
-      off.push(bindHoverScramble(a, { chars: GLYPHS.upper, duration: 0.38 }))
-    })
 
     // Magnetic pull, for a precise pointer only: the address leans a little
     // towards the cursor and the arrow leans further, so the two separate
@@ -317,8 +256,6 @@ export default function ContactPrint() {
     return () => {
       cancelled = true
       off.forEach((fn) => fn())
-      eyebrowCancel?.()
-      mailCancels.forEach((cancel) => cancel?.())
       ctx.revert()
       resize.disconnect()
       root.classList.remove('is-printing')

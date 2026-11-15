@@ -18,6 +18,8 @@ import FestivePopup from './components/FestivePopup.jsx'
 // home page has to download before anything appears.
 const Philosophy = lazy(() => import('./pages/Philosophy.jsx'))
 const About = lazy(() => import('./pages/About.jsx'))
+// The blue brand-deck About, parked: reachable by URL only, never prefetched.
+const AboutHue = lazy(() => import('./pages/AboutHue.jsx'))
 
 // ...but a split route that is only fetched on click trades first-load bytes
 // for a blank pause at the moment of navigation. Warming both chunks once the
@@ -128,6 +130,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/philosophy" element={<Philosophy />} />
           <Route path="/about" element={<About />} />
+          <Route path="/about/hue" element={<AboutHue />} />
         </Routes>
       </Suspense>
       {/* Outside the routes: it greets a first visit on whichever page it

@@ -1,13 +1,30 @@
-// The Experience timeline — the content behind the 3D "chapters" section on
-// the About page (see ExperienceTimeline.jsx / ExperienceScene.jsx).
+// "The path" on the About page (HuePath.jsx): every step, oldest first, with
+// the wins folded into the step they were won in. The path reads period,
+// role, org, place, sketch and wins; it rings the last row as the current
+// one, and starts its head's span at the first row's year. The remaining
+// fields belong to the 3D chapters (ExperienceTimeline.jsx /
+// ExperienceScene.jsx), which are not mounted.
+//
+// A win is something someone issued you -- a registration, an award -- and
+// it goes in the `wins` of the step it came from, not in a row of its own.
 //
 // EDIT THIS FILE, not the components. Order is oldest -> newest on purpose:
-// the section is scrolled through like a story, so scrolling down moves
-// forward in time.
+// the section is read like a story, so reading down moves forward in time.
+//
+// Fields read by the path:
+//   sketch  the drawing at the end of the row (src/lib/sketches.js)
+//   wins    optional: [{ title, from }], each set under the role in yellow
+//           with a hand-drawn star -- `title` the win, `from` who issued it
+//
+// The square photo that follows the pointer over a row is not a field: it
+// is a file named after the step's id, in src/assets/about/path/ (see the
+// README there). A step without one shows its sketch on a yellow square.
 //
 // Fields:
 //   id      unique + stable (used as the React key and the deep-link target)
-//   year    the short label on the left rail — keep it to ~4-9 characters
+//   year    the short label on the year rail and in display type under the
+//           object — keep it to about 4 characters: the rail sets it upright,
+//           one letter under another
 //   period  the full span, shown on the card
 //   role    what you were
 //   org     where, or the name of the thing you were building
@@ -15,10 +32,10 @@
 //   lead    one sentence that carries the chapter. This is the line people
 //           actually read, so make it a claim, not a job description.
 //   notes   2-4 short specifics. Outcomes beat responsibilities.
-//   tools   short chips on the card, and one orbiting dot each in the 3D
-//           scene. Free text — where a name also appears in the Stack marquee
-//           in About.jsx it will read as the same thing, but it does not have
-//           to, and several here (VHF, CNS) deliberately do not.
+//   tools   set as one slash-separated line at the foot of the card. Free
+//           text — where a name also appears in the stack index
+//           (StackIndex.jsx) it will read as the same thing, but it does not
+//           have to, and several here (VHF, CNS) deliberately do not.
 //   model   optional. Either `src` — a file in public/models/ — or `builder`,
 //           naming a procedural model in src/lib/models.js. Shown on the left of the
 //           stage while this chapter is the current one. Omit it and the
@@ -40,13 +57,15 @@
 
 export const EXPERIENCE = [
   {
-    id: 'xp-nec',
+    id: 'xp-be',
     year: '2021',
-    period: '2021 — 2025',
-    role: 'BE, Electronics and Communication Engineering',
-    org: 'Certified NEC Engineer, 2025',
+    period: '2021–2025',
+    role: 'Bachelor of Engineering',
+    org: 'Electronics & Communication',
     place: 'Nepal',
-    lead: 'Four years spent learning how signal becomes system — from the physics of a circuit up to the software riding on top of it.',
+    sketch: 'cap',
+    wins: [{ title: 'Certified Engineer', from: 'Nepal Engineering Council, 2025' }],
+    lead: 'Four years spent learning how signal becomes system, from the physics of a circuit up to the software riding on top of it.',
     notes: [
       'Registered with the Nepal Engineering Council as a certified engineer in 2025.',
       'Built the electronics and communication grounding that the rest of this timeline runs on.',
@@ -61,8 +80,9 @@ export const EXPERIENCE = [
     year: '2025',
     period: '2025',
     role: 'Engineering Intern',
-    org: 'CNAD — Civil Aviation Authority of Nepal',
+    org: 'CNAD, Civil Aviation Authority of Nepal',
     place: 'Communication & Navigation Aid Department',
+    sketch: 'tower',
     lead: 'Aviation is the one place where a dropped signal is not an inconvenience, and that is where I learned what reliable actually costs.',
     notes: [
       'Hands-on with VHF, aviation communication and navigation systems.',
@@ -92,15 +112,16 @@ export const EXPERIENCE = [
   {
     id: 'xp-daai',
     year: '2025',
-    period: '2025 — 2026',
+    period: '2025–2026',
     role: 'DAAI Fellow',
     org: 'Data, Automation & AI Fellowship',
-    place: 'Top Performer',
-    lead: 'The turn from hardware to data — a fellowship spent automating the things I had been doing by hand.',
-    notes: [
-      'Hands-on work across data, automation and AI.',
-      'Recognised as a Top Performer of the cohort.',
-    ],
+    // The host, and the award, as the plaque and medallion name them
+    // (trophyTextures.js).
+    place: 'CloudMandap',
+    sketch: 'medal',
+    wins: [{ title: 'Top Performer', from: 'Award of Excellence, Cohort-1' }],
+    lead: 'The turn from hardware to data: a fellowship spent automating the things I had been doing by hand.',
+    notes: ['Hands-on work across data, automation and AI.'],
     tools: ['Python', 'AI/ML', 'Data Analysis', 'Automation', 'Git'],
     // The one object with no file behind it: the fellowship's own award,
     // generated from curves at runtime. See src/lib/trophy.js.
@@ -109,11 +130,12 @@ export const EXPERIENCE = [
   {
     id: 'xp-mandaapx',
     year: 'Now',
-    period: '2026 — present',
+    period: '2026–present',
     role: 'Software Engineer',
     org: 'MandaapX',
     place: 'Currently brewing',
-    lead: 'Building full-stack products on the FARM stack — FastAPI, React and MongoDB — and shipping them to real infrastructure.',
+    sketch: 'brew',
+    lead: 'Building full-stack products on the FARM stack (FastAPI, React and MongoDB) and shipping them to real infrastructure.',
     notes: [
       'REST APIs, frontend interfaces, backend services and the integrations between them.',
       'Docker, AWS and cloud deployments.',

@@ -1,0 +1,26 @@
+/* Stroke widths are in sheet units (240 wide), so the line grows with the
+   page it is drawn on: the marker the weight of the "ghb" nib, the pen the
+   signature's. */
+.sketch {
+  display: block;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sketch-m {
+  stroke: var(--hue-yellow);
+  stroke-width: 4.2;
+}
+
+.sketch-p {
+  stroke: var(--hue-white);
+  stroke-width: 1.4;
+}
+
+/* As Scribble.css: dash 1, gap 2, so 1.01 hides even the round cap. */
+.sketch path {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+}

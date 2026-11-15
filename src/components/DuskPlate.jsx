@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { GLYPHS, scramble } from '../lib/textFx.js'
 import filmPhone from '../assets/video/kathmandu-dusk-720.mp4'
 import filmAv1 from '../assets/video/kathmandu-dusk-1080-av1.mp4'
 import filmAv1Uhd from '../assets/video/kathmandu-dusk-2160-av1.mp4'
@@ -34,28 +33,21 @@ import './DuskPlate.css'
 //
 // The print is drawn as a diff and only when asked for: a frame is requested
 // when the film presents a new picture (at most 24 times a second), when the
-// scroll moves the develop or the frame, and for as long as cells are
-// churning. Each glyph is copied from a pre-set atlas rather than set as text,
-// rows off the screen wait until they are on it, and once the photograph
-// covers the plate the canvas is hidden and idle.
+// scroll moves the develop or the frame. Each glyph is copied from a pre-set
+// atlas rather than set as text, rows off the screen wait until they are on
+// it, and once the photograph covers the plate the canvas is hidden and idle.
 
 gsap.registerPlugin(ScrollTrigger)
 
 // Lightest to densest, as the hero relief's interlude printed them.
 const RAMP = ' .:-=+*#%@'
 const TOP = RAMP.length - 1
-// The same pool the page's text scrambles churn through.
-const NOISE = GLYPHS.ascii
-const NOISE_COUNT = NOISE.length
 
-// Atlas codes. 0 is an empty cell; 1..9 are the ramp in marine (the print);
-// from 10 on, the noise glyphs in pale marine. No red here: the page keeps its
-// one red for the full stop and the band.
-const NOISE_BASE = TOP + 1
-const SPRITES = NOISE_BASE + NOISE_COUNT - 1
+// Atlas codes. 0 is an empty cell; 1..9 are the ramp in marine (the print).
+// No red here: the page keeps its one red for the full stop and the band.
+const SPRITES = TOP
 
 const MARINE = '#003b5c'
-const NOISE_INK = 'rgba(0, 59, 92, 0.42)'
 
 // Tone. A cell's darkness is one minus the luma of the film under it, then
 // levelled: the bright orange low in the sky drops to bare paper, the dark
@@ -70,19 +62,17 @@ const HOLD = 0.06
 // Develop. A cell lands when the develop value passes its turn. ROW_BIAS of
 // the turn is the cell's height on the plate, so the print forms from the top
 // down as the sheet rises into view; TONE_BIAS is its darkness (shadows
-// first); the rest is chance. NOISE_WINDOW is how far ahead of landing a cell
-// starts to churn; every turn lies beyond it, so a print that has not begun
-// to develop is clean paper. A cell that will land blank (the open sky) only
-// shows a glyph one churn step in four, so the sky comes up as a light
-// scatter rather than a field of static.
+// first); the rest is chance. A cell simply appears at its turn, already in
+// its final glyph. DEVELOP_FROM is the stretch of the develop that passes
+// before the first turn; every turn lies beyond it, so a print that has not
+// begun to develop is clean paper and the front stays just under the fold.
 const ROW_BIAS = 0.5
 const TONE_BIAS = 0.3
-const NOISE_WINDOW = 0.16
-const BLANK_TONE = 0.5 / TOP
+const DEVELOP_FROM = 0.16
 const turnAt = (row, tone, chance) =>
   Math.min(
     0.999,
-    NOISE_WINDOW + (1 - NOISE_WINDOW) * (ROW_BIAS * row + TONE_BIAS * (1 - tone) + (1 - ROW_BIAS - TONE_BIAS) * chance),
+    DEVELOP_FROM + (1 - DEVELOP_FROM) * (ROW_BIAS * row + TONE_BIAS * (1 - tone) + (1 - ROW_BIAS - TONE_BIAS) * chance),
   )
 
 // The print runs at film rate or below, never at the display's.
@@ -112,16 +102,8 @@ const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => 
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 
-// Cheap integer hash for the churn: stable per (cell, step), different
-// between neighbours.
-const hash = (a, b) => {
-  let h = (Math.imul(a, 374761393) + Math.imul(b, 668265263)) | 0
-  h = Math.imul(h ^ (h >>> 13), 1274126177)
-  return (h ^ (h >>> 16)) >>> 0
-}
-
 // Cell height in CSS px for a given sheet width: about 11px on a laptop, never
-// under 9px, below which a phone shows noise rather than characters.
+// under 9px, below which a phone shows grit rather than characters.
 const cellFor = (width) => clamp(width * 0.0076, 9, 12)
 // Cells are narrower than tall, like set type: a mono advance is 0.6em.
 const CELL_ASPECT = 0.64
@@ -251,7 +233,6 @@ export default function DuskPlate() {
         atlasCtx.fillText(glyph, (code - 1) * cw + cw / 2, baseline)
       }
       for (let k = 1; k <= TOP; k++) put(k, RAMP[k], MARINE)
-      for (let j = 0; j < NOISE_COUNT; j++) put(NOISE_BASE + j, NOISE[j], NOISE_INK)
     }
 
     // --- the frame -------------------------------------------------------------
@@ -369,16 +350,9 @@ export default function DuskPlate() {
 
       const n = cols * rows
       const chance = new Float32Array(n)
-      const rate = new Float32Array(n)
-      const phase = new Float32Array(n)
-      for (let i = 0; i < n; i++) {
-        chance[i] = Math.random()
-        // Each cell churns at its own pace, so the noise never ticks in step.
-        rate[i] = 4 + Math.random() * 8
-        phase[i] = Math.random() * 16
-      }
+      for (let i = 0; i < n; i++) chance[i] = Math.random()
       grid = {
-        cols, rows, cw, ch, cwD, chD, ox, oy, plate, chance, rate, phase,
+        cols, rows, cw, ch, cwD, chD, ox, oy, plate, chance,
         held: new Float32Array(n).fill(-1),
         shown: new Int16Array(n).fill(-1),
       }
@@ -403,18 +377,17 @@ export default function DuskPlate() {
     }
 
     // --- paint -----------------------------------------------------------------
-    // Paints rows r0..r1 (the ones on screen). Returns how many cells are
-    // still churning: while any are, the next frame is needed even if nothing
-    // else moves.
-    const paintCells = (d, t, r0, r1) => {
-      const { cols, rows, cw, ch, cwD, chD, ox, oy, chance, rate, phase, held, shown } = grid
+    // Paints rows r0..r1 (the ones on screen). Only cells whose glyph has
+    // changed are redrawn, so a frame where nothing moves costs next to
+    // nothing.
+    const paintCells = (d, r0, r1) => {
+      const { cols, rows, cw, ch, cwD, chD, ox, oy, chance, held, shown } = grid
       // Cells wholly under the film or its mat cannot be seen; skip them.
       const kc0 = Math.ceil((skip.x0 - ox) / cw)
       const kc1 = Math.floor((skip.x1 - ox) / cw) - 1
       const kr0 = Math.ceil((skip.y0 - oy) / ch)
       const kr1 = Math.floor((skip.y1 - oy) / ch) - 1
       const span = LEVEL_HI - LEVEL_LO
-      let churn = 0
 
       for (let r = r0; r <= r1; r++) {
         const inRows = skip.any && r >= kr0 && r <= kr1
@@ -435,16 +408,11 @@ export default function DuskPlate() {
           if (tone < 0) continue
 
           let code = 0
-          const turn = turnAt(row, tone, chance[i])
-          if (d >= turn) {
+          if (d >= turnAt(row, tone, chance[i])) {
             // Ordered dither between the two nearest ramp steps.
             const f = tone * TOP
             const base = f | 0
             code = Math.min(TOP, base + (f - base > BAYER[(r & 3) * 4 + (c & 3)] ? 1 : 0))
-          } else if (d > turn - NOISE_WINDOW) {
-            churn++
-            const h = hash(i, Math.floor(t * rate[i] + phase[i]))
-            if (tone >= BLANK_TONE || (h >>> 24) < 64) code = NOISE_BASE + (h % NOISE_COUNT)
           }
 
           if (code === shown[i]) continue
@@ -455,7 +423,6 @@ export default function DuskPlate() {
           if (code) ctx.drawImage(atlas, (code - 1) * cwD, 0, cwD, chD, x, y, cwD, chD)
         }
       }
-      return churn
     }
 
     const filmRunning = () => !video.paused && !video.ended
@@ -478,8 +445,8 @@ export default function DuskPlate() {
       const r1 = Math.min(rows - 1, Math.floor((window.innerHeight - stageTop - oy) / ch))
       if (r1 < r0) return
       sample()
-      const churn = paintCells(state.develop, now / 1000, r0, r1)
-      if (churn || filmRunning()) request()
+      paintCells(state.develop, r0, r1)
+      if (filmRunning()) request()
     }
 
     const request = () => {
@@ -520,42 +487,18 @@ export default function DuskPlate() {
     }, root)
 
     // --- caption -------------------------------------------------------------------
-    // Decodes out of the print's own noise as the sheet takes the screen; the
-    // red full stop lands after the last letter. Reset when the reader goes
-    // back up past it, so it prints again on the way down.
-    const texts = Array.from(caption.querySelectorAll('.dp-text'))
-    const finals = texts.map((el) => el.textContent)
-    let cancels = []
-    let captionIn = false
-    const reveal = () => {
-      if (captionIn) return
-      captionIn = true
-      caption.classList.add('is-in')
-      cancels = texts.map((el, k) =>
-        scramble(el, {
-          text: finals[k],
-          duration: 0.9,
-          delay: k * 0.22,
-          lockWidth: true,
-          onDone: k === texts.length - 1 ? () => caption.classList.add('is-set') : undefined,
-        }),
-      )
-    }
-    const conceal = () => {
-      if (!captionIn) return
-      captionIn = false
-      cancels.forEach((cancel) => cancel())
-      cancels = []
-      caption.classList.remove('is-in', 'is-set')
-    }
+    // Fades in as the sheet takes the screen while its rule is laid in from
+    // the margin (both in CSS, off one class). Reset when the reader goes back
+    // up past it, so it prints again on the way down. Opacity only, so the
+    // words stay in the accessibility tree throughout.
     gctx.add(() => {
       const st = ScrollTrigger.create({
         trigger: root,
         start: 'top 30%',
         end: 'max',
-        onToggle: (self) => (self.isActive ? reveal() : conceal()),
+        onToggle: (self) => caption.classList.toggle('is-in', self.isActive),
       })
-      if (st.isActive) reveal()
+      if (st.isActive) caption.classList.add('is-in')
     })
 
     // --- lifecycle -----------------------------------------------------------------
@@ -614,12 +557,11 @@ export default function DuskPlate() {
       video.removeEventListener('loadeddata', onFilm)
       video.removeEventListener('playing', onFilm)
       video.removeEventListener('seeked', onFilm)
-      cancels.forEach((cancel) => cancel())
       gctx.revert()
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       canvas.style.visibility = ''
       for (const name of STAGE_VARS) stage.style.removeProperty(name)
-      caption.classList.remove('is-in', 'is-set')
+      caption.classList.remove('is-in')
       root.classList.remove('is-live')
     }
   }, [])
@@ -820,12 +762,9 @@ export default function DuskPlate() {
 
         <figcaption className="dp-caption" ref={captionRef}>
           <span className="dp-rule" aria-hidden="true" />
+          <span className="dp-line">based in Kathmandu</span>{' '}
           <span className="dp-line">
-            <span className="dp-text">based in Kathmandu</span>
-          </span>{' '}
-          <span className="dp-line">
-            <span className="dp-text">and working globally</span>
-            <span className="dp-dot">.</span>
+            and working globally<span className="dp-dot">.</span>
           </span>
         </figcaption>
 

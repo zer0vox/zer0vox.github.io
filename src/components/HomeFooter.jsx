@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { HomeLink } from './SiteChrome'
 import { SocialTextLinks } from './social.jsx'
-import { bindHoverScramble } from '../lib/textFx.js'
+import { WORDMARK } from '../data/wordmark.js'
 import himalayaNight from '../assets/himalaya-night.webp'
 import './HomeFooter.css'
 
@@ -22,19 +22,23 @@ import './HomeFooter.css'
 // band's width, so the band's edges come back as the spine's rules.
 //
 // Motion is printing again: the rules go down before the type, the band's
-// stop drops into register, and the wordmark's letters rise out of a baseline
-// mask trailing loose butter and red plates that lock under the ink as each
-// letter lands. Reduced motion gets the printed page as it is.
+// stop drops into register, and the wordmark is drawn the way a fineline
+// tattoo is: construction lines first, then each letter's outline traced in a
+// single hairline, then packed solid with ink, the guides lifted away and the
+// red full stop pressed in last. Reduced motion gets the printed page as it
+// is.
 
 const WORD = 'greenhueblues'
 
-// Ink side bearings of Neue Haas Unica Pro Bold, in em, measured off the
-// rendered outlines at 1000px. The wordmark is sized by its INK, not its
-// advance boxes: the g's bowl starts 0.035em inside its box and the full
-// stop's ink ends 0.206em after its origin, so a word sized by its boxes sits
-// visibly inside the margins at this scale -- 7px on the left alone at 1440.
-const INK_LEFT_G = 0.035
-const INK_RIGHT_STOP = 0.206
+// The wordmark as outlines (src/data/wordmark.js), so each letter's contour
+// can be traced before it is filled. The full stop is its own beat.
+const LETTERS = WORDMARK.glyphs.filter((g) => g.ch !== '.')
+const STOP = WORDMARK.glyphs.find((g) => g.ch === '.')
+// The type's own lines, top to foot: ascender, x-height, baseline, descender.
+const GUIDES = [0, WORDMARK.xHeight, WORDMARK.baseline, WORDMARK.height]
+// The fill gates run a little past each letter's ink, so no anti-aliased
+// edge is left unfilled.
+const GATE_PAD = 12
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
@@ -44,39 +48,21 @@ const latest = (entries) => entries[entries.length - 1]
 
 export default function HomeFooter() {
   const rootRef = useRef(null)
+  // An id the url() reference can carry as written.
+  const gateId = `hf-gate-${useId().replace(/[^\w-]/g, '')}`
 
-  // Fit the wordmark's ink to the measure. The stylesheet sizes the letters as
-  // measure / --hf-k, where --hf-k is the ink's width in em, so resizing never
-  // needs script; this only re-derives --hf-k from the letters as actually
-  // set, which keeps the fit exact if the face ever falls back.
+  // The hairlines are one device pixel at any size: the stroke is set in the
+  // wordmark's own units, so it is re-derived whenever the measure changes.
   useEffect(() => {
-    const word = rootRef.current?.querySelector('.hf-word')
-    const ink = word?.querySelector('.hf-word-ink')
-    if (!ink) return undefined
+    const svg = rootRef.current?.querySelector('.hf-word-ink')
+    if (!svg) return undefined
 
-    const fit = () => {
-      const first = ink.querySelector('.hf-ch')
-      const stop = ink.querySelector('.hf-stop')
-      const size = parseFloat(getComputedStyle(ink).fontSize)
-      if (!first || !stop || !size) return
-      // Horizontal positions only, so the letters' rise does not disturb the
-      // measurement; the ratio holds at any size, so one reading is enough.
-      const span = stop.getBoundingClientRect().left - first.getBoundingClientRect().left
-      word.style.setProperty('--hf-k', (span / size + INK_RIGHT_STOP - INK_LEFT_G).toFixed(4))
-    }
-
-    let cancelled = false
-    fit()
-    document.fonts?.ready.then(() => !cancelled && fit())
-    // A weight requested after the first `ready` (font-display: swap) would
-    // re-set the word without moving its container, so nothing else re-fits.
-    document.fonts?.addEventListener?.('loadingdone', fit)
-
-    return () => {
-      cancelled = true
-      document.fonts?.removeEventListener?.('loadingdone', fit)
-      word.style.removeProperty('--hf-k')
-    }
+    const ro = new ResizeObserver((entries) => {
+      const width = latest(entries).contentRect.width
+      if (width) svg.style.setProperty('--hf-px', (WORDMARK.width / width).toFixed(3))
+    })
+    ro.observe(svg)
+    return () => ro.disconnect()
   }, [])
 
   // Reveals. Each part plays when it comes into view and is reset once the
@@ -149,43 +135,54 @@ export default function HomeFooter() {
         )
       playWhen(box, colophon, 0.35)
 
-      // The wordmark. Each letter rises out of the line's mask on a long expo
-      // curve. Its butter and red plates ride up with it but hang back below
-      // and apart on a slower curve, catching up -- registering -- after the
-      // letter has landed, and only then drop out under the ink. The full stop
-      // lands last, on its own beat. Transforms and opacity only.
-      const letters = gsap.utils.toArray('.hf-ch', root)
-      const butter = gsap.utils.toArray('.hf-plate--butter', root)
-      const red = gsap.utils.toArray('.hf-plate--red', root)
-      const each = 0.045
+      // The wordmark, drawn. The type's four lines run out across the measure;
+      // each letter's outline is traced over them in one hairline (pathLength
+      // 1, so the dash runs 1 -> 0 whatever the contour's length -- outer
+      // contour first, then the counters), and once its contour has closed
+      // the ink packs it from the foot of its ink box up. Then the guides and
+      // the tracing lift off together, leaving only the solid word, and the
+      // red full stop is pressed in on its own beat.
+      const guides = gsap.utils.toArray('.hf-guide', root)
+      const traces = gsap.utils.toArray('.hf-trace path', root)
+      const gates = gsap.utils.toArray('.hf-gate', root)
+      const each = 0.06
+      const trace = 1.3
+      const pack = 0.75
+      const traced = 0.2
+      const packed = traced + trace * 0.85
+      const settled = packed + (LETTERS.length - 1) * each + pack
       const mark = gsap
         .timeline({ paused: true })
-        .fromTo(letters, { yPercent: 112 }, { yPercent: 0, duration: 1.15, ease: 'expo.out', stagger: each }, 0)
-        // Offsets kept to a fringe: further out, the red plate reads as a
-        // second, red word rising under the first -- a big red fill the page
-        // never allows, however briefly.
+        .set(['.hf-guides', '.hf-trace'], { autoAlpha: 1 }, 0)
         .fromTo(
-          butter,
-          { xPercent: 5, yPercent: 8 },
-          { xPercent: 0, yPercent: 0, duration: 1.1, ease: 'power3.inOut', stagger: each },
-          0.04
+          guides,
+          { strokeDashoffset: 1 },
+          { strokeDashoffset: 0, duration: 1.2, ease: 'power3.inOut', stagger: 0.1 },
+          0
         )
         .fromTo(
-          red,
-          { xPercent: -4, yPercent: 14 },
-          { xPercent: 0, yPercent: 0, duration: 1.2, ease: 'power3.inOut', stagger: each },
-          0.08
+          traces,
+          { strokeDashoffset: 1 },
+          { strokeDashoffset: 0, duration: trace, ease: 'power2.inOut', stagger: each },
+          traced
         )
-        // Held at strength while they are visibly out of register, then gone,
-        // so a registered plate never leaves a coloured fringe round the
-        // anti-aliased edge of the ink.
+      gates.forEach((gate, i) => {
+        const [, y, , h] = LETTERS[i].box
+        mark.fromTo(
+          gate,
+          { attr: { y: y + h + GATE_PAD, height: 0 } },
+          { attr: { y: y - GATE_PAD, height: h + 2 * GATE_PAD }, duration: pack, ease: 'power3.inOut' },
+          packed + i * each
+        )
+      })
+      mark
+        .to(['.hf-guides', '.hf-trace'], { autoAlpha: 0, duration: 0.9, ease: 'power2.inOut' }, settled - 0.2)
         .fromTo(
-          [...butter, ...red],
-          { autoAlpha: 0.9 },
-          { autoAlpha: 0, duration: 1.25, ease: 'power4.in', stagger: each / 2 },
-          0.04
+          '.hf-stop',
+          { scale: 0.4, autoAlpha: 0, transformOrigin: '50% 50%' },
+          { scale: 1, autoAlpha: 1, duration: 0.7, ease: 'expo.out' },
+          settled - 0.1
         )
-        .fromTo('.hf-stop', { yPercent: 112 }, { yPercent: 0, duration: 0.9, ease: 'expo.out' }, 0.95)
       playWhen(root.querySelector('.hf-word'), mark, 0.6)
 
       timelines.push(term, colophon, mark)
@@ -213,19 +210,6 @@ export default function HomeFooter() {
       ctx.revert()
       root.classList.remove('is-armed')
     }
-  }, [])
-
-  // Links decode out of glyph noise on hover and on keyboard focus. Every
-  // value link holds plain text only, which is what the scramble needs; the
-  // social links keep their full names in aria-label throughout.
-  useEffect(() => {
-    const root = rootRef.current
-    if (!root || reducedMotion()) return undefined
-
-    const unbind = Array.from(root.querySelectorAll('.hf-value a'), (link) =>
-      bindHoverScramble(link, { duration: 0.45 })
-    )
-    return () => unbind.forEach((fn) => fn())
   }, [])
 
   return (
@@ -295,19 +279,47 @@ export default function HomeFooter() {
 
         <p className="hf-word">
           <span className="hf-sr">{WORD}</span>
-          {/* One box per letter so each can rise on its own, each carrying
-              its two loose plates. Hidden from assistive tech, which reads the
-              plain copy beside it instead of thirteen separate letters. */}
-          <span className="hf-word-ink" aria-hidden="true">
-            {Array.from(WORD, (ch, i) => (
-              <span key={i} className="hf-ch">
-                <span className="hf-plate hf-plate--butter">{ch}</span>
-                <span className="hf-plate hf-plate--red">{ch}</span>
-                {ch}
-              </span>
-            ))}
-            <span className="hf-stop">.</span>
-          </span>
+          {/* Three layers of the same letters: the guides and the tracing
+              (hairlines, shown only while it is being drawn) over the ink,
+              which each letter's gate lets through. Hidden from assistive
+              tech, which reads the plain copy beside it instead. */}
+          <svg
+            className="hf-word-ink"
+            viewBox={`0 0 ${WORDMARK.width} ${WORDMARK.height}`}
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <clipPath id={gateId}>
+                {LETTERS.map(({ box: [x, y, w, h] }, i) => (
+                  <rect
+                    key={i}
+                    className="hf-gate"
+                    x={x - GATE_PAD}
+                    y={y - GATE_PAD}
+                    width={w + 2 * GATE_PAD}
+                    height={h + 2 * GATE_PAD}
+                  />
+                ))}
+              </clipPath>
+            </defs>
+            <g className="hf-guides">
+              {GUIDES.map((y) => (
+                <path key={y} className="hf-guide" d={`M0 ${y}H${WORDMARK.width}`} pathLength="1" />
+              ))}
+            </g>
+            <g className="hf-fill" clipPath={`url(#${gateId})`}>
+              {LETTERS.map(({ d }, i) => (
+                <path key={i} d={d} />
+              ))}
+            </g>
+            <g className="hf-trace">
+              {LETTERS.map(({ d }, i) => (
+                <path key={i} d={d} pathLength="1" />
+              ))}
+            </g>
+            <path className="hf-stop" d={STOP.d} />
+          </svg>
         </p>
       </div>
     </footer>

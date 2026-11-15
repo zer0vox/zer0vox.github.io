@@ -1,29 +1,28 @@
 import { useEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { GLYPHS, scramble } from '../lib/textFx.js'
 import './HeroFx.css'
 
 // Load and scroll effects for the home hero, attached to the <header> the ref
 // points at.
 //
 // The sheet arrives printed and leaves un-printing. On load the name is thrown
-// up from its masks (index.css) and the slogan decodes out of glyph noise under
-// a rule laid in from the left. On the way out the name drifts up ahead of the
-// page while its butter and red plates come apart -- the inverse of the lock
-// the statement in the marine spread below prints in with, so the two sheets
-// hand over in one vocabulary -- and each line's ink lifts off just before it
-// would slide under the bare masthead. The slogan goes first, its rule pulled
-// away to the right; the two prints separate in depth. The red band does not
-// move: it runs on down the page at the same x.
+// up from its masks (index.css), a rule is laid in from the left under it,
+// and the slogan fades in beneath the rule. On the way out the name drifts up
+// ahead of the page while its butter and red plates come apart -- the inverse
+// of the lock the statement in the marine spread below prints in with, so the
+// two sheets hand over in one vocabulary -- and each line's ink lifts off just
+// before it would slide under the bare masthead. The slogan goes first, its
+// rule pulled away to the right; the two prints separate in depth. The red
+// band does not move: it runs on down the page at the same x.
 //
 // Scrubbed, so it all reverses. Reduced motion gets the printed sheet.
 
 // Seconds after mount. The name's last line is thrown up from 0.5s on a curve
 // that is nearly home by 1.2s, and the stop stamps at 1.5s: the rule is laid
-// just before the line lands, and the slogan resolves under it.
+// just before the line lands, and the slogan fades in under it.
 const RULE_AT = 1.15
-const DECODE_AT = 1.3
+const SUB_AT = 1.3
 
 // How far each line drifts up past the page over the hero's scroll, as a
 // percentage of its mask. The mask is exactly 1em tall (0.86 leading plus the
@@ -70,40 +69,10 @@ export function useHeroFx(heroRef) {
 
     gsap.registerPlugin(ScrollTrigger)
     hero.classList.add('hfx-live')
-    subText.classList.add('hfx-pending')
 
     const small = () => window.matchMedia(SMALL).matches
     const drift = () => (small() ? DRIFT_SMALL : DRIFT)
     const em = () => parseFloat(getComputedStyle(title).fontSize)
-
-    // The decode. While noise of a different width churns through the slogan
-    // its box is held at the printed size: the rule spans that box, and the
-    // copy is anchored at the bottom, so a wider line -- or a wrapped one --
-    // would stretch the rule or lift the whole name. The height matters as
-    // much as the width: scramble() empties the text for the frame before its
-    // first glyphs, and an empty box would drop the name by a line for a frame.
-    let cancelDecode = null
-    const release = () => {
-      cancelDecode = null
-      sub.style.width = ''
-      sub.style.height = ''
-      subText.style.whiteSpace = ''
-    }
-    const decode = () => {
-      if (subText.getClientRects().length === 1) subText.style.whiteSpace = 'nowrap'
-      const box = sub.getBoundingClientRect()
-      sub.style.width = `${box.width}px`
-      sub.style.height = `${box.height}px`
-      subText.classList.remove('hfx-pending')
-      cancelDecode = scramble(subText, {
-        duration: 0.85,
-        delay: 0.1,
-        order: 'ltr',
-        spread: 0.3,
-        chars: GLYPHS.ascii,
-        onDone: release,
-      })
-    }
 
     // The scroll position at which line i's top -- its drift included --
     // reaches k line heights below the masthead. Solved from layout on every
@@ -128,9 +97,13 @@ export function useHeroFx(heroRef) {
     }
 
     const ctx = gsap.context(() => {
-      // Load: the rule is laid, then the slogan resolves along it.
+      // Load: the rule is laid, then the slogan fades in under it. The fade is
+      // on the text alone, so the rule is not held back with it, and opacity
+      // only, so a reader of the accessibility tree has the slogan from the
+      // first frame. It stands in for index.css's fade-in, which HeroFx.css
+      // turns off because the scroll-away below owns the paragraph's opacity.
       gsap.fromTo(ruleInk, { scaleX: 0 }, { scaleX: 1, duration: 0.95, ease: 'expo.out', delay: RULE_AT })
-      gsap.delayedCall(DECODE_AT, decode)
+      gsap.fromTo(subText, { opacity: 0 }, { opacity: 1, duration: 1, ease: 'power2.out', delay: SUB_AT })
 
       // Scroll away, over the hero's own height. Timeline time is progress
       // through it: 0 printed, 1 the hero's bottom edge at the top.
@@ -219,12 +192,9 @@ export function useHeroFx(heroRef) {
 
     return () => {
       cancelled = true
-      cancelDecode?.()
-      release()
       ctx.revert()
       lastInner?.removeEventListener('animationend', onLanded)
       hero.classList.remove('hfx-live', 'hfx-settled')
-      subText.classList.remove('hfx-pending')
     }
   }, [heroRef])
 }

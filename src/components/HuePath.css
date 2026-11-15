@@ -1,0 +1,360 @@
+/* The path. The left edge is the spread's (35/1024 of the width), so the
+   list hangs off the same line as the three words above it. */
+
+.hue-path {
+  position: relative;
+  z-index: 1;
+  background: var(--hue-blue);
+  color: var(--hue-white);
+  padding: clamp(96px, 9vw, 150px) 3.42vw clamp(48px, 5vw, 88px);
+}
+
+.hue-path-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 clamp(20px, 2.4vw, 36px);
+  color: var(--hue-yellow);
+  font-size: max(11px, 1.05vw);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hue-path-head h2 {
+  margin: 0;
+  font: inherit;
+}
+
+.hue-years {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One step: the span, the role with its wins under it, where, and the sketch
+   at the row's end, standing across both lines. */
+.hue-year {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16% minmax(0, 1fr) 26% clamp(104px, 11vw, 176px);
+  /* The sketch is the row's tallest thing; the flexible second line takes
+     its extra height, so the first stays as tall as the role and the wins
+     sit right under it. */
+  grid-template-rows: auto 1fr;
+  column-gap: 24px;
+  row-gap: 12px;
+  align-items: baseline;
+  padding-block: clamp(20px, 2.2vw, 34px);
+}
+
+.hue-year:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+/* Under a mouse, as in the reference: the row being shown fades back to
+   half (the modal is over it) and its type steps along 10px. `translate`,
+   not `transform`, because the reveal leaves its own transform on the
+   cells, and opacity on the row for the same reason. */
+@media (hover: hover) and (pointer: fine) {
+  .hue-year {
+    transition: opacity 0.2s var(--ease);
+  }
+
+  .hue-year:hover {
+    opacity: 0.5;
+  }
+
+  .hue-year-role,
+  .hue-year-org {
+    transition: translate 0.3s var(--ease);
+  }
+
+  .hue-year:hover .hue-year-role,
+  .hue-year:hover .hue-year-org {
+    translate: 10px 0;
+  }
+}
+
+/* The hover modal (HuePath's HoverModal, on the body): 1:1, over the page
+   and under the nav. HuePath centres it on the pointer and scales it; until
+   then it is closed, so a screen that cannot hover never sees it. */
+.hue-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: clamp(240px, 25vw, 380px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--hue-paper);
+  transform: translate(-50%, -50%) scale(0);
+}
+
+/* One slide per step, stacked; the row under the pointer slides its own
+   into the window, on the reference's 0.5s (0.76, 0, 0.24, 1). */
+.hue-modal-slider {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.hue-modal-slide {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* The photo, 1:1, inset on its slide's ink. */
+.hue-modal-photo {
+  display: grid;
+  place-items: center;
+  width: 74%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.hue-modal-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* No photo yet: the step's sketch, in the blue. */
+.hue-modal-photo .sketch {
+  width: 100%;
+  height: auto;
+}
+
+.hue-modal-photo .sketch-m,
+.hue-modal-photo .sketch-p {
+  stroke: var(--hue-blue);
+}
+
+/* The round cursor and its label: two discs, so the label can trail a
+   touch closer than the disc. The white ring keeps the blue disc seen when
+   it is off the modal, over the blue page. */
+.hue-modal-cursor,
+.hue-modal-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 41;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+.hue-modal-cursor {
+  background: var(--hue-blue);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.hue-modal-label {
+  z-index: 42;
+  color: var(--hue-white);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hue-modal-slider {
+    transition: none;
+  }
+}
+
+.hue-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.45);
+  transform-origin: 0 50%;
+}
+
+.hue-year-when {
+  grid-area: 1 / 1;
+  color: var(--hue-yellow);
+  font-size: max(13px, 1.15vw);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The ring clears the current span ("2026–present") by about half an em to
+   the sides and under half an em above and below, at whatever width the
+   span is set. */
+.hue-now {
+  position: relative;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.hue-now-ring {
+  left: -0.65em;
+  top: -0.45em;
+  width: calc(100% + 1.3em);
+  height: 2.1em;
+}
+
+.hue-year-role {
+  grid-area: 1 / 2;
+  font-size: max(20px, 2.6vw);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+/* Spans both lines, so a two-line place does not hold the role's wins down
+   below it; it still sits on the role's baseline. */
+.hue-year-org {
+  grid-area: 1 / 3 / span 2 / 4;
+  font-size: max(14px, 1.15vw);
+  line-height: 1.4;
+}
+
+.hue-year-place {
+  display: block;
+  opacity: 0.72;
+}
+
+/* The wins, under the role they were won in: yellow, full strength (a tint
+   of the yellow would fall below AA on the blue), the win in the face's
+   medium and who issued it in its regular. */
+.hue-year-wins {
+  grid-area: 2 / 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--hue-yellow);
+  font-size: max(14px, 1.15vw);
+  line-height: 1.4;
+}
+
+.hue-year-win + .hue-year-win {
+  margin-top: 0.3em;
+}
+
+.hue-win-title {
+  font-weight: 500;
+}
+
+/* The star sits in the line like a bullet; Scribble.css places marks
+   absolutely over what they mark, so this one is put back in the flow. */
+.hue-year-win .hue-win-star {
+  position: relative;
+  display: inline-block;
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: 0.45em;
+  vertical-align: -0.16em;
+}
+
+.hue-year-art {
+  grid-area: 1 / 4 / span 2 / 5;
+  align-self: center;
+}
+
+/* The sketches were drawn for a page some 380px wide; at a row's end they
+   are under half that, so both nibs are set heavier here to keep the line
+   the weight it was drawn at. */
+.hue-year-art .sketch {
+  width: 100%;
+  height: auto;
+}
+
+.hue-year-art .sketch-m {
+  stroke-width: 5.6;
+}
+
+.hue-year-art .sketch-p {
+  stroke-width: 2;
+}
+
+/* On the steps' grid: the label in the span column, the names across the
+   rest, slashed the way the timeline used to set its tools. */
+.hue-tools {
+  display: grid;
+  grid-template-columns: 16% 1fr;
+  gap: 24px;
+  align-items: baseline;
+  padding-top: clamp(22px, 2.4vw, 36px);
+}
+
+.hue-tools-label {
+  margin: 0;
+  color: var(--hue-yellow);
+  font-size: max(13px, 1.15vw);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.hue-tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: max(14px, 1.15vw);
+  line-height: 1.6;
+}
+
+.hue-tools-list li:not(:last-child)::after {
+  content: "/";
+  margin-inline: 0.55em;
+  opacity: 0.45;
+}
+
+@media (max-width: 760px) {
+  .hue-tools {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .hue-path {
+    padding: 32px 16px 72px;
+  }
+
+  /* The span and the role stacked beside the sketch; where, and the wins,
+     across the full measure under them. */
+  /* As on the wide grid, the sketch's extra height goes to a flexible line
+     -- here the role's -- so the span and the role stay together at the top
+     beside it. */
+  .hue-year {
+    grid-template-columns: minmax(0, 1fr) 30vw;
+    grid-template-rows: auto 1fr auto auto;
+    column-gap: 16px;
+    row-gap: 8px;
+    padding-block: 22px;
+  }
+
+  .hue-year-when {
+    grid-area: 1 / 1;
+  }
+
+  .hue-year-role {
+    grid-area: 2 / 1;
+    font-size: 24px;
+  }
+
+  .hue-year-org {
+    grid-area: 3 / 1 / 4 / 3;
+  }
+
+  .hue-year-wins {
+    grid-area: 4 / 1 / 5 / 3;
+  }
+
+  .hue-year-art {
+    grid-area: 1 / 2 / 3 / 3;
+    align-self: end;
+  }
+}

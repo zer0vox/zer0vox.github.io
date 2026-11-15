@@ -6,36 +6,9 @@
    population of one — with this site's own marks on it. Nothing here borrows a
    trademark, which is the only way a joke like this can sit on a public page.
 
-   The frame itself lives in About.css with the rest of the `meet` layout; only
-   the nudge and the slab are here, because only they belong to the egg. */
-
-/* The nudge ---------------------------------------------------------------- */
-
-/* The frame answers back from the third click of a run. Nothing says "keep
-   going" in words — it should read as the photograph catching the light, and
-   only in hindsight as a hint. --nudge ramps 0-1 across the second half of the
-   run so one set of rules can scale all of it. */
-.meet-portrait {
-  transition: transform .32s var(--ease), box-shadow .32s var(--ease);
-}
-
-.meet-portrait[data-run='3'] { --nudge: .18; }
-.meet-portrait[data-run='4'] { --nudge: .34; }
-.meet-portrait[data-run='5'] { --nudge: .5; }
-.meet-portrait[data-run='6'] { --nudge: .66; }
-.meet-portrait[data-run='7'] { --nudge: .82; }
-.meet-portrait[data-run='8'] { --nudge: 1; }
-
-.meet-portrait[data-run] {
-  transform:
-    rotate(calc(var(--nudge) * -.7deg))
-    scale(calc(1 + var(--nudge) * .015));
-  /* Both accents, so the tell is the brand's own two-tone rather than a
-     generic glow. */
-  box-shadow:
-    0 0 calc(var(--nudge) * 26px) rgba(168, 199, 255, calc(var(--nudge) * .3)),
-    0 0 calc(var(--nudge) * 64px) rgba(168, 255, 199, calc(var(--nudge) * .16));
-}
+   Only the slab is here. The frame that is clicked, and the nudge it gives
+   back as a run builds (--nudge, set by PortraitSlab.jsx), belong to the
+   picture: see the plate in AboutHero.css. */
 
 /* The case ----------------------------------------------------------------- */
 
@@ -472,16 +445,11 @@
 
 /* The egg still works with reduced motion — it just stops moving. The tilt is
    already skipped in JS, so --rx/--ry stay 0 and the transform is flat; what
-   is left here is the entrance and the nudge. */
+   is left here is the entrance. */
 @media (prefers-reduced-motion: reduce) {
-  .meet-portrait,
   .slab,
   .slab-close {
     transition: none;
-  }
-
-  .meet-portrait[data-run] {
-    transform: none;
   }
 
   .gcard {

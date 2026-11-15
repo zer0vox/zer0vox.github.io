@@ -50,7 +50,7 @@ export default function Home() {
 
       <main id="main">
 
-      <header className="hero hero--print" id="top" ref={heroRef}>
+      <header className="hero hero--print" id="top" ref={heroRef} data-printed>
         <div className="hero-art" aria-hidden="true">
           <img className="hero-butter" src={heroButter} alt="" />
           <img className="hero-print" src={heroPrint} alt="" />
@@ -64,7 +64,7 @@ export default function Home() {
           </h1>
           {/* The 2px rule is its own pair of spans so it can be laid in from
               the left and drawn back to the right (HeroFx); the slogan sits
-              in a text-only span because the decode rewrites its text. */}
+              in a span of its own so it can fade in without the rule. */}
           <p className="hero-sub">
             <span className="hfx-rule" aria-hidden="true"><span className="hfx-rule-ink" /></span>
             <span className="hfx-sub-text">Building mindful systems for a conscious world.</span>

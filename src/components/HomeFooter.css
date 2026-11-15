@@ -14,7 +14,6 @@
   --hf-mute: rgba(244, 242, 237, 0.55);
   --hf-hair: rgba(244, 242, 237, 0.18);
   --hf-red: #ff3b30;
-  --hf-butter: #ffd966;
   /* The page margin every section on the home page sets its type against. */
   --hf-m: clamp(20px, 4vw, 56px);
   /* One design pixel of the 1440x900 board, exactly as the hero declares it,
@@ -220,9 +219,8 @@
   letter-spacing: -0.012em;
 }
 
-/* Inline-block so the decode can hold each link's width while it runs, and
-   so the hit area can be padded without moving the row: the padding is taken
-   back by an equal negative margin. */
+/* Inline-block so the hit area can be padded without moving the row: the
+   padding is taken back by an equal negative margin. */
 .hf-value a {
   --hf-hit: 6px;
   position: relative;
@@ -233,7 +231,7 @@
 }
 
 /* The underline is drawn rather than set, so it can run in from the left on
-   hover and keep its place while the letters churn. A drawn line cannot skip
+   hover and off to the right on leave. A drawn line cannot skip
    ink the way a text decoration does, so it sits just under the descenders
    (0.2em below the baseline) instead of cutting through the p and the y. */
 .hf-value a::before {
@@ -262,8 +260,8 @@
   }
 }
 
-/* The global `a:hover { opacity: .7 }` would grey the link at the moment it
-   decodes; the underline is the whole of the hover state. */
+/* The global `a:hover { opacity: .7 }` would grey the link under its drawn
+   rule; the underline is the whole of the hover state. */
 .hf a:hover {
   opacity: 1;
 }
@@ -347,76 +345,62 @@
 }
 
 /* ── The wordmark ─────────────────────────────────────────────────────────
-   Set so its INK spans the measure exactly: the letters are sized as
-   measure / --hf-k (the ink's width in em; HomeFooter.jsx re-derives it from
-   the set letters), pulled left by the g's side bearing, and the block is
-   trimmed top and bottom to the ink -- the b's ascender to the g's tail -- so
-   the spacing around it is measured from what is printed, not from the
-   font's line box. */
+   The word as outlines (src/data/wordmark.js), its viewBox trimmed to the
+   ink -- the g's bowl to the full stop, the b's ascender to the g's tail --
+   so at the full measure its ink meets the margins exactly and the spacing
+   around it is measured from what is printed. */
 .hf-word {
-  /* Ink width of "greenhueblues." in em at this tracking; a fallback until
-     the script measures. */
-  --hf-k: 6.595;
-  container-type: inline-size;
-  display: flow-root;
   margin: clamp(72px, 11svh, 128px) 0 0;
 }
 
 .hf-word-ink {
+  /* Wordmark units per CSS pixel; HomeFooter.jsx measures it. This is the
+     1440 desktop value, close enough until it does. */
+  --hf-px: 4.96;
   display: block;
-  /* Line box 1em, baseline at 0.915em, ascender ink 0.712em above it and the
-     g's tail 0.194em below: the margins trim the box to that ink; the padding
-     keeps the tail inside the reveal mask; the right side gives the full
-     stop's last pixel room before the clip. */
-  margin: -0.203em -0.05em -0.051em -0.035em;
-  padding: 0 0.05em 0.16em 0;
-  overflow: hidden;
-  font-family: var(--display-font);
-  font-weight: 700;
-  font-size: calc((100vw - 2 * var(--hf-m)) / var(--hf-k));
-  font-size: calc(100cqi / var(--hf-k));
-  line-height: 1;
-  letter-spacing: -0.05em;
-  white-space: nowrap;
-  color: var(--hf-paper);
-  user-select: none;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-/* Its own stacking context, so the plates can sit under the letter's ink
-   whether or not a transform is applied at the moment. */
-.hf-ch {
-  position: relative;
-  z-index: 0;
-  display: inline-block;
-}
-
-.hf-plate {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
-  visibility: hidden;
-  opacity: 0;
-}
-
-.hf-plate--butter {
-  color: var(--hf-butter);
-}
-
-.hf-plate--red {
-  color: var(--hf-red);
+.hf-fill {
+  fill: var(--hf-paper);
 }
 
 .hf-stop {
-  display: inline-block;
-  color: var(--hf-red);
+  fill: var(--hf-red);
+}
+
+/* Hairlines, one pixel at any size. Only seen while the word is being drawn:
+   the printed page shows the ink alone. */
+.hf-guides,
+.hf-trace {
+  visibility: hidden;
+  opacity: 0;
+  fill: none;
+  stroke-width: calc(var(--hf-px) * 1px);
+}
+
+.hf-guides {
+  stroke: var(--hf-hair);
+}
+
+.hf-trace {
+  stroke: var(--hf-paper);
+  stroke-linejoin: round;
 }
 
 /* Start state for the reveal (HomeFooter.jsx adds the class, never under
-   reduced motion). */
+   reduced motion). Every guide and contour is normalised to length 1, so one
+   dash the length of the path, offset by its length, hides it whole. */
 .hf.is-armed .hf-colophon,
 .hf.is-armed .hf-row {
   --hf-rule: 0;
+}
+
+.hf.is-armed .hf-guide,
+.hf.is-armed .hf-trace path {
+  stroke-dasharray: 1 1;
 }
 
 /* ── Narrow screens ───────────────────────────────────────────────────────

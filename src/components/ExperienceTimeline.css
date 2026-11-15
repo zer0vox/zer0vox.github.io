@@ -1,0 +1,649 @@
+/* ExperienceTimeline -- the walk through the years as a pinned marine spread,
+   as the work spread is on the home page: a running head across the top, the
+   chapter's object printed in paper and butter dots on the left (the canvas,
+   ExperienceScene), its card left of the band, the year in display type under
+   the object and the tategaki year rail in the corner. The stage is sticky
+   inside a track one screen per chapter tall; the page scrolls and the
+   object turns.
+
+   Breakpoint note: 900px is shared with ExperienceScene.jsx, which aims the
+   camera off-centre above it and centres the object below it. Move one, move
+   the other, or the card will sit on top of the object. */
+.xp {
+  --paper: #f4f2ed;
+  --ink: #0f1b23;
+  --marine: #003b5c;
+  --red: #ff3b30;
+  --butter: #ffd966;
+  --margin: clamp(20px, 4vw, 56px);
+  --gutter: clamp(12px, 1.6vw, 24px);
+  --nav-h: 64px;
+  --foot: clamp(24px, 6.2svh, 56px);
+  --u: max(calc(100vw / 1440), calc(100vh / 900));
+  --u: max(calc(100vw / 1440), calc(100svh / 900));
+  --band-l: calc(213 * var(--u));
+  --band-w: calc(72 * var(--u));
+  position: relative;
+  z-index: 1;
+  background: var(--marine);
+  color: var(--paper);
+}
+
+.xp ::selection {
+  background: var(--butter);
+  color: var(--marine);
+}
+
+.xp-track {
+  position: relative;
+  /* height comes from the entry count, set inline in ExperienceTimeline.jsx */
+}
+
+.xp-stage {
+  position: sticky;
+  top: 0;
+  /* svh, and no taller: a sticky box taller than the scrollport does not
+     stick. */
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* The objects travel along a helix between chapters, and on the way they
+   cross the card's columns. The print is masked out of those columns, so a
+   model in transit never lays dots over the type; a settled one is held to
+   the left of the card by the scene, well inside the mask. */
+.xp-gl-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 47%, transparent 52%);
+  mask-image: linear-gradient(90deg, #000 0, #000 47%, transparent 52%);
+}
+
+.xp-gl-wrap canvas {
+  display: block;
+}
+
+/* ── The wait ─────────────────────────────────────────────────────────────
+   Where the object will print, while it loads: a registration mark whose
+   butter and red plates slip out of register and back over the key, and the
+   caption under it. Comes in only after a beat, so a model that is already
+   cached never flashes it; goes at once. */
+.xp-wait {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 28.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(244 242 237 / 0.7);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+  pointer-events: none;
+}
+
+.xp-wait[data-shown] {
+  opacity: 1;
+  transition-delay: 0.14s;
+}
+
+.xp-wait-reg {
+  display: block;
+  width: 34px;
+  height: 34px;
+  overflow: visible;
+  fill: none;
+  stroke-width: 0.9;
+}
+
+.xp-wait-key {
+  stroke: var(--paper);
+}
+
+.xp-wait-plate--butter {
+  stroke: var(--butter);
+  animation: xp-wait-butter 1.6s ease-in-out infinite;
+}
+
+.xp-wait-plate--red {
+  stroke: var(--red);
+  animation: xp-wait-red 1.6s ease-in-out infinite;
+}
+
+@keyframes xp-wait-butter {
+  0%,
+  100% {
+    opacity: 0.95;
+    transform: translate(2.6px, -1.8px);
+  }
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+@keyframes xp-wait-red {
+  0%,
+  100% {
+    opacity: 0.95;
+    transform: translate(-2.2px, 1.6px);
+  }
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* The type layer. The canvas is decorative; only the controls take the
+   pointer. The columns are the ten of the type area, which stops a gutter
+   short of the band. */
+.xp-ui {
+  --type-w: calc(100% - var(--margin) - var(--band-l) - var(--gutter));
+  --col: calc((var(--type-w) - 9 * var(--gutter)) / 10);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.xp-ui :is(button, a) {
+  pointer-events: auto;
+}
+
+/* ── Heading ───────────────────────────────────────────────────────────────
+   Only the flat list shows it; the pinned stage keeps it for the outline. */
+.xp-title {
+  margin: 0 0 0 -0.04em;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: clamp(30px, 5.6vw, 80px);
+  line-height: 0.92;
+  letter-spacing: -0.048em;
+}
+
+.xp-title-dot {
+  color: var(--red);
+}
+
+/* ── The card ─────────────────────────────────────────────────────────────
+   The last four columns, between the running head and the foot, where the
+   credit line sits. */
+.xp-cards {
+  position: absolute;
+  top: calc(var(--nav-h) + clamp(72px, 13svh, 128px));
+  bottom: calc(var(--foot) + 40px);
+  left: calc(var(--margin) + 6 * (var(--col) + var(--gutter)));
+  right: calc(var(--band-l) + var(--gutter));
+}
+
+.xp-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.45s var(--ease), transform 0.6s var(--ease);
+}
+
+.xp-card.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.xp-card-period {
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--butter);
+}
+
+.xp-card-role {
+  margin: 0;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: clamp(28px, 3.1vw, 48px);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.xp-dot {
+  color: var(--red);
+}
+
+.xp-card-org {
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.35;
+  color: rgb(244 242 237 / 0.72);
+}
+
+.xp-card-sep {
+  color: rgb(244 242 237 / 0.4);
+}
+
+/* The quiet voice, on the house 2px rule. */
+.xp-card-lede {
+  display: flex;
+  flex-direction: column;
+  margin-top: 22px;
+}
+
+.xp-card-rule {
+  display: block;
+  height: 2px;
+  background: var(--paper);
+}
+
+.xp-card-lead {
+  margin: 14px 0 0;
+  font-size: clamp(16px, 1.25vw, 19px);
+  font-weight: 300;
+  line-height: 1.38;
+  letter-spacing: -0.005em;
+  color: rgb(244 242 237 / 0.88);
+  text-wrap: pretty;
+}
+
+/* The specifics as a ruled table, a hairline under each, as the colophon
+   sets its rows. */
+.xp-card-notes {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.xp-card-notes li {
+  padding: 10px 0 11px;
+  border-bottom: 1px solid rgb(244 242 237 / 0.18);
+  font-size: 14px;
+  line-height: 1.42;
+  color: rgb(244 242 237 / 0.74);
+}
+
+.xp-card-notes li:first-child {
+  border-top: 1px solid rgb(244 242 237 / 0.18);
+}
+
+.xp-card-tools {
+  margin: 16px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(244 242 237 / 0.62);
+}
+
+/* ── Caption: count and year, under the object ──────────────────────────── */
+.xp-caption {
+  position: absolute;
+  left: 22%;
+  bottom: var(--foot);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.xp-count {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.xp-count-total {
+  color: rgb(244 242 237 / 0.6);
+}
+
+.xp-year {
+  margin: 0;
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: clamp(40px, 5.6vw, 88px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+
+/* ── Year rail ────────────────────────────────────────────────────────────
+   Tategaki, as on the home page's work index: one vertical column per
+   chapter, set right to left as vertical text runs, so (01) stands at the
+   right. The figures of each number share one upright cell; the letters of
+   the year stand upright. The side rule fills as the reader comes up to the
+   chapter, so read together the four rules are a meter of the walk. */
+.xp-rail {
+  position: absolute;
+  left: calc(var(--margin) - 7px);
+  bottom: calc(var(--foot) - 4px);
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.xp-rail-btn {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.4em;
+  padding: 4px 7px;
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(244 242 237 / 0.6);
+  writing-mode: vertical-rl;
+  transition: color 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.xp-rail-btn:hover,
+.xp-rail-btn:focus-visible,
+.xp-rail-item.is-on .xp-rail-btn {
+  color: var(--paper);
+}
+
+.xp-rail-btn:focus-visible {
+  outline: 2px solid var(--butter);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+.xp-rail-tcy {
+  text-combine-upright: all;
+  letter-spacing: 0;
+}
+
+.xp-rail-year {
+  text-orientation: upright;
+}
+
+.xp-rail-rule {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  right: 0;
+  width: 1px;
+}
+
+.xp-rail-rule::before,
+.xp-rail-fill {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+}
+
+.xp-rail-rule::before {
+  content: "";
+  opacity: 0.22;
+}
+
+.xp-rail-fill {
+  display: block;
+  transform: scaleY(var(--fill, 0));
+  transform-origin: 50% 0;
+}
+
+.xp-rail-item:first-child .xp-rail-fill {
+  --fill: 1;
+}
+
+/* ── Model credit ─────────────────────────────────────────────────────────
+   A licence obligation, not decoration: the radio on the CNAD chapter is
+   CC BY 4.0 and may not be shown without it. See `credit` in
+   src/data/experience.js. Under the card, on the foot line. */
+.xp-credit {
+  position: absolute;
+  left: calc(var(--margin) + 6 * (var(--col) + var(--gutter)));
+  right: calc(var(--band-l) + var(--gutter));
+  bottom: var(--foot);
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: rgb(244 242 237 / 0.6);
+}
+
+.xp-credit a {
+  color: rgb(244 242 237 / 0.72);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgb(244 242 237 / 0.3);
+}
+
+.xp-credit a:hover,
+.xp-credit a:focus-visible {
+  opacity: 1;
+  color: var(--paper);
+  text-decoration-color: currentColor;
+}
+
+/* ── Band ─────────────────────────────────────────────────────────────────
+   On the section, so it runs unbroken through the whole walk; flat over
+   marine, as on the work spread. Over the pinned stage. */
+.xp-band {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - var(--band-l));
+  width: var(--band-w);
+  background: rgba(255, 59, 48, 0.86);
+  pointer-events: none;
+}
+
+/* ── Narrow ───────────────────────────────────────────────────────────────
+   The object centres itself in the upper part of the stage and the card
+   reads underneath it, left of the band. The rail turns and runs under the
+   running head; the caption gives way to the card's own period. */
+@media (max-width: 900px) {
+  /* Here the card is under the object, so the mask runs down the stage. */
+  .xp-gl-wrap {
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 47%, transparent 53%);
+    mask-image: linear-gradient(180deg, #000 0, #000 47%, transparent 53%);
+  }
+
+  .xp-cards {
+    top: 52%;
+    bottom: var(--foot);
+    left: var(--margin);
+  }
+
+  .xp-card {
+    justify-content: flex-end;
+  }
+
+  .xp-caption {
+    display: none;
+  }
+
+  .xp-wait {
+    top: 30%;
+    left: 50%;
+  }
+
+  .xp-rail {
+    top: calc(var(--nav-h) + clamp(28px, 5svh, 48px) + 22px);
+    bottom: auto;
+    flex-direction: row;
+    gap: 2px;
+  }
+
+  .xp-rail-btn {
+    writing-mode: horizontal-tb;
+    gap: 0.6em;
+    padding: 8px 7px 9px;
+  }
+
+  .xp-rail-year {
+    text-orientation: mixed;
+  }
+
+  .xp-rail-rule {
+    top: auto;
+    left: 7px;
+    right: 7px;
+    bottom: 0;
+    width: auto;
+    height: 1px;
+  }
+
+  .xp-rail-fill {
+    transform: scaleX(var(--fill, 0));
+    transform-origin: 0 50%;
+  }
+
+  .xp-credit {
+    display: none;
+  }
+}
+
+@media (max-width: 810px) {
+  .xp {
+    --nav-h: 60px;
+    --band-l: 24%;
+    --band-w: 8%;
+  }
+
+  .xp-cards {
+    right: calc(24% + 16px);
+  }
+
+  /* Four "(0n) yyyy" entries do not fit left of the band at this width; the
+     years alone do, and their order tells the two 2025s apart. The buttons
+     keep their full names. */
+  .xp-rail-num {
+    display: none;
+  }
+
+  .xp-card-role {
+    font-size: clamp(24px, 7.4vw, 34px);
+  }
+
+  .xp-card-lede {
+    margin-top: 16px;
+  }
+}
+
+/* Short or small screens keep the card to what fits: the specifics go
+   first, then the tools. */
+@media (max-width: 900px), (max-height: 760px) {
+  .xp-card-notes li:nth-child(n + 2) {
+    display: none;
+  }
+}
+
+@media (max-width: 560px), (max-height: 640px) {
+  .xp-card-notes,
+  .xp-card-tools {
+    display: none;
+  }
+}
+
+/* Touch: the rail's buttons get a full finger's width. */
+@media (pointer: coarse) {
+  .xp-rail-btn {
+    padding-inline: 14px;
+  }
+
+  .xp-rail-rule {
+    right: 7px;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 900px) {
+  .xp-rail-btn {
+    padding: 14px 10px 15px;
+  }
+
+  .xp-rail-rule {
+    right: 10px;
+    left: 10px;
+  }
+}
+
+/* ── The printed list (no WebGL, or reduced motion) ─────────────────────── */
+.xp.is-flat {
+  padding: calc(var(--nav-h) + clamp(40px, 8svh, 88px)) calc(var(--band-l) + var(--gutter))
+    clamp(56px, 10svh, 112px) var(--margin);
+}
+
+.xp-flat-sheet {
+  position: relative;
+  z-index: 1;
+}
+
+.xp-flat {
+  margin: clamp(32px, 6svh, 64px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.xp-flat-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: clamp(16px, 3vw, 48px);
+  padding-block: clamp(28px, 4vw, 48px);
+  border-top: 1px solid rgb(244 242 237 / 0.35);
+}
+
+.xp-flat-row:last-child {
+  border-bottom: 1px solid rgb(244 242 237 / 0.35);
+}
+
+.xp-flat-row .xp-card-period {
+  margin: 0.3em 0 0;
+}
+
+.xp-flat-body {
+  max-width: 62ch;
+}
+
+@media (max-width: 810px) {
+  .xp.is-flat {
+    padding-right: calc(24% + 16px);
+  }
+
+  .xp-flat-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-card,
+  .xp-rail-btn {
+    transition: none;
+  }
+
+  .xp-wait-plate--butter,
+  .xp-wait-plate--red {
+    animation: none;
+    opacity: 0;
+  }
+}

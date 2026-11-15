@@ -129,13 +129,6 @@
   white-space: nowrap;
 }
 
-/* While the noise runs the title is held at its new width and cut at that
-   edge -- a window, like the counter's -- so no wide glyph can run over the
-   full stop. Horizontal only: the descender of "Logic" must not be cropped. */
-.dhc-title-text.is-decoding {
-  overflow-x: clip;
-}
-
 .dhc-title-stop {
   color: #ff3b30;
 }

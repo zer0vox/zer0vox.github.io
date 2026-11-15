@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { getLenis } from '../lib/lenis.js'
-import portraitImg from '../assets/about/portrait.webp'
 import cardArtImg from '../assets/about/card-art.webp'
 import './PortraitSlab.css'
 
-// The portrait, and the easter egg behind it: nine clicks and it comes back as
-// a professionally graded 1/1 slab.
+// The easter egg behind the portrait: nine clicks and it comes back as a
+// professionally graded 1/1 slab.
 //
 // The card is the format, not the franchise — an acrylic case, a grading label,
 // holo foil, a population of one. Every mark on it is this site's own, which is
 // the only way an in-joke like this can ship on a public page.
+//
+// This component owns the count and the slab, not the picture: it wraps
+// whatever frame it is given (the About hero's printed portrait) and tells it
+// how far into a run it is, as `data-run` and as `--nudge`, 0 until the frame
+// starts answering back and 1 on the click before the slab. How the frame
+// answers is the frame's own business.
 
 // High enough that nobody trips it while reading, low enough to be worth
 // finishing once the frame starts answering back.
@@ -29,7 +34,11 @@ const NUDGE_FROM = 3
 const reducedMotion = () =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-export default function PortraitSlab() {
+// 0 below NUDGE_FROM, then up in even steps to 1 on the last click of a run.
+const nudgeFor = (run) =>
+  run < NUDGE_FROM ? 0 : (run - NUDGE_FROM + 1) / (CLICKS_TO_OPEN - NUDGE_FROM)
+
+export default function PortraitSlab({ className, children }) {
   const [open, setOpen] = useState(false)
   const [run, setRun] = useState(0)
 
@@ -155,18 +164,12 @@ export default function PortraitSlab() {
           of a screen reader that the egg does not keep. Once the slab is open it
           is a proper dialog — Escape, a focus trap, a real close button. */}
       <div
-        className="meet-portrait"
+        className={className}
         data-run={run >= NUDGE_FROM ? run : undefined}
+        style={{ '--nudge': nudgeFor(run) }}
         onClick={onFrameClick}
       >
-        <img
-          src={portraitImg}
-          alt="Sumip Chaudhary"
-          width="840"
-          height="1260"
-          loading="lazy"
-          decoding="async"
-        />
+        {children}
       </div>
 
       {open
@@ -221,7 +224,7 @@ export default function PortraitSlab() {
                       />
                     </div>
 
-                    <p className="gcard-kind">Builder — Creative Practice · 1/1</p>
+                    <p className="gcard-kind">Builder, Creative Practice · 1/1</p>
 
                     <ul className="gcard-moves">
                       <li>
@@ -237,7 +240,7 @@ export default function PortraitSlab() {
                     </ul>
 
                     <p className="gcard-rules">
-                      Weakness — Meetings ×2 · Resistance — Deadlines −30
+                      Weakness: Meetings ×2 · Resistance: Deadlines −30
                     </p>
 
                     <footer className="gcard-foot">

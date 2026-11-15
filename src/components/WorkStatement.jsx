@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { GLYPHS, scramble } from '../lib/textFx.js'
 import './WorkStatement.css'
 
 // The practice statement, set in the left column of the pinned work section so
@@ -119,36 +118,6 @@ export default function WorkStatement({ scrollRef }) {
       root.classList.remove('is-printing', 'is-receded')
     }
   }, [scrollRef])
-
-  // The link's words decode on hover and on keyboard focus. The listeners sit
-  // on the link, so the arrow and the keyboard count too, but the effect runs
-  // on a span holding only the words: scramble() rewrites text, and the arrow
-  // has to survive it. (textFx honours reduced motion by setting the text.)
-  useEffect(() => {
-    const link = rootRef.current?.querySelector('.ws-more')
-    const words = link?.querySelector('.ws-more-words')
-    if (!link || !words) return undefined
-    const text = words.textContent
-    let cancel = null
-    const run = () => {
-      cancel?.()
-      cancel = scramble(words, {
-        text,
-        duration: 0.42,
-        spread: 0.5,
-        fps: 30,
-        chars: GLYPHS.ascii,
-        lockWidth: true,
-      })
-    }
-    link.addEventListener('pointerenter', run)
-    link.addEventListener('focus', run)
-    return () => {
-      link.removeEventListener('pointerenter', run)
-      link.removeEventListener('focus', run)
-      cancel?.()
-    }
-  }, [])
 
   return (
     <div className="ws" id="about" ref={rootRef}>

@@ -25,7 +25,6 @@
 import * as React from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { GLYPHS, scramble } from "../lib/textFx.js"
 import { getLenis } from "../lib/lenis.js"
 import "./DitherHelixCarousel.css"
 
@@ -54,9 +53,9 @@ import "./DitherHelixCarousel.css"
 //
 // And the type around it, so the caption is as considered as the picture:
 //
-//  * When the facing card changes, the title decodes out of glyph noise while
-//    the red full stop glides to its new end, and the "(01) / 04" counter
-//    rolls its digits like an odometer.
+//  * When the facing card changes, the new title is set at once while the red
+//    full stop glides to its new end, and the "(01) / 04" counter rolls its
+//    digits like an odometer.
 //  * `rail` (scroll-driven mode only, default on): a tategaki index of the
 //    titles, set in vertical columns in the stage's lower margin, each with a
 //    side rule that fills as the helix turns toward that card -- the vertical
@@ -111,9 +110,8 @@ const CLICK_MS = 1300
 
 const THEME_EVERY = 20
 
-/* Caption. The decode is kept short: it marks the change and gets out of the
-   way, landing before the counter's roll has finished settling. */
-const DECODE_S = 0.45
+/* Caption. The stop's glide is kept short: it marks the change and gets out
+   of the way, landing before the counter's roll has finished settling. */
 const STOP_GLIDE_MS = 560
 const EASE_OUT_EXPO = "cubic-bezier(0.16, 1, 0.3, 1)"
 
@@ -1250,8 +1248,9 @@ export function DitherHelixCarousel({
   }, [sources, count, reduced, playEntry, scrollDriven, showRail])
 
   // --- caption --------------------------------------------------------------
-  // The title is printed imperatively: scramble() rewrites the node's text, so
-  // React renders only the first title and never touches that node again.
+  // The title is set imperatively: the full stop's old position has to be read
+  // before the new text lands, so React renders only the first title and
+  // never touches that node again.
   const title = items[active]?.title ?? ""
   const [firstTitle] = React.useState(title)
   const printed = React.useRef(title)
@@ -1273,13 +1272,7 @@ export function DitherHelixCarousel({
     // scroll changed the card again -- so a chain of changes stays one motion.
     const from = stop.getBoundingClientRect().left
     glide.current?.cancel()
-    el.style.width = ""
     el.textContent = title
-    // Held at the new title's width while the noise runs, and clipped to it:
-    // proportional glyphs would otherwise jostle the full stop on every frame
-    // of the decode, or run over it.
-    el.style.width = `${el.getBoundingClientRect().width}px`
-    el.classList.add("is-decoding")
     const to = stop.getBoundingClientRect().left
     if (Math.abs(from - to) > 0.5) {
       glide.current = stop.animate(
@@ -1287,23 +1280,7 @@ export function DitherHelixCarousel({
         { duration: STOP_GLIDE_MS, easing: EASE_OUT_EXPO }
       )
     }
-
-    const release = () => {
-      el.style.width = ""
-      el.classList.remove("is-decoding")
-    }
-    const cancel = scramble(el, {
-      text: title,
-      duration: DECODE_S,
-      chars: GLYPHS.ascii,
-      spread: 0.3,
-      fps: 30,
-      onDone: release,
-    })
-    return () => {
-      cancel()
-      release()
-    }
+    return undefined
   }, [title, reduced])
 
   // Only on unmount: the glide is otherwise handed from one change to the next.
