@@ -7,7 +7,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 // Every route opens on a full-bleed hero, and each names it differently: the
 // home header, the philosophy hero, the about parallax stage.
-const HERO_SELECTOR = '.hero, .hero-wrap'
+const HERO_SELECTOR = '.hero, .ph-hero, .hero-wrap'
 
 // The nav sits transparent over the hero and turns to glass once the hero has
 // scrolled out from under it. Measured off the live hero rather than a magic
@@ -25,18 +25,11 @@ function useScrolledPastHero(navRef) {
       frame = 0
       const hero = document.querySelector(HERO_SELECTOR)
       const navHeight = navRef.current?.offsetHeight ?? 0
-      // A printed hero (data-printed, the same opt-in that gives the page the
-      // masthead in index.css) runs its print and band right up under the
-      // labels, which are only legible on it at rest. There the paper strip
-      // comes in with the first scroll instead of once the hero has gone.
-      const printed = hero?.hasAttribute('data-printed')
 
       setPastHero(
-        printed
-          ? window.scrollY > 16
-          : hero
-            ? hero.getBoundingClientRect().bottom <= navHeight
-            : window.scrollY > navHeight
+        hero
+          ? hero.getBoundingClientRect().bottom <= navHeight
+          : window.scrollY > navHeight
       )
     }
 
@@ -101,7 +94,7 @@ function scrollHomeToTop(pathname) {
 // component is the point — the footer's copy is exactly the one that was left
 // behind pointing at #work when the nav item was renamed, because there was
 // nothing tying them together.
-export function HomeLink({ className, markCurrent = false, children }) {
+function HomeLink({ className, markCurrent = false, children }) {
   const { pathname } = useLocation()
   const current = markCurrent && pathname === '/'
 
@@ -424,13 +417,7 @@ export function SiteNav() {
               read: it says nothing a link does not already say. */}
           <span className="nav-pill" aria-hidden="true" />
 
-          {/* The wordmark is the hand-drawn "ghb" monogram, drawn in the bar's
-              own ink (index.css); the name stays as text for assistive
-              technology. */}
-          <HomeLink className="brand">
-            <span className="visually-hidden">greenhueblues</span>
-            <span className="brand-mark" aria-hidden="true" />
-          </HomeLink>
+          <HomeLink className="brand">greenhueblues</HomeLink>
 
           {/* One wrapper, two presentations. On the desktop bar it is
               `display: contents`, so the list and the actions fall straight

@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { buildModel, loadModel } from '../lib/models.js'
+import ExperienceBackdrop from './ExperienceBackdrop.jsx'
 
 // The 3D half of the Experience section. The DOM half — the year rail and the
 // chapter cards — lives in ExperienceTimeline.jsx, which owns the scroll maths
@@ -13,14 +14,6 @@ import { buildModel, loadModel } from '../lib/models.js'
 // halo, no ring, no dust, no orbiting dots and no idle motion — an earlier
 // version had all of them and they read as decoration for its own sake. The
 // only thing that moves is what the reader is moving: scroll position.
-//
-// Nothing here reaches the screen as it was rendered. The page is a run of
-// printed sheets, and this one is marine stock, so the scene is drawn into a
-// target off screen and then printed onto the canvas through a halftone
-// screen (HalftonePass, below): light becomes paper ink, the brightest
-// highlights take the butter plate, and the dark of the stage is simply the
-// sheet showing through. The models are still lit and still turn; what the
-// reader sees of them is dots.
 //
 // Chapters still sit on a helix, but the helix is now purely a path, never
 // drawn. Scrolling turns and lifts the whole group so the current chapter
@@ -146,181 +139,6 @@ function StageEnvironment() {
   useEffect(() => () => texture.dispose(), [texture])
 
   return <primitive attach="environment" object={texture} />
-}
-
-// ── The print ───────────────────────────────────────────────────────────────
-//
-// A 45-degree screen, as the hero's portrait and the name sheet's plates are
-// screened on the 2D canvas, here done per pixel on the GPU so it can run at
-// the frame rate. Each pixel finds the cell of the lattice it falls in, reads
-// the scene at that cell's centre (four taps, so a hairline catches a dot
-// rather than flickering between cells), and is inked if it lies inside the
-// dot the cell's tone asks for.
-//
-// The tone is light, not shadow: on marine stock the dots are the paper ink,
-// so a lit face prints and a dark one is the sheet. A floor of cover wherever
-// the model is present keeps a dark object's silhouette printing as a fine
-// tint instead of vanishing into the stage. The brightest highlights print in
-// butter, as the night ridge's lights do on the philosophy page.
-//
-// The screen is fine, and every dot is cut to the model's own outline. A
-// coarse screen broke thin parts -- the wordmark's letters, the board's
-// traces, the trophy's rim -- into a loose dot field with ragged edges; cut,
-// each model keeps a clean silhouette with the dots inside it.
-
-// CSS px between dot centres along the screen angle, on the 1440px board;
-// scaled with the stage and held between these bounds.
-const SCREEN_PITCH = 3.4
-const SCREEN_MIN = 2.8
-const SCREEN_MAX = 4.4
-
-// Inks, as raw sRGB components: the shader writes them out as they are, with
-// no colour management between it and the page.
-const PAPER_INK = [0xf4 / 255, 0xf2 / 255, 0xed / 255]
-const BUTTER_INK = [0xff / 255, 0xd9 / 255, 0x66 / 255]
-
-// Straight to clip space: a full-screen quad, which ignores the camera.
-const screenVertex = /* glsl */ `
-  void main() {
-    gl_Position = vec4(position.xy, 0.0, 1.0);
-  }
-`
-
-const screenFragment = /* glsl */ `
-  uniform sampler2D uScene;
-  uniform vec2 uRes;
-  uniform float uPitch;
-  uniform vec3 uPaper;
-  uniform vec3 uButter;
-
-  // Into the lattice (turned 45 degrees) and back out of it.
-  const mat2 TURN = mat2(0.70710678, -0.70710678, 0.70710678, 0.70710678);
-  const mat2 BACK = mat2(0.70710678, 0.70710678, -0.70710678, 0.70710678);
-
-  vec4 tap(vec2 px) {
-    vec4 s = texture2D(uScene, px / uRes);
-    // The target holds colour already multiplied by the models' fade.
-    return vec4(s.a > 0.0001 ? s.rgb / s.a : vec3(0.0), s.a);
-  }
-
-  void main() {
-    vec2 q = TURN * gl_FragCoord.xy / uPitch;
-    vec2 cell = floor(q) + 0.5;
-    vec2 centre = BACK * cell * uPitch;
-
-    vec2 o = BACK * vec2(0.25, 0.25) * uPitch;
-    vec2 o2 = BACK * vec2(0.25, -0.25) * uPitch;
-    vec4 s = 0.25 * (tap(centre + o) + tap(centre - o) + tap(centre + o2) + tap(centre - o2));
-
-    // Linear light to the eye's scale, then levelled: the darkest tenth of a
-    // lit model prints at the floor, the top tenth as full dots.
-    float l = pow(clamp(dot(s.rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0), 1.0 / 2.2);
-    float tone = smoothstep(0.1, 0.9, l);
-    float cover = s.a * mix(0.07, 0.76, tone);
-
-    // Area to radius, in cells; the dot is cut with a one-pixel soft edge.
-    float r = sqrt(cover / 3.14159265);
-    float d = length(q - cell);
-    float edge = 0.5 / uPitch;
-    float ink = 1.0 - smoothstep(r - edge, r + edge, d);
-    ink *= step(0.012, cover);
-
-    // Cut to the outline: the model's coverage at this pixel, not at the
-    // cell's centre. The target is multisampled, so the edge is smooth.
-    float here = texture2D(uScene, gl_FragCoord.xy / uRes).a;
-    ink *= smoothstep(0.08, 0.45, here);
-
-    vec3 colour = mix(uPaper, uButter, smoothstep(0.88, 0.97, l));
-    gl_FragColor = vec4(colour * ink, ink);
-  }
-`
-
-function createPass() {
-  // Multisampled, so a cut outline is anti-aliased rather than stair-stepped.
-  const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 })
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      uScene: { value: target.texture },
-      uRes: { value: new THREE.Vector2(1, 1) },
-      uPitch: { value: SCREEN_PITCH },
-      uPaper: { value: new THREE.Vector3(...PAPER_INK) },
-      uButter: { value: new THREE.Vector3(...BUTTER_INK) },
-    },
-    vertexShader: screenVertex,
-    fragmentShader: screenFragment,
-    // The canvas is composited premultiplied; the shader writes exactly that,
-    // and nothing under it is worth blending with.
-    blending: THREE.NoBlending,
-    depthTest: false,
-    depthWrite: false,
-  })
-  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material)
-  quad.frustumCulled = false
-  const screen = new THREE.Scene()
-  screen.add(quad)
-
-  return {
-    target,
-    material,
-    screen,
-    camera: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1),
-    dispose() {
-      target.dispose()
-      material.dispose()
-      quad.geometry.dispose()
-    },
-  }
-}
-
-// Renders the scene into a target the size of the canvas, then prints it to
-// the canvas through the screen. Registered at a positive priority, which
-// tells R3F this component now does the rendering and its own render is off.
-// The pass is a live GPU resource written every frame, so it lives in a ref,
-// as the models' groups do, rather than in React state.
-function HalftonePass() {
-  const gl = useThree((state) => state.gl)
-  const scene = useThree((state) => state.scene)
-  const camera = useThree((state) => state.camera)
-  const size = useThree((state) => state.size)
-  const dpr = useThree((state) => state.viewport.dpr)
-  const passRef = useRef(null)
-
-  useEffect(() => {
-    const pass = createPass()
-    passRef.current = pass
-    return () => {
-      passRef.current = null
-      pass.dispose()
-    }
-  }, [])
-
-  // The target matches the drawing buffer pixel for pixel, and the pitch is
-  // set in device pixels from a CSS size that follows the stage's width.
-  // Declared after the effect above, so the pass exists by the time it runs.
-  useEffect(() => {
-    const pass = passRef.current
-    if (!pass) return
-    const w = Math.max(1, Math.round(size.width * dpr))
-    const h = Math.max(1, Math.round(size.height * dpr))
-    pass.target.setSize(w, h)
-    pass.material.uniforms.uRes.value.set(w, h)
-    const pitch = Math.min(SCREEN_MAX, Math.max(SCREEN_MIN, (SCREEN_PITCH * size.width) / 1440))
-    pass.material.uniforms.uPitch.value = pitch * dpr
-  }, [size, dpr])
-
-  useFrame(() => {
-    const pass = passRef.current
-    if (!pass) return
-    gl.setRenderTarget(pass.target)
-    gl.setClearColor(0x000000, 0)
-    gl.clear()
-    gl.render(scene, camera)
-    gl.setRenderTarget(null)
-    gl.clear()
-    gl.render(pass.screen, pass.camera)
-  }, 1)
-
-  return null
 }
 
 // One chapter's GLB, parked on that chapter's point on the helix — which is to
@@ -470,18 +288,21 @@ function Scene({ entries, easedRef, onModelSettled }) {
 
   return (
     <>
+      {/* Drawn before everything else and outside the helix group: it is the
+          stage the chapters stand on, not one of the things standing on it. */}
+      <ExperienceBackdrop easedRef={easedRef} />
+
       {/* Nothing else in the scene is lit, so these exist purely for the
           chapter models and are skipped when no chapter has one. World-fixed
           rather than inside the helix group: the key light should stay put as
-          the models turn past it. White, all three: the print reads only how
-          much light falls, so a coloured light would only be a weaker one. */}
+          the models turn past it. */}
       {lit && (
         <>
           <StageEnvironment />
           <ambientLight intensity={0.35} />
-          <directionalLight position={[3.5, 4, 5]} intensity={2.6} />
-          <directionalLight position={[-4.5, -1, 2.5]} intensity={1.1} />
-          <directionalLight position={[0, 2.5, -5]} intensity={1.4} />
+          <directionalLight position={[3.5, 4, 5]} intensity={2.6} color="#eaf1ff" />
+          <directionalLight position={[-4.5, -1, 2.5]} intensity={1.15} color="#a8ffc7" />
+          <directionalLight position={[0, 2.5, -5]} intensity={1.5} color="#a8c7ff" />
         </>
       )}
 
@@ -498,8 +319,6 @@ function Scene({ entries, easedRef, onModelSettled }) {
           ) : null
         )}
       </group>
-
-      <HalftonePass />
     </>
   )
 }
@@ -508,8 +327,8 @@ export default function ExperienceScene({ entries, easedRef, live, onModelSettle
   return (
     <Canvas
       className="xp-gl"
-      // Parked whenever the section is off-screen: the rest of the page
-      // should not pay for a stage nobody can see.
+      // Parked whenever the section is off-screen. This page also carries the
+      // mountain hero, and neither should pay for the other.
       frameloop={live ? 'always' : 'never'}
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}

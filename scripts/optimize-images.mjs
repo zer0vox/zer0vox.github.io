@@ -13,7 +13,7 @@
 //   npm run optimize:images
 
 import { execFileSync } from 'node:child_process'
-import { statSync, existsSync, mkdirSync } from 'node:fs'
+import { statSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
 
@@ -63,13 +63,6 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 //            and lands at 196 kB without. Removing it moves the file back
 //            toward the photograph it was before someone saved it as pal8.
 //            Do NOT use on images whose fine detail is the content.
-// out:       write to this path instead of beside the source. For derived
-//            assets -- a crop or a sampling source cut from a master that
-//            already has its own .webp.
-//
-// A path fragment as the first argument re-encodes only the targets whose
-// src or out contains it, so adding one asset does not re-encode the rest:
-//   npm run optimize:images -- philosophy/print
 const TARGETS = [
   // About hero — four stacked full-bleed layers, painted at `150% auto`.
   { src: 'src/assets/about/mountain-photo.jpg', width: 2560, quality: 76 },
@@ -92,33 +85,15 @@ const TARGETS = [
   { src: 'src/assets/about/card-art.jpg',      width: 720,  quality: 82, mono: true,
     crop: 'iw:ih*0.74:0:ih*0.18' },
 
-  // Philosophy, as it was before it was printed. These five are no longer
-  // imported by any page (the printed page samples the derived sources
-  // further down); the masters stay, as the sources for those.
+  // Philosophy.
   { src: 'src/assets/philosophy/hero-ridgeline.jpg', width: 2560, quality: 74 },
+  // Rendered through `filter: grayscale(1)` (Philosophy.css:562).
   { src: 'src/assets/philosophy/mark-band.jpg',      width: 2200, quality: 76, grayscale: true },
-  // Despite the .png name this file is already a JPEG.
+  // Despite the .png name this file is already a JPEG. It sits at opacity .34
+  // under a saturate/contrast/brightness stack, so it can go much smaller.
   { src: 'src/assets/philosophy/ambient-grain.png',  width: 1000, quality: 66 },
   { src: 'src/assets/philosophy/practice.jpg',       width: 646,  quality: 82 },
   { src: 'src/assets/philosophy/greenhueblues-mark.png', width: 307, quality: 90, alpha: true },
-
-  // Philosophy, printed: sampling sources for the halftone canvases, never
-  // shown as pictures. Grey and small -- a dot screen reads one luminance
-  // value per cell, so these only need a few pixels per dot.
-  // The plate: the golden-section crop of the ridge (1 : 1.618, portrait)
-  // whose pole -- 0.7236 of the way across and down -- falls on the figure
-  // with the camera. Flush with the right edge and clear of the letterbox.
-  { src: 'src/assets/philosophy/mark-band.jpg', out: 'src/assets/philosophy/print/plate.webp',
-    width: 720, quality: 84, grayscale: true, crop: 'iw*0.32227:ih*0.69515:iw*0.67773:ih*0.19879' },
-  // The preface's night ridge, and the press's contact sheet.
-  { src: 'src/assets/philosophy/hero-ridgeline.jpg', out: 'src/assets/philosophy/print/night.webp',
-    width: 800, quality: 80, grayscale: true },
-  { src: 'src/assets/philosophy/practice.jpg', out: 'src/assets/philosophy/print/hands.webp',
-    width: 360, quality: 80, grayscale: true },
-  { src: 'src/assets/logic-spiral.jpg', out: 'src/assets/philosophy/print/stair.webp',
-    width: 360, quality: 80, grayscale: true },
-  { src: 'src/assets/video/kathmandu-dusk-poster.jpg', out: 'src/assets/philosophy/print/dusk.webp',
-    width: 360, quality: 80, grayscale: true },
 
   // Home panel backgrounds — each sits under a ~.4 black scrim.
   // vision/dna were saved as 256-colour dithered PNGs; see `denoise` above.
@@ -137,17 +112,13 @@ const kb = (n) => (n / 1024).toFixed(1).padStart(8) + ' kB'
 let before = 0
 let after = 0
 
-const only = process.argv[2]
-const picked = only ? TARGETS.filter((t) => t.src.includes(only) || t.out?.includes(only)) : TARGETS
-
-for (const t of picked) {
+for (const t of TARGETS) {
   const src = join(root, t.src)
   if (!existsSync(src)) {
     console.warn(`  skip (missing): ${t.src}`)
     continue
   }
-  const out = t.out ? join(root, t.out) : src.replace(/\.(jpe?g|png)$/i, '.webp')
-  mkdirSync(dirname(out), { recursive: true })
+  const out = src.replace(/\.(jpe?g|png)$/i, '.webp')
 
   // `scale` never upscales: -2 keeps the dimension even, which libwebp wants.
   const filters = [`scale='min(${t.width},iw)':-2`]
@@ -190,7 +161,7 @@ for (const t of picked) {
   before += b
   after += a
   const pct = (100 - (a / b) * 100).toFixed(0)
-  console.log(`${kb(b)} -> ${kb(a)}  (-${String(pct).padStart(2)}%)  ${t.out ?? t.src}`)
+  console.log(`${kb(b)} -> ${kb(a)}  (-${String(pct).padStart(2)}%)  ${t.src}`)
 }
 
 console.log(`\n${kb(before)} -> ${kb(after)}   saved ${kb(before - after)} (${(100 - (after / before) * 100).toFixed(1)}%)`)

@@ -1,21 +1,19 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import LiquidLoader from './LiquidLoader.jsx'
 import { scrollToOffset } from '../lib/lenis.js'
 import { EXPERIENCE } from '../data/experience.js'
-import './ExperienceTimeline.css'
 
-// The Experience section: a scroll-scrubbed timeline on the about page, set
-// as a pinned marine spread the way the work spread is on the home page. The
-// copy lives in src/data/experience.js; the models and their halftone print
-// live in ExperienceScene.jsx; this file is the part that reads the scroll,
-// decides which chapter is current, and draws everything a person reads: the
-// running head, the chapter's card, the year under the object, and the
-// tategaki year rail, which is the one control on the stage.
+// The Experience section: a scroll-scrubbed 3D timeline that sits between the
+// Stack marquee and contact on the About page. The copy lives in
+// src/data/experience.js; the helix lives in ExperienceScene.jsx; this file is
+// the part that reads the scroll, decides which chapter is current, and draws
+// everything a person actually reads.
 //
 // Two things are deliberate here:
 //
-// 1. The chapter index is measured every frame from the track's rect rather
-//    than from scroll events. Lenis owns the scroll position on this site and
-//    a rect never disagrees with it.
+// 1. The chapter index is measured every frame from the track's rect, the same
+//    way the Philosophy dial does it, rather than from scroll events. Lenis
+//    owns the scroll position on this site and a rect never disagrees with it.
 // 2. There is one source of truth for "which chapter", and it is a ref, not
 //    state. React state would re-render the whole section 60 times a second;
 //    the scene reads the ref inside its own frame loop, and state only changes
@@ -29,11 +27,8 @@ const ExperienceScene = lazy(() => import('./ExperienceScene'))
 // Frame-rate independent damping: `rate` is the fraction closed per 60fps frame.
 const damp = (rate, dt) => 1 - Math.pow(1 - rate, dt * 60)
 
-const pad2 = (n) => String(n).padStart(2, '0')
-const clamp01 = (v) => Math.min(1, Math.max(0, v))
-
 // The 3D telling needs WebGL, and it is a scroll-driven motion piece, so
-// anyone who has asked for less motion gets the printed list instead. Both are
+// anyone who has asked for less motion gets the plain list instead. Both are
 // decided once at mount — this is not worth re-deciding mid-scroll.
 function canTellTheStory() {
   if (typeof window === 'undefined') return false
@@ -53,23 +48,10 @@ export default function ExperienceTimeline({ entries = EXPERIENCE }) {
   return story ? <ExperienceStory entries={entries} /> : <ExperienceFlat entries={entries} />
 }
 
-// The sheet's heading, shared by both tellings. The pinned stage reads as
-// what it is from its first card, so there it is kept for the outline only;
-// the flat list sets it as its title.
-function Heading({ shown = false }) {
-  return (
-    <h2 className={shown ? 'xp-title' : 'visually-hidden'} id="xp-title">
-      Experience
-      {shown && <span className="xp-title-dot" aria-hidden="true">.</span>}
-    </h2>
-  )
-}
-
 function ExperienceStory({ entries }) {
   const last = Math.max(1, entries.length - 1)
 
   const trackRef = useRef(null)
-  const railRef = useRef(null)
   const easedRef = useRef(0)
   const liveRef = useRef(false)
 
@@ -111,9 +93,8 @@ function ExperienceStory({ entries }) {
   useEffect(() => {
     let rafId = 0
     let lastT = 0
-    let ready = false
+    let settled = false
     let lastIndex = -1
-    const shown = []
 
     const loop = (now) => {
       rafId = requestAnimationFrame(loop)
@@ -133,9 +114,9 @@ function ExperienceStory({ entries }) {
 
       // A deep link can land mid-section; snap on the first frame rather than
       // sweeping through every chapter to get there.
-      if (!ready) {
+      if (!settled) {
         easedRef.current = target
-        ready = true
+        settled = true
       } else {
         easedRef.current += (target - easedRef.current) * damp(0.14, dt)
       }
@@ -145,19 +126,6 @@ function ExperienceStory({ entries }) {
         lastIndex = index
         setActive(index)
       }
-
-      // The rail's rules are a meter of the walk: each fills as the reader
-      // comes up to its chapter, the first from the start. A custom property
-      // rather than a transform, so the stylesheet can run the fill down a
-      // side rule or along an underline as the rail turns. Written only when
-      // a value moves.
-      const fills = railRef.current?.querySelectorAll('.xp-rail-fill') ?? []
-      fills.forEach((fill, i) => {
-        const v = i === 0 ? 1 : Math.round(clamp01(easedRef.current - i + 1) * 1000) / 1000
-        if (shown[i] === v) return
-        shown[i] = v
-        fill.style.setProperty('--fill', v)
-      })
     }
 
     rafId = requestAnimationFrame(loop)
@@ -195,7 +163,7 @@ function ExperienceStory({ entries }) {
     !settled.has(active)
 
   return (
-    <section className="xp" id="experience" aria-labelledby="xp-title">
+    <section className="xp" id="experience">
       {/* One viewport of run-up per chapter, plus one to land on the last. */}
       <div className="xp-track" ref={trackRef} style={{ height: `${(entries.length + 1) * 100}vh` }}>
         <div className="xp-stage">
@@ -211,104 +179,65 @@ function ExperienceStory({ entries }) {
               </Suspense>
             )}
           </div>
+          <div className="xp-veil" aria-hidden="true" />
 
           {/* Outside .xp-gl-wrap on purpose: that wrapper is aria-hidden, being
               pure decoration, and a status message inside it would never be
-              announced. Before .xp-ui in the DOM so the copy paints over it.
+              announced. Before .xp-ui in the DOM so the copy paints over it. */}
+          <LiquidLoader inline show={stageWaiting} label="Loading model" />
 
-              The site's liquid-chrome loader is a glossy object, and this is
-              a printed sheet; the wait here is the press's own: a
-              registration mark whose plates slip out of register and back,
-              where the object will print. The caption is only in the
-              document while there is something to wait for, so the live
-              region announces it once, as it starts. */}
-          <p className="xp-wait" role="status" aria-live="polite" data-shown={stageWaiting ? '' : undefined}>
-            <svg className="xp-wait-reg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <g className="xp-wait-plate xp-wait-plate--butter">
-                <circle cx="12" cy="12" r="6.5" />
-                <path d="M12 0v24M0 12h24" />
-              </g>
-              <g className="xp-wait-plate xp-wait-plate--red">
-                <circle cx="12" cy="12" r="6.5" />
-                <path d="M12 0v24M0 12h24" />
-              </g>
-              <g className="xp-wait-key">
-                <circle cx="12" cy="12" r="6.5" />
-                <path d="M12 0v24M0 12h24" />
-              </g>
-            </svg>
-            <span className="xp-wait-text">{stageWaiting ? 'Loading model' : ''}</span>
-          </p>
+          {/* Not aria-hidden: the year rail is a real control. The crossfading
+              cards below are the part that duplicates the outline, so only they
+              are hidden from assistive tech. */}
+          <div className="xp-ui wrap">
+            <header className="xp-head">
+              <div className="section-label">Experience</div>
+              <p className="xp-kicker">Oldest first. Scroll to walk it, or jump by year.</p>
+            </header>
 
-          <div className="xp-ui">
-            <Heading />
+            <div className="xp-body">
+              <ol className="xp-rail">
+                {entries.map((entry, i) => (
+                  <li className="xp-rail-row" key={entry.id}>
+                    <button
+                      type="button"
+                      className={i === active ? 'xp-rail-btn is-on' : 'xp-rail-btn'}
+                      aria-label={`Go to ${entry.period}: ${entry.role}`}
+                      aria-current={i === active ? 'true' : undefined}
+                      onClick={() => goTo(i)}
+                    >
+                      <span className="xp-rail-dot" />
+                      <span className="xp-rail-year">{entry.year}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
 
-            {/* The crossfading cards are the part that duplicates the outline
-                below, so only they are hidden from assistive tech. */}
-            <div className="xp-cards" aria-hidden="true">
-              {entries.map((entry, i) => (
-                <article className={i === active ? 'xp-card is-on' : 'xp-card'} key={entry.id}>
-                  <p className="xp-card-period">{entry.period}</p>
-                  <h3 className="xp-card-role">
-                    {entry.role}
-                    <span className="xp-dot">.</span>
-                  </h3>
-                  <p className="xp-card-org">
-                    {entry.org} <span className="xp-card-sep">/</span> {entry.place}
-                  </p>
-                  <div className="xp-card-lede">
-                    <span className="xp-card-rule" />
+              <div className="xp-cards" aria-hidden="true">
+                {entries.map((entry, i) => (
+                  <article className={i === active ? 'xp-card is-on' : 'xp-card'} key={entry.id}>
+                    <div className="xp-card-period">{entry.period}</div>
+                    <h3 className="xp-card-role">{entry.role}</h3>
+                    <div className="xp-card-org">
+                      <span>{entry.org}</span>
+                      <span className="xp-card-sep">/</span>
+                      <span>{entry.place}</span>
+                    </div>
                     <p className="xp-card-lead">{entry.lead}</p>
-                  </div>
-                  <ul className="xp-card-notes">
-                    {entry.notes.map((note) => (
-                      <li key={note}>{note}</li>
-                    ))}
-                  </ul>
-                  <p className="xp-card-tools">{entry.tools.join(' / ')}</p>
-                </article>
-              ))}
+                    <ul className="xp-card-notes">
+                      {entry.notes.map((note) => (
+                        <li key={note}>{note}</li>
+                      ))}
+                    </ul>
+                    <ul className="xp-card-tools">
+                      {entry.tools.map((tool) => (
+                        <li key={tool}>{tool}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
             </div>
-
-            {/* Under the object: where the walk is, and the chapter's year in
-                display type with the house stop. The year is simply reset when
-                the chapter changes, as a compositor swaps a forme: the card
-                above already crossfades, and the caption under it holds still. */}
-            <div className="xp-caption" aria-hidden="true">
-              <p className="xp-count">
-                ({pad2(active + 1)}) <span className="xp-count-total">/ {pad2(entries.length)}</span>
-              </p>
-              <p className="xp-year">
-                <span className="xp-year-text">{entries[active]?.year}</span>
-                <span className="xp-dot">.</span>
-              </p>
-            </div>
-
-            {/* Not aria-hidden: the year rail is a real control. Set tategaki,
-                as the home page's work index is, one column per chapter. */}
-            <ol className="xp-rail" ref={railRef} aria-label="Chapters">
-              {entries.map((entry, i) => (
-                <li className={i === active ? 'xp-rail-item is-on' : 'xp-rail-item'} key={entry.id}>
-                  <button
-                    type="button"
-                    className="xp-rail-btn"
-                    aria-label={`Go to ${entry.period}: ${entry.role}`}
-                    aria-current={i === active ? 'true' : undefined}
-                    onClick={() => goTo(i)}
-                  >
-                    <span className="xp-rail-num" aria-hidden="true">
-                      (<span className="xp-rail-tcy">{pad2(i + 1)}</span>)
-                    </span>
-                    <span className="xp-rail-year" aria-hidden="true">
-                      {entry.year}
-                    </span>
-                    <span className="xp-rail-rule" aria-hidden="true">
-                      <span className="xp-rail-fill" />
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ol>
 
             {credit && (
               <p className="xp-credit">
@@ -334,47 +263,45 @@ function ExperienceStory({ entries }) {
           This is the whole thing, in order, for screen readers and for anyone
           who lands here with JavaScript half-loaded. */}
       <ExperienceOutline entries={entries} className="visually-hidden" />
-
-      {/* The red band, on the section rather than the pinned stage, so it runs
-          unbroken down the whole walk. */}
-      <span className="xp-band" aria-hidden="true" />
     </section>
   )
 }
 
-// The no-WebGL / reduced-motion telling: the same content, printed as a ruled
-// list on the same marine sheet. Not a stub — it is the version most people
-// will get on an old phone, so it is set as a real section.
+// The no-WebGL / reduced-motion telling: same content, laid out as a plain
+// timeline. Not a stub — it is the version most people will get on an old
+// phone, so it is styled as a real section rather than a fallback.
 function ExperienceFlat({ entries }) {
   return (
-    <section className="xp is-flat" id="experience" aria-labelledby="xp-title">
-      <div className="xp-flat-sheet">
-        <Heading shown />
-        <ol className="xp-flat">
-          {entries.map((entry) => (
-            <li className="xp-flat-row" key={entry.id}>
-              <p className="xp-card-period">{entry.period}</p>
-              <div className="xp-flat-body">
-                <h3 className="xp-card-role">
-                  {entry.role}
-                  <span className="xp-dot" aria-hidden="true">.</span>
-                </h3>
-                <p className="xp-card-org">
-                  {entry.org} <span className="xp-card-sep">/</span> {entry.place}
-                </p>
-                <p className="xp-card-lead">{entry.lead}</p>
-                <ul className="xp-card-notes">
-                  {entry.notes.map((note) => (
-                    <li key={note}>{note}</li>
-                  ))}
-                </ul>
-                <p className="xp-card-tools">{entry.tools.join(' / ')}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+    <section className="xp is-flat wrap" id="experience">
+      <div className="section-row">
+        <div className="section-label">Experience</div>
       </div>
-      <span className="xp-band" aria-hidden="true" />
+      <ol className="xp-flat">
+        {entries.map((entry) => (
+          <li className="xp-flat-row" key={entry.id}>
+            <div className="xp-flat-year">{entry.period}</div>
+            <div className="xp-flat-body">
+              <h3 className="xp-card-role">{entry.role}</h3>
+              <div className="xp-card-org">
+                <span>{entry.org}</span>
+                <span className="xp-card-sep">/</span>
+                <span>{entry.place}</span>
+              </div>
+              <p className="xp-card-lead">{entry.lead}</p>
+              <ul className="xp-card-notes">
+                {entry.notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+              <ul className="xp-card-tools">
+                {entry.tools.map((tool) => (
+                  <li key={tool}>{tool}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
@@ -385,7 +312,7 @@ function ExperienceOutline({ entries, className }) {
       {entries.map((entry) => (
         <li key={entry.id}>
           <h3>
-            {entry.role}, {entry.org} ({entry.period})
+            {entry.role} — {entry.org}, {entry.period}
           </h3>
           <p>{entry.lead}</p>
           <ul>

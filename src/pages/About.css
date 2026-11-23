@@ -1,0 +1,1035 @@
+/* About page — ported from the greenhueblues Claude Design file (About.dc.html),
+   minus the Three.js MandaapX logo-story (deferred; see the note in
+   About.jsx). Reuses site tokens from index.css. */
+
+/* Section header. Was a mono-caps label + hairline rule + zero-padded number
+   ("MEET THE MAN ———— 01") — a template tic that repeated on every section
+   and said nothing. Now just the label, small and quiet. No rule, no
+   numbering. */
+
+.section-row {
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.section-label {
+  font-size: clamp(14px, 1.1vw, 16px);
+  font-weight: 500;
+  letter-spacing: -.01em;
+  color: var(--fg-dim);
+}
+
+/* Mountain hero — pinned day-to-night parallax reveal, scroll-scrubbed. ---- */
+
+.hero-wrap {
+  position: relative;
+}
+
+.hero-dist {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200vh;
+  pointer-events: none;
+}
+
+.hero-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+  overflow: hidden;
+  /* Read by every layer in AboutHero.jsx (photo, ridge, glow and the sky-mask).
+     They are one 4:3 frame cut four ways, so they must share these to the
+     pixel -- change them here, never on an individual layer.
+
+     The size was `150% auto`: 1.5x the CONTAINER WIDTH, height following the
+     4:3 frame. On a landscape window that comfortably overshoots the screen, but
+     on a portrait phone it resolves to 585x439 against an 844px-tall viewport,
+     so the artwork stopped about 40% down and the rest of the hero was flat
+     #0d0d0d. The max() adds a height-derived floor so the frame is sized by
+     whichever axis is actually starved: 180vh clears 100vh of stage, the -24vw
+     position offset and the 78px of parallax travel, with margin, down to 320px.
+     The two terms cross at an aspect ratio of 6:5, so every landscape viewport
+     keeps the authored 150% exactly and the desktop composition does not move. */
+  --hero-bg-pos: 26% -24vw;
+  --hero-bg-size: max(150%, 180vh) auto;
+  /* Held back until AboutHero has all four layers (see the `data-hero-ready`
+     note there). They are half a megabyte of photograph and they arrive
+     independently; painting the frame before the last one lands shows a ridge
+     with no mountain behind it. Long enough to be a dissolve rather than a
+     switch, so it lands underneath the loader's own fade rather than after it. */
+  opacity: 0;
+  transition: opacity .8s var(--ease);
+}
+
+.hero-wrap[data-hero-ready] .hero-stage {
+  opacity: 1;
+}
+
+.hero-spacer {
+  height: 200vh;
+  pointer-events: none;
+}
+
+/* Base photo (background-image set inline from the imported asset). */
+.hero-photo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 168%;
+  background-color: #0d0d0d;
+  filter: brightness(1) contrast(1.05) saturate(1.06);
+  will-change: transform;
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11, 21, 36, .6) 0%, rgba(11, 21, 36, .5) 30%, rgba(11, 21, 36, .34) 46%, rgba(11, 21, 36, .1) 70%, rgba(11, 21, 36, 0) 100%);
+}
+
+.hero-night-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Ridge silhouette, layered over the photo for a sharper foreground edge. */
+.hero-fg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 168%;
+  filter: brightness(.9) contrast(1.06) saturate(1.02);
+  will-change: transform;
+}
+
+.hero-nighttint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 168%;
+  background-image: linear-gradient(180deg, rgba(6, 10, 20, .62) 0%, rgba(6, 10, 20, .86) 45%, rgba(4, 7, 14, .95) 100%);
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Sunlit-peak highlight, screen-blended over everything below it. */
+.hero-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 168%;
+  opacity: .35;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.hero-cue {
+  fill: rgba(255, 255, 255, .85);
+}
+
+.hero-arrowbtn {
+  cursor: pointer;
+}
+
+.hero-appear {
+  font-size: clamp(15px, 2.9vw, 26px);
+  line-height: 1;
+  font-family: var(--mono);
+  font-style: italic;
+  letter-spacing: -.01em;
+  position: absolute;
+  left: clamp(16px, 8.9vw, 81px);
+  /* 287px is the authored position and stays exact on any viewport taller than
+     407px; the calc only takes over on short ones -- landscape phones -- where a
+     fixed offset put the hero's only copy below the fold. */
+  top: min(287px, calc(100vh - 120px));
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: .42em;
+  flex-wrap: wrap;
+  white-space: normal;
+  max-width: calc(100vw - 2rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stage {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+  }
+
+  .hero-dist,
+  .hero-spacer {
+    display: none;
+  }
+}
+
+/* Meet the man — bio + portrait. -------------------------------------------- */
+
+/* The hero above is position:fixed and never unpins, so this section is what
+   retires it: its background starts fully transparent and ramps to solid, so
+   the night sky dissolves behind it instead of being sliced off by a hard
+   edge. Ported from the source design's #statement — don't flatten it to a
+   solid colour. */
+.meet {
+  position: relative;
+  z-index: 2;
+  background-color: transparent;
+  background-image: linear-gradient(180deg, rgba(13, 13, 13, 0) 0, rgba(13, 13, 13, .72) 34vh, var(--bg) 62vh);
+  padding-block: clamp(150px, 22vh, 300px) clamp(48px, 6vw, 80px);
+}
+
+/* Same shape of bug as .about-story-cols, less acute: auto-fit and a 300px floor
+   flipped this to two columns at 672px, where each track is 303px -- narrower
+   than the single-column layout it had just left. Hold one column until there is
+   genuinely room for two. */
+.meet-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(40px, 5vw, 88px);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .meet-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The markup for this frame lives in components/PortraitSlab.jsx, which also
+   owns the nine-click easter egg behind it — the frame stays here because it is
+   part of the `meet` two-column layout, and the slab styles stay there because
+   they are not. */
+.meet-portrait {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 4 / 5;
+  /* A hairline on the site's own --line, so the frame reads as a printed edge.
+     The floor under it is darker than --bg: the portrait's own blacks are
+     close to the page's, and a slightly deeper ground keeps the frame from
+     dissolving into the section around it. */
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #0a0a0a;
+  overflow: hidden;
+  /* The tone and grain layers below are blended, and without this they would
+     blend with the page behind the frame as well as with the portrait. */
+  isolation: isolate;
+}
+
+.meet-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The master is 2:3 and the frame is 4:5, so cover drops about 17% of the
+     height. Biased upward rather than centred: a centred crop takes equal
+     bites off the hair and the forearms, and the head is the subject. */
+  object-position: 50% 18%;
+  /* The file is already black and white — see the `mono` target in
+     scripts/optimize-images.mjs. This is not the conversion; it is a floor, so
+     that if the master is ever swapped for a colour original the frame still
+     reads as intended rather than silently going colour. */
+  filter: grayscale(1);
+}
+
+/* Toning. Not a duotone — the brief was black and white, and a gradient map
+   would make it a coloured photograph. This is the printing equivalent: a
+   faint split tone, green accent through the highlights and blue through the
+   shadows, which is greenhueblues' own two-channel permutation (a8ffc7 /
+   a8c7ff) used as a tone rather than as a colour.
+
+   soft-light is what keeps it a tone. At this opacity it shifts the neutrals
+   perhaps a couple of degrees — enough that the portrait belongs to the page,
+   not enough to read as tinted. */
+.meet-portrait::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: .38;
+  background: linear-gradient(172deg,
+    rgba(168, 255, 199, .5) 0%,
+    rgba(190, 210, 235, .1) 52%,
+    rgba(168, 199, 255, .5) 100%);
+}
+
+/* Grain. The site already carries grain in the About hero and the Philosophy
+   ambient layer, so a clean portrait is the odd one out — it reads as a stock
+   headshot dropped onto a textured page. Generated rather than another image
+   request: one feTurbulence tile costs no bytes over the wire and tiles
+   without a seam (stitchTiles). overlay so it works into the mid-tones and
+   leaves the blacks alone, which is where film grain actually lives. */
+.meet-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: .1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* The grain is fixed-size texture, so on a 2x screen it would render at half
+   the apparent size and disappear into the panel. */
+@media (min-resolution: 2dppx) {
+  .meet-portrait::after {
+    background-size: 90px 90px;
+    opacity: .13;
+  }
+}
+
+.meet-body {
+  display: grid;
+  gap: 28px;
+}
+
+.meet-lead {
+  margin: 0;
+  max-width: 52ch;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking-sm);
+  line-height: 1.34;
+  color: var(--fg);
+  text-wrap: pretty;
+}
+
+.meet-body p:not(.meet-lead) {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--fg-mute);
+  text-wrap: pretty;
+}
+
+.meet-credit {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 26px;
+}
+
+.meet-credit-name {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--fg);
+}
+
+.meet-credit-role {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* The name — why greenhueblues. --------------------------------------------- */
+
+.about-story {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  padding-block: clamp(72px, 8vw, 120px);
+}
+
+/* `minmax(340px, 1fr)` cannot go below 340px, so on any viewport under 372px the
+   single auto-fit track was still 340px wide inside a 288px content box and the
+   second column was pushed off the page with no way to scroll to it. A px floor
+   is the wrong way to say "two columns from here" -- it is a minimum the track
+   keeps even when there is only one of them. The min-width query says it
+   directly, and minmax(0, 1fr) lets the tracks actually shrink. */
+.about-story-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: start;
+}
+
+@media (min-width: 860px) {
+  .about-story-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.about-story-head {
+  margin: 0;
+  max-width: 20ch;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-size: clamp(29px, 3.3vw, 54px);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: 1.14;
+  color: var(--fg);
+  text-wrap: balance;
+}
+
+.about-story-body {
+  display: grid;
+  gap: 22px;
+  max-width: 46ch;
+}
+
+.about-story-body p {
+  margin: 0;
+  font-size: clamp(17px, 1.25vw, 20px);
+  line-height: 1.62;
+  color: var(--fg-mute);
+  text-wrap: pretty;
+}
+
+.about-story-body .about-story-pull {
+  padding-left: 20px;
+  border-left: 2px solid;
+  border-image: linear-gradient(180deg, var(--accent-green), var(--accent)) 1;
+  color: var(--fg);
+}
+
+/* Stack — an infinite-scroll marquee of tools. ------------------------------ */
+
+@keyframes ghb-marq {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.stack {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  padding-block: clamp(56px, 7vw, 96px);
+  overflow: hidden;
+}
+
+.stack-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+.stack-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(44px, 4.6vw, 84px);
+  width: max-content;
+  /* Room for what hangs outside the 28px row: the hover name below each item
+     and the glow's bleed above it. The mask on .stack-mask only covers this
+     box, so anything past it is masked away rather than clipped visibly. */
+  padding-block: 26px;
+  animation: ghb-marq 60s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-track { animation: none; }
+}
+
+.stack-item {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 28px;
+  color: var(--fg-mute);
+  white-space: nowrap;
+  position: relative;
+  isolation: isolate;
+  transition: color .45s var(--ease);
+}
+
+.stack-logo {
+  height: 26px;
+  width: auto;
+  opacity: .68;
+  transition: opacity .35s var(--ease);
+}
+
+/* These two are only served in full colour, so they get flattened to white to
+   sit with the rest of the row. */
+.stack-logo.is-flat {
+  filter: grayscale(1) brightness(0) invert(1);
+}
+
+.stack-item:hover .stack-logo { opacity: .95; }
+
+/* Iridescence — one `filter` per stop so the parts compose instead of
+   overriding, same approach as heroFlameFlicker in index.css. The shadows are
+   cast off the mark's own alpha, so the shine follows the glyph rather than
+   lighting a box around it, and the two accents trade dominance across the
+   cycle to read as a shifting green-to-blue sheen. */
+@keyframes ghb-iridesce {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 5px rgba(168, 255, 199, .45))
+      drop-shadow(0 0 14px rgba(168, 199, 255, .3))
+      hue-rotate(0deg);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 6px rgba(168, 199, 255, .48))
+      drop-shadow(0 0 16px rgba(168, 255, 199, .28))
+      hue-rotate(-16deg);
+  }
+}
+
+/* Same cycle, but re-stating the flatten filter — an animated `filter` replaces
+   the declared one outright, so the full-colour marks would revert without it. */
+@keyframes ghb-iridesce-flat {
+  0%, 100% {
+    filter:
+      grayscale(1) brightness(0) invert(1)
+      drop-shadow(0 0 5px rgba(168, 255, 199, .45))
+      drop-shadow(0 0 14px rgba(168, 199, 255, .3));
+  }
+  50% {
+    filter:
+      grayscale(1) brightness(0) invert(1)
+      drop-shadow(0 0 6px rgba(168, 199, 255, .48))
+      drop-shadow(0 0 16px rgba(168, 255, 199, .28));
+  }
+}
+
+.stack-item:hover .stack-logo { animation: ghb-iridesce 3.6s var(--ease) infinite; }
+.stack-item:hover .stack-logo.is-flat { animation-name: ghb-iridesce-flat; }
+
+/* The name. Absolutely positioned so revealing it never reflows the track —
+   an in-flow label would shove every logo after it sideways mid-scroll. */
+.stack-name {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-50%) translateY(3px);
+  transition: opacity .35s var(--ease), transform .35s var(--ease);
+  pointer-events: none;
+}
+
+.stack-item:hover .stack-name {
+  opacity: .85;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Hover is the only thing that ever identified a tool in this marquee, so on a
+   touch device the whole section was a row of unlabelled logos. With no hover to
+   wait for, show the names outright -- the reveal is the affordance, and without
+   a pointer there is nothing to reveal them with.
+
+   Phones are the exception: the track's gap shrinks with the viewport while the
+   names do not, so at these widths neighbouring labels run into each other
+   ("PROTEUSSALESFORCE"). Below the breakpoint the row is marks only. */
+@media (hover: none) and (min-width: 701px) {
+  .stack-name {
+    opacity: .85;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  /* display, not opacity — a tap on a touch device still fires :hover, and the
+     label it would reveal is the one that collides. The fallback name is kept:
+     there it is the item itself, not a caption under a mark. */
+  .stack-item:not(.is-fallback) .stack-name { display: none; }
+}
+
+/* Icon missing: the name stops being a label and becomes the item itself. */
+.is-fallback .stack-name {
+  position: static;
+  transform: none;
+  opacity: .68;
+  color: inherit;
+  font-family: var(--display-font);
+  font-optical-sizing: auto;
+  font-size: 19px;
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking-sm);
+  text-transform: none;
+}
+
+.stack-item.is-fallback:hover .stack-name { opacity: 1; transform: none; }
+
+/* Hover — the two accents are the same channels permuted (a8ffc7 / a8c7ff), so
+   overlapping them reads as one green-to-blue field rather than two tints. The
+   isolate/negative-z pair keeps it behind the glyphs; blurred and held at .3 so
+   it stays a wash, not a highlight. */
+.stack-item::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -20px -22px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 26% 34%, rgba(168, 255, 199, .55) 0%, rgba(168, 255, 199, 0) 62%),
+    radial-gradient(circle at 62% 30%, rgba(168, 226, 255, .42) 0%, rgba(168, 226, 255, 0) 60%),
+    radial-gradient(circle at 70% 74%, rgba(168, 199, 255, .48) 0%, rgba(168, 199, 255, 0) 66%);
+  filter: blur(18px);
+  opacity: 0;
+  transform: scale(.86);
+  transition: opacity .5s var(--ease), transform .5s var(--ease);
+  pointer-events: none;
+}
+
+.stack-item:hover { color: var(--fg); }
+.stack-item:hover::before { opacity: .3; transform: scale(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-item::before,
+  .stack-item:hover::before { transform: none; transition: opacity .2s linear; }
+
+  /* Keep the shine, drop the shimmer — holding the first stop leaves a static
+     green-blue glow instead of a cycling one. */
+  .stack-item:hover .stack-logo,
+  .stack-item:hover .stack-logo.is-flat { animation-iteration-count: 1; animation-play-state: paused; }
+
+  .stack-name { transition: opacity .2s linear; transform: translateX(-50%); }
+  .stack-item:hover .stack-name { transform: translateX(-50%); }
+}
+
+/* Experience — a scroll-scrubbed 3D timeline. -------------------------------
+
+   The stage is sticky inside a tall track, the same arrangement as the
+   Philosophy dial: the page scrolls, the stage does not, and the helix behind
+   the type turns instead. Everything here is layered over a WebGL canvas, so
+   the type carries its own contrast (.xp-veil) rather than relying on whatever
+   the scene happens to be doing behind it.
+
+   Breakpoint note: 900px is shared with ExperienceScene.jsx, which aims the
+   camera off-centre above it and centres the helix below it. Move one, move
+   the other, or the card will start sitting on top of the lit node. */
+
+.xp {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+}
+
+.xp-track {
+  position: relative;
+  /* height comes from the entry count, set inline in ExperienceTimeline.jsx */
+}
+
+.xp-stage {
+  position: sticky;
+  top: 0;
+  /* svh for the same reason as .hero and .panel in index.css, and the 620px
+     floor goes for the same reason too: this is a sticky element, and a sticky
+     box taller than the scrollport does not stick. */
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.xp-gl-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.xp-gl-wrap canvas {
+  display: block;
+}
+
+/* Two jobs: sink the canvas edges into the page above and below, and put a
+   soft floor under the right-hand column so the card never has to compete
+   with a bright node passing behind it. */
+.xp-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 46% at 78% 52%, rgba(13, 13, 13, .78) 0%, rgba(13, 13, 13, 0) 100%),
+    linear-gradient(180deg, var(--bg) 0%, rgba(13, 13, 13, 0) 16%, rgba(13, 13, 13, 0) 82%, var(--bg) 100%);
+}
+
+.xp-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  /* head / body / model credit — the third row collapses to nothing on the
+     chapters whose model needs no attribution, and on the one with no model. */
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(16px, 2.4vh, 28px);
+  padding-block: clamp(22px, 4.4vh, 54px);
+  /* The canvas is decorative; only the controls take the pointer. */
+  pointer-events: none;
+}
+
+.xp-ui button {
+  pointer-events: auto;
+}
+
+/* Model attribution, under the object it credits on the left of the stage.
+   This is a licence obligation, not decoration: the radio on the CNAD chapter
+   is CC BY 4.0 and may not be shown without it. See the `credit` field in
+   src/data/experience.js. */
+.xp-credit {
+  margin: 0;
+  align-self: end;
+  max-width: 52ch;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: .02em;
+  color: rgba(255, 255, 255, .36);
+}
+
+.xp-credit a {
+  pointer-events: auto;
+  color: rgba(255, 255, 255, .58);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255, 255, 255, .22);
+}
+
+.xp-credit a:hover,
+.xp-credit a:focus-visible {
+  color: var(--fg);
+  text-decoration-color: currentColor;
+}
+
+.xp-head {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(12px, 2vw, 24px);
+  flex-wrap: wrap;
+}
+
+.xp-kicker {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--fg-dim);
+}
+
+.xp-body {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) minmax(300px, 34vw);
+  align-items: center;
+  gap: clamp(20px, 3vw, 56px);
+  min-height: 0;
+}
+
+/* Year rail. ---------------------------------------------------------------- */
+
+.xp-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.xp-rail-btn {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 7px 10px 7px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .02em;
+  transition: color .35s var(--ease), opacity .35s var(--ease);
+}
+
+.xp-rail-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: rgba(255, 255, 255, .22);
+  transition: background .35s var(--ease), box-shadow .35s var(--ease), transform .35s var(--ease);
+}
+
+.xp-rail-year {
+  transform: translateX(-4px);
+  opacity: .75;
+  transition: transform .45s var(--ease), opacity .45s var(--ease);
+}
+
+.xp-rail-btn:hover,
+.xp-rail-btn:focus-visible {
+  color: var(--fg);
+}
+
+.xp-rail-btn:hover .xp-rail-dot,
+.xp-rail-btn:focus-visible .xp-rail-dot {
+  background: rgba(255, 255, 255, .55);
+}
+
+.xp-rail-btn.is-on {
+  color: var(--fg);
+}
+
+.xp-rail-btn.is-on .xp-rail-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(168, 199, 255, .14), 0 0 14px rgba(168, 199, 255, .55);
+  transform: scale(1.15);
+}
+
+.xp-rail-btn.is-on .xp-rail-year {
+  transform: none;
+  opacity: 1;
+}
+
+/* The chapter card. --------------------------------------------------------- */
+
+.xp-cards {
+  position: relative;
+  grid-column: 3;
+  min-height: 360px;
+}
+
+.xp-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity .45s var(--ease), transform .6s var(--ease);
+}
+
+.xp-card.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.xp-card-period {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.xp-card-role {
+  margin: 0;
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking-sm);
+  font-size: clamp(28px, 3.1vw, 46px);
+  line-height: 1.02;
+}
+
+.xp-card-org {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  color: var(--fg-mute);
+}
+
+.xp-card-sep {
+  color: var(--fg-dim);
+}
+
+.xp-card-lead {
+  margin: 4px 0 0;
+  font-size: clamp(16px, 1.2vw, 19px);
+  line-height: 1.45;
+  color: var(--fg);
+  max-width: 46ch;
+}
+
+.xp-card-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 46ch;
+}
+
+.xp-card-notes li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--fg-mute);
+}
+
+.xp-card-notes li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .62em;
+  width: 8px;
+  height: 1px;
+  background: var(--line);
+}
+
+.xp-card-tools {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.xp-card-tools li {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--fg-dim);
+  transition: color .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease);
+}
+
+/* Narrow: the helix centres itself and the card reads underneath it. --------- */
+
+@media (max-width: 900px) {
+  .xp-veil {
+    background:
+      radial-gradient(72% 34% at 50% 78%, rgba(13, 13, 13, .86) 0%, rgba(13, 13, 13, 0) 100%),
+      linear-gradient(180deg, var(--bg) 0%, rgba(13, 13, 13, 0) 14%, rgba(13, 13, 13, 0) 74%, var(--bg) 100%);
+  }
+
+  .xp-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    align-items: end;
+    gap: 14px;
+  }
+
+  .xp-rail {
+    flex-direction: row;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Fades the row out at the edges instead of ending on a hard cut. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 94%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 94%, transparent 100%);
+  }
+
+  .xp-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .xp-rail-btn {
+    padding: 6px 4px;
+    gap: 7px;
+  }
+
+  .xp-rail-year {
+    transform: none;
+  }
+
+  .xp-cards {
+    grid-column: 1;
+    min-height: 300px;
+    align-self: end;
+  }
+
+  .xp-card {
+    justify-content: flex-end;
+  }
+
+  .xp-card-lead,
+  .xp-card-notes {
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .xp-card-notes li:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+/* No WebGL, or reduced motion: the same content as a plain timeline. --------- */
+
+.xp.is-flat {
+  padding-block: var(--section-y);
+}
+
+.xp-flat {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.xp-flat-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: clamp(16px, 3vw, 48px);
+  padding-block: clamp(28px, 4vw, 48px);
+  border-top: 1px solid var(--line);
+}
+
+.xp-flat-row:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.xp-flat-year {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.xp-flat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .xp-flat-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Touch targets, last in the file on purpose. The year rail measured 55x27 --
+   these are the only controls on the page and the design system asks for >=40px
+   on touch. This has to come after the max-width: 700px block above, which sets
+   `padding` as a shorthand and would otherwise win on source order.
+
+   Padding rather than min-height: the button is a flex row whose dot and label
+   are already centred, so the space wants to go around them. Scoped to coarse
+   pointers so the desktop rail keeps its tight rhythm. */
+@media (pointer: coarse) {
+  .xp-rail-btn {
+    padding-block: 15px;
+  }
+}
